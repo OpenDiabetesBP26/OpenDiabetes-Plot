@@ -15,5 +15,7 @@ _(you have just to edit and save the files and your changes will be on the site 
 ## Tutorials D3 and React
 ### Intro
 [https://medium.com/@Elijah_Meeks/interactive-applications-with-react-d3-f76f7b3ebc71]
-### Manual
+### Manual 1
 [https://livebook.manning.com/book/d3js-in-action-second-edition/chapter-9/1]
+### Manual 2
+[https://wangqianwen0418.github.io/writing/2018/06/01/react-with-d3/]
