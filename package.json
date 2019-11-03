@@ -1,0 +1,41 @@
+{
+  "name": "opendiabetes-plot",
+  "version": "0.0.1",
+  "description": "Project Dev Ops Site: https://dev.azure.com/aleksej-strassheim/OpenDiabetes-plot",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --debug --open --mode development",
+    "build": "webpack --debug --mode development",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Creative332/OpenDiabetes-Plot.git"
+  },
+  "author": "",
+  "license": "GPL V3",
+  "bugs": {
+    "url": "https://github.com/Creative332/OpenDiabetes-Plot/issues"
+  },
+  "homepage": "https://github.com/Creative332/OpenDiabetes-Plot#readme",
+  "devDependencies": {
+    "@babel/core": "7.6.4",
+    "babel-loader": "8.0.6",
+    "@babel/preset-env": "7.6.3",
+    "@babel/preset-react": "7.6.3",
+    "css-loader": "3.2.0",
+    "node-sass": "4.13.0",
+    "react-hot-loader": "4.12.15",
+    "sass-loader": "8.0.0",
+    "style-loader": "1.0.0",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.9.0"
+  },
+  "dependencies": {
+    "bootstrap": "^4.3.1",
+    "react": "16.11.0",
+    "react-dom": "16.11.0",
+    "react-router-dom": "5.1.2"
+  }
+}
