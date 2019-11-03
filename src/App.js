@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Home from './components/Home';
 import About from './components/About';
-import ItemView from './components/ItemView';
+import D3Sample from './components/D3Sample';
 import NotFound from './components/NotFound';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import {hot} from 'react-hot-loader';
@@ -32,6 +32,7 @@ export class App extends Component {
                             <div class="collapse navbar-collapse" id="navbarNav">
                                 <ul class="navbar-nav">
                                     <NavItem path="/" name="Home" />
+                                    <NavItem path="/d3sample" name="D3Sample" />
                                     <NavItem path="/about" name="About" />
                                 </ul>
                             </div>
@@ -40,7 +41,7 @@ export class App extends Component {
                     <main>
                     <Switch>
                         <Route exact path='/' component={Home} />
-                        <Route exact path='/item/:id' component={ItemView} />
+                        <Route exact path='/d3sample' component={D3Sample} />
                         <Route exact path='/about' component={About} />
                         <Route path="*" component={NotFound} />
                     </Switch>

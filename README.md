@@ -11,3 +11,9 @@ Project Dev Ops Site: [https://dev.azure.com/aleksej-strassheim/OpenDiabetes-plo
 ### Debug Mode: 
 __npm start__ will compile and open project in __hot reload__ mode 
 _(you have just to edit and save the files and your changes will be on the site directly without refresh)_
+
+## Tutorials D3 and React
+### Intro
+[https://medium.com/@Elijah_Meeks/interactive-applications-with-react-d3-f76f7b3ebc71]
+### Manual
+[https://livebook.manning.com/book/d3js-in-action-second-edition/chapter-9/1]
