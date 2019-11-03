@@ -9,5 +9,5 @@ Project Dev Ops Site: [https://dev.azure.com/aleksej-strassheim/OpenDiabetes-plo
 
 ## Run project
 ### Debug Mode: 
-__npm start__ will compile and open project in _ _hot reload_ _ mode 
-_ _(you have just to edit and save the files and your changes will be on the site directly without refresh)_ _
+__npm start__ will compile and open project in __hot reload__ mode 
+_(you have just to edit and save the files and your changes will be on the site directly without refresh)_
