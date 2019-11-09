@@ -3,13 +3,12 @@ var webpack = require('webpack');
 
 module.exports = {
   entry: './src/index.js',
-  mode: "development",
+  mode: "production",
   performance: {hints:false},
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].bundle.js'
   },
-  devtool: 'inline-source-map',
   module: {
     rules: [
         {
@@ -32,12 +31,9 @@ module.exports = {
   devServer: {
     contentBase: './dist',
     publicPath: "/",
-    hot: true,
     historyApiFallback: {
       disableDotRule:true
     },
   },
-  plugins: [
-    new webpack.HotModuleReplacementPlugin()
-  ]
+  plugins: []
 }

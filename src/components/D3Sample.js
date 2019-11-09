@@ -5,7 +5,7 @@ import {hot} from 'react-hot-loader';
 
 class D3Sample extends Component {
     render() {
-        return <div>D3 Sample</div>;
+        return <h2 id="d3sample_pagetitle">D3 Sample</h2>;
     }
     // render() {
     //     const projection = geoMercator()
