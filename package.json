@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --debug --open --mode development",
-    "build": "webpack --debug --mode development",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack --config webpack.config.prod.js --mode production",
+    "test": "testcafe chrome ./src/**/*.test.js --app \"webpack-dev-server --debug --mode development\"",
+    "test-prod": "testcafe chrome:headless ./src/**/*.test.js --app \"webpack-dev-server --config webpack.config.prod.js --mode production\""
   },
   "repository": {
     "type": "git",
@@ -20,15 +21,16 @@
   "homepage": "https://github.com/Creative332/OpenDiabetes-Plot#readme",
   "devDependencies": {
     "@babel/core": "7.6.4",
-    "babel-loader": "8.0.6",
     "@babel/preset-env": "7.6.3",
     "@babel/preset-react": "7.6.3",
+    "babel-loader": "8.0.6",
     "codecov": "3.6.1",
     "css-loader": "3.2.0",
     "node-sass": "4.13.0",
     "react-hot-loader": "4.12.15",
     "sass-loader": "8.0.0",
     "style-loader": "1.0.0",
+    "testcafe": "^1.6.1",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10",
     "webpack-dev-server": "^3.9.0"

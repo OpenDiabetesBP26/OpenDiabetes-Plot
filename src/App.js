@@ -12,7 +12,7 @@ const NavItem = props => {
     const aClassName = props.disabled ? "nav-link disabled" : "nav-link"
     return (
       <li className={liClassName}>
-        <a href={props.path} className={aClassName}>{props.name}</a>
+        <a id={props.id} href={props.path} className={aClassName}>{props.name}</a>
         {(props.path === pageURI) ? (<span className="sr-only">(current)</span>) : ''}
       </li>
     );
@@ -31,9 +31,9 @@ export class App extends Component {
                             </button>
                             <div class="collapse navbar-collapse" id="navbarNav">
                                 <ul class="navbar-nav">
-                                    <NavItem path="/" name="Home" />
-                                    <NavItem path="/d3sample" name="D3Sample" />
-                                    <NavItem path="/about" name="About" />
+                                    <NavItem id="nav_home" path="/" name="Home" />
+                                    <NavItem id="nav_d3sample" path="/d3sample" name="D3Sample" />
+                                    <NavItem id="nav_about" path="/about" name="About" />
                                 </ul>
                             </div>
                         </nav>
