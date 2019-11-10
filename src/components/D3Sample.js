@@ -1,13 +1,11 @@
 import React, { Component } from 'react';
 import {hot} from 'react-hot-loader';
-import * as d3 from 'd3';
 
 //import { geoMercator, geoPath } from 'd3-geo'
 
 class D3Sample extends Component {
     render() {
-
-        return <div><div id="my_dataviz"></div><svg id="test" width="500" height="500"></svg></div>;
+        return <h2 id="d3sample_pagetitle">D3 Sample</h2>;
     }
     // render() {
     //     const projection = geoMercator()
