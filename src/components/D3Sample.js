@@ -30,14 +30,13 @@ class D3Sample extends Component {
       {date: new Date(2019, 11, 5, 9, 30), value: 132},
       {date: new Date(2019, 11, 5, 10, 0), value: 92},
     ]
-
     //Selects first element of type
     const svg = d3.select('svg');
     const height = +svg.attr('height');
     const width = +svg.attr('width');
     //Appends element and returns it
     const g = svg.append('g').attr('transform', `translate(30,0)`);
-
+	//Adding Scales
     const yScale = d3.scaleLinear().domain([400, 0]).range([0, height]);
     const xScale = d3.scaleTime().domain(d3.extent(data, (d) => d.date)).range([0, width]);
 
