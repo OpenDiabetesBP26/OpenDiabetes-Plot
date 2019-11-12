@@ -1,0 +1,19 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: 
+    git clone --mirror https://aleksej-strassheim@dev.azure.com/aleksej-strassheim/OpenDiabetes-plot/_git/OpenDiabetes-site
+    cd OpenDiabetes-site
+    git remote add --mirror=fetch secondary https://github.com/Creative332/OpenDiabetes-Plot.git
+    git fetch origin
+    git push secondary --all
+  displayName: 'Copy repo to github'
