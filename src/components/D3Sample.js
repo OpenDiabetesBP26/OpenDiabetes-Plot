@@ -7,7 +7,7 @@ import * as d3 from 'd3';
 class D3Sample extends Component {
     render() {
 
-        return <div><h2 id="d3sample_pagetitle">D3 Sample</h2><div id="my_dataviz"></div><svg id="test" width="500" height="500"></svg></div>;
+        return <div><h2 id="d3sample_pagetitle">D3 Sample</h2><div id="my_dataviz"></div><svg id="d3sample_image" width="500" height="500"></svg></div>;
     }
     // render() {
     //     const projection = geoMercator()
