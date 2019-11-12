@@ -12,8 +12,11 @@ pool:
 steps:
 - script: 
     git clone --mirror https://aleksej-strassheim@dev.azure.com/aleksej-strassheim/OpenDiabetes-plot/_git/OpenDiabetes-site
+- script: 
     cd OpenDiabetes-site
+- script: 
     git remote add --mirror=fetch secondary https://github.com/Creative332/OpenDiabetes-Plot.git
+- script: 
     git fetch origin
+- script: 
     git push secondary --all
-  displayName: 'Copy repo to github'
