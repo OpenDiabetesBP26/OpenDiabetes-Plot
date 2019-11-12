@@ -12,11 +12,11 @@ pool:
 steps:
 
 - script: 
-    git clone --mirror "https://anything:{%TOKEN%}@dev.azure.com/aleksej-strassheim/OpenDiabetes-plot/_git/OpenDiabetes-site"
+    git clone --mirror "https://anything:$(token)@dev.azure.com/aleksej-strassheim/OpenDiabetes-plot/_git/OpenDiabetes-site"
 - script: 
     cd OpenDiabetes-site
 - script: 
-    git remote add --mirror=fetch secondary https://%USERNAME%:%PASSWORD%@github.com/Creative332/OpenDiabetes-Plot.git
+    git remote add --mirror=fetch secondary https://$(username):$(password)@github.com/Creative332/OpenDiabetes-Plot.git
 - script: 
     git fetch origin
 - script: 
