@@ -18,6 +18,4 @@ steps:
 - script: 
     git remote add --mirror=fetch secondary https://anything:$(githubtoken)@github.com/Creative332/OpenDiabetes-Plot.git
 - script: 
-    git fetch origin
-- script: 
     git push secondary --all
