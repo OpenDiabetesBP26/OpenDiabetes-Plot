@@ -10,8 +10,9 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+    AUTH=$(echo -n ":wantg44rfglynjd3wrzb52uvj44aw365wof5s7iqyfwl4g46hzyq" | openssl base64 | tr -d '\n')
 - script: 
-    git clone --mirror git@ssh.dev.azure.com:v3/aleksej-strassheim/OpenDiabetes-plot/OpenDiabetes-site
+    git -c http.https://aleksej-strassheim@dev.azure.com/aleksej-strassheim/OpenDiabetes-plot/_git/OpenDiabetes-site.extraheader="AUTHORIZATION: basic $AUTH" clone --mirror https://aleksej-strassheim@dev.azure.com/aleksej-strassheim/OpenDiabetes-plot/_git/OpenDiabetes-site
 - script: 
     cd OpenDiabetes-site
 - script: 
