@@ -11,7 +11,7 @@ pool:
 
 steps:
 - script: 
-    git clone --mirror https://aleksej-strassheim@dev.azure.com/aleksej-strassheim/OpenDiabetes-plot/_git/OpenDiabetes-site
+    git clone --mirror git@ssh.dev.azure.com:v3/aleksej-strassheim/OpenDiabetes-plot/OpenDiabetes-site
 - script: 
     cd OpenDiabetes-site
 - script: 
