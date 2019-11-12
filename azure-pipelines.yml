@@ -10,12 +10,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-
 - script: 
     git remote add --mirror=fetch secondary https://anything:$(githubtoken)@github.com/sign4media/mytestrepo.git
-- script: 
-    git remote set-url origin https://anything:$(token)@dev.azure.com/aleksej-strassheim/OpenDiabetes-plot/_git/OpenDiabetes-site
-- script: 
-    git fetch origin
 - script: 
     git push secondary master
