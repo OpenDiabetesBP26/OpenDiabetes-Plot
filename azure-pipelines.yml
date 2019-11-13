@@ -1,4 +1,5 @@
 # Starter pipeline
+
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
@@ -10,7 +11,11 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: 
-    git remote add --mirror=fetch secondary https://anything:$(githubtoken)@github.com/sign4media/mytestrepo.git
-- script: 
-    git push --force secondary --all
+- task: CmdLine@2
+  inputs:
+    script: |
+      git clone --mirror "https://anything:k4rquxritgwv2cbavq2p2mrhtrtmvzm7qkdix2lklvoszkqd2bpq@dev.azure.com/aleksej-strassheim/OpenDiabetes-plot/_git/OpenDiabetes-site"    
+      cd OpenDiabetes-site.git	
+      git remote add --mirror=fetch secondary "https://anything:d4d319c02c0872c9b119cfb3e542dbbb37d35068@github.com/Creative332/OpenDiabetes-Plot.git"
+      git fetch origin
+      git push secondary --all
