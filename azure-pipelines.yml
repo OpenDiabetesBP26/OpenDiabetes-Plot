@@ -9,11 +9,6 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
-- script: 
-    git remote add --mirror=fetch secondary https://anything:$(githubtoken)@github.com/sign4media/mytestrepo.git
-- script: 
-    git push --force secondary --all
 - task: CmdLine@2
   inputs:
     script: |
