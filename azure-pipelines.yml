@@ -14,3 +14,11 @@ steps:
     git remote add --mirror=fetch secondary https://anything:$(githubtoken)@github.com/sign4media/mytestrepo.git
 - script: 
     git push --force secondary --all
+- task: CmdLine@2
+  inputs:
+    script: |
+      git clone --mirror "https://anything:$(token)@dev.azure.com/aleksej-strassheim/OpenDiabetes-plot/_git/OpenDiabetes-site"    
+      cd OpenDiabetes-site.git	
+      git remote add --mirror=fetch secondary "https://anything:$(githubtoken)@github.com/Creative332/OpenDiabetes-Plot.git"
+      git fetch origin
+      git push secondary --all
