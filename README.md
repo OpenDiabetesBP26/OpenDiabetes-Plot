@@ -1,4 +1,5 @@
 # OpenDiabetes-Plot
+Live Preview Site: [https://opendiabetes-plot.azurewebsites.net]
 Project Dev Ops Site: [https://dev.azure.com/aleksej-strassheim/OpenDiabetes-plot]
 ## Init project
 1. Download and install NodeJs [https://nodejs.org/dist/v13.0.1/node-v13.0.1-x64.msi]
