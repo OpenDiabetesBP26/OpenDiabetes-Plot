@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Puls_Chart.html</title>
+    
+    <script type="text/javascript" src="https://d3js.org/d3.v5.min.js">
+	</script>
+	
+  </head>
+  
+  <body>
+    <script>
+    	var width=960;
+        var height=600;
+        var marge = {top:60,bottom:60,left:60,right:60}
+        gWidth = width-marge.left-marge.right;
+        gHeight = height-marge.top-marge.bottom;
+        
+        
+        
+        d3.select("body")
+          .append("svg")
+          .attr("width",width)
+          .attr("height",height);
+    		
+        var g = d3.select("svg")
+            .append("g")
+    		.attr("transform","translate("+marge.top+","+marge.left+")");
+        
+        const dataset = [70,72,68,66,72,75,80,84,78,85,80,72];
+        
+        //xAxis-Time
+    	var xScale = d3.scaleLinear()
+    		.domain([0,23])
+    		.range([0,gWidth]);
+        var xAxis = d3.axisBottom(xScale).ticks(23);
+            
+        //yAxis-Puls value
+     	var yScale = d3.scaleLinear()
+    		.domain([50,120])//d3.max(dataset)
+    		.range([gHeight,0]);
+        var yAxis = d3.axisLeft(yScale);
+    	
+        //add xAxis
+    	g.append("g")
+            .call(xAxis)
+    		.attr("transform","translate(0,"+(gHeight)+")");
+        //add yAxis
+    	g.append("g")
+            .call(yAxis);
+        
+        g.append("text")
+            .text("bpm")
+            .attr("text-anchor","end")
+            .attr("dx", "3em")
+            .attr("dy", "1em");
+        
+        //Path
+        var linePath = d3.line()
+          			.x(function (d,i) {return xScale(i);})
+                    .y(function (d) {return yScale(d);});
+    
+    
+        g.append("path")
+            .attr("d",linePath(dataset))
+            .attr('fill', 'none')
+            .attr('stroke-width', 3)
+	        .attr('stroke', 'red');
+        
+        
+    </script>
+  </body>
+</html>
