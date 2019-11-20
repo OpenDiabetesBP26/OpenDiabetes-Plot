@@ -7,7 +7,9 @@
 <button onclick="update(200);">Click</button>
 <input type="range" min="100" max="400" value="400" class="slider" id="testSlider">
 <input type="range" min="1" max="23" value="400" class="slider" id="testSlider2">
-<svg id="food-chart" width="500" height="500"></svg>
+<div class="testDiv" height="auto" style="overflow:scroll; width:400px">
+<svg id="food-chart" height="500"></svg>
+</div>
 <script>
 //Food Chart
   //Test Data
@@ -26,7 +28,7 @@
   //Creating Selection
   const foodChart = d3.select('svg#food-chart');
   //Creating vars for graph size
-  const widthChart = +foodChart.attr('width');
+  const widthChart = 800;
   const heightChart = +foodChart.attr('height');
   const margin = {top: 50, right: 40, bottom: 30, left: 40};
   const innerWidth = widthChart - margin.right - margin.left;
