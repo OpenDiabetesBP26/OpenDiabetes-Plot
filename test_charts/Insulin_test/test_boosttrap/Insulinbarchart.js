@@ -11,7 +11,7 @@ var y = data.map(x => x.value);
 window.onload = function() {
 	var width = 600, height = 300;
 	var padding = {top:30, right:30, bottom:30, left:30};
-	var main = d3.select("body")
+	var main = d3.select(".bar")
 			.append("svg")
 			.attr("width", width)
 			.attr('height', height)
@@ -48,7 +48,7 @@ window.onload = function() {
 		
 	var rectMargin = 15;
 
-	main.selectAll('.bar')
+	main.selectAll('.bar1')
 			.data(data)
 			.join((enter) => enter.append('rect')
 								.attr('x', function(d, i) {return xScale(d.date);})
