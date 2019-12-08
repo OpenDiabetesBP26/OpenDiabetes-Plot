@@ -2,13 +2,23 @@ import React, { Component } from 'react';
 import {hot} from 'react-hot-loader';
 import * as d3 from 'd3';
 import Timeline from './Chart/Timeline';
-
+//Load Test Data here !!! TODO -> import custom data
+import data from '../../data/2019-11-20-1349_export-data.json';
 //import { geoMercator, geoPath } from 'd3-geo'
 
 class D3Sample extends Component {
+    constructor(props){
+        super(props);
+        this.state = {
+            data: [],
+        };
+    }
     render() {
 
-        return <div><Timeline/><h2 id="d3sample_pagetitle">D3 Sample</h2><div id="my_dataviz"></div><svg id="food-chart" width="500" height="500"></svg><svg id="d3sample_image" width="500" height="500"></svg></div>;
+        return <div>
+          <svg id="food-chart" width="500" height="500">
+            </svg>
+            </div>;
     }
     // render() {
     //     const projection = geoMercator()
@@ -24,6 +34,47 @@ class D3Sample extends Component {
     //         </svg>
     //  }
 	componentDidMount(){
+    //Debug outprint
+    //Filter only CGM Data
+    let glucoseData = data.data.slice(0,100).filter((e) => e.type=='GLUCOSE_CGM')
+    var formatTime = d3.utcParse("%Y-%m-%dT%H:%M:%S%Z");
+    //Parse Time String to Date
+    glucoseData.forEach(e => e.isoTime = formatTime(e.isoTime))
+    //Select SVG
+    const svg = d3.select('svg')
+    const height = +svg.attr('height')
+    const width = +svg.attr('width')
+    const margin = {top: 20, right: 20, bottom: 20, left: 40}
+
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+    const yScale = d3.scaleLinear().domain([400, 0]).range([0, height-margin.top-margin.bottom]);
+    const xScale = d3.scaleTime().domain(d3.extent(glucoseData, (d) => d.isoTime)).range([0, width-margin.left-margin.right]);
+    const yAxis = d3.axisLeft().scale(yScale)
+    const xAxis = d3.axisBottom().scale(xScale)
+    const yAxisG = svg.append('g').attr('class', 'axisY').attr('transform', `translate(${margin.left},${margin.top})`)
+    const xAxisG = svg.append('g').attr('class', 'axisX').attr('transform', `translate(${margin.left},${height-margin.bottom})`)
+    yAxisG.call(yAxis)
+    xAxisG.call(xAxis)
+    var rect = g.append('rect')
+      .attr('y', yScale(180))
+      .attr('x', 0)
+      .attr('width', 1000)
+      .attr('height', yScale(90)-yScale(180))
+      .attr('transform', `translate(0,0)`)
+      .style('fill', '#62fc03')
+      .style('opacity', 0.5)
+        
+    var circs = g.selectAll('circle').data(glucoseData).join(
+      (enter) => enter.append('circle')
+                      .attr('cx', (d) => xScale(d.isoTime))
+                      .attr('cy', (d) => yScale(d.value))
+                      .attr('r', 3)
+                      .attr('stroke', 'black'),
+      (update) => update,
+      (exit) => exit.remove()
+    );
+  
+    /*
     const data = [
       {date: new Date(2019, 11, 5, 8, 0), value: 102},
       {date: new Date(2019, 11, 5, 8, 30), value: 115},
@@ -61,7 +112,7 @@ class D3Sample extends Component {
       (update) => update,
       (exit) => exit.remove()
     );
-
+  
   //Food Chart
   //Test Data
   const dataFood = [
@@ -109,7 +160,7 @@ class D3Sample extends Component {
                         .attr('class', 'yAxis')
                         .attr('transform', 'translate('+margin.left+', '+margin.top+')')
                         .call(yAxisFood)
-  
+  */
 	}
 }
 

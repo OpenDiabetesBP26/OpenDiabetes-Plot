@@ -5,6 +5,10 @@ import D3Sample from './components/D3Sample';
 import NotFound from './components/NotFound';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import {hot} from 'react-hot-loader';
+import * as d3 from 'd3';
+//Load Test Data here !!! TODO -> import custom data
+import data from '../data/2019-11-20-1349_export-data.json';
+
 
 const NavItem = props => {
     const pageURI = window.location.pathname+window.location.search
@@ -19,7 +23,23 @@ const NavItem = props => {
   }
 
 export class App extends Component {
+    //Fuege eigene States hinzu
+    constructor(props){
+        super(props);
+        this.state = {
+            data: [],
+        };
+    }
+    //Lese Daten aus JSON ein
+    componentDidMount(){
+        //Debug outprint
+        console.log(data.data.filter((e) => e.type=='GLUCOSE_CGM'))
+        //Set Data as State
+        this.setState({data: data.data})
+    }
     render() {
+        const {data} = this.state;
+        console.log(data[0])
         return (
             <BrowserRouter>
                 <div className="App">
