@@ -8,9 +8,9 @@ test('Title visible', async t => {
     await t.expect(Selector('#d3sample_pagetitle').textContent).contains('D3 Sample');
 });
 
-test('5 circles on page', async t => {
-        await t.click('#nav_d3sample');
-        const img = Selector('#d3sample_image')
-        const circles = Selector('#d3sample_image circle');
-        await t.expect(circles.count).eql(5);
-});
+// test('5 circles on page', async t => {
+    //     await t.click('#nav_d3sample');
+        // const img = Selector('#d3sample_image')
+    //     const circles = Selector('#d3sample_image circle');
+    //     await t.expect(circles.count).eql(5);
+// });

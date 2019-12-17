@@ -5,7 +5,7 @@ import D3Sample from './components/D3Sample';
 import NotFound from './components/NotFound';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import {hot} from 'react-hot-loader';
-
+import data from '../data/2019-11-20-1349_export-data.json';
 const NavItem = props => {
     const pageURI = window.location.pathname+window.location.search
     const liClassName = (props.path === pageURI) ? "nav-item active" : "nav-item";
@@ -41,7 +41,7 @@ export class App extends Component {
                     <main>
                     <Switch>
                         <Route exact path='/' component={Home} />
-                        <Route exact path='/d3sample' component={D3Sample} />
+                        <Route exact path='/d3sample' component={(props) => <D3Sample {...props} data={data}/>}/>
                         <Route exact path='/about' component={About} />
                         <Route path="*" component={NotFound} />
                     </Switch>
@@ -50,6 +50,8 @@ export class App extends Component {
             </BrowserRouter>
         );
     }
+
 }
+
 
 export default hot ? hot(module)(App) : App;
