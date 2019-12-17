@@ -3,18 +3,17 @@ import {hot} from 'react-hot-loader';
 import * as d3 from 'd3';
 
 //import { geoMercator, geoPath } from 'd3-geo'
-var data;
+
 class D3Sample extends Component {
   constructor(props){
-    super(props)
-    data = props.data;
+    super(props);
   }
 
   render() {
       return <div><h2 id="d3sample_pagetitle">D3 Sample</h2><div id="my_dataviz"></div><svg id="d3sample" width="1000" height="500"></svg></div>;
   }
 
-	componentDidMount(){
+  initD3(data) {
     var svg = d3.select("svg"),
     margin = {top: 20, right: 20, bottom: 110, left: 40},
     margin2 = {top: 430, right: 20, bottom: 30, left: 40},
@@ -134,6 +133,14 @@ class D3Sample extends Component {
       d.price = +d.price;
       return d;
     }
+  }
+
+	componentDidMount(){
+    fetch("/data/2019-11-20-1349_export-data.json").then(response=>{
+      response.json().then(data=> {
+        this.initD3(data);
+      });
+    });
 	}
 }
 
