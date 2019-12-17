@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --debug --open --mode development",
+    "start-test": "node server.js",
     "build": "webpack --config webpack.config.prod.js --mode production",
     "test": "testcafe chrome ./src/**/*.test.js --app \"webpack-dev-server --debug --mode development\"",
     "test-prod": "testcafe chrome:headless ./src/**/*.test.js --app \"webpack-dev-server --config webpack.config.prod.js --mode production\""
@@ -24,6 +25,7 @@
     "@babel/preset-env": "7.6.3",
     "@babel/preset-react": "7.6.3",
     "@babel/plugin-proposal-class-properties": "^7.6.3",
+    "express": "^4.17.1",
     "babel-loader": "8.0.6",
     "codecov": "3.6.1",
     "css-loader": "3.2.0",
