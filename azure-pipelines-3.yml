@@ -12,10 +12,10 @@ variables:
   azureSubscription: '48229f51-8d86-47cf-a170-22fee293661f'
   
   # Web app name
-  webAppName: 'opendiabetes-plot-dev'
+  webAppName: 'opendiabetes-plot'
   
   # Environment name
-  environmentName: 'opendiabetes-plot-dev'
+  environmentName: 'opendiabetes-plot'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
