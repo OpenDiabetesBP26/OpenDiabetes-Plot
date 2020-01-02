@@ -35,7 +35,6 @@ class D3Sample extends Component {
     //https://github.com/d3/d3-zoom
     var zoom = d3.zoom()
         //Wie viel man unzoomen und zoomen kann
-        .scaleExtent([1, 160])
         .translateExtent([[0, 0], [width, height]])
         .extent([[0, 0], [width, height]])
         .on("zoom", zoomed);
@@ -46,7 +45,7 @@ class D3Sample extends Component {
 
 
     //Debug Data
-    var glucoseData = data.data.slice(0,3000).filter((d) => d.type == "GLUCOSE_CGM")
+    var glucoseData = data.data.filter((d) => d.type == "GLUCOSE_CGM")
     glucoseData.forEach((d) => d.time = new Date(d.epoch))
     var filteredGlucoseData = glucoseData
 
@@ -89,14 +88,56 @@ class D3Sample extends Component {
         .attr("fill", "#faafaa")
     var circsG = svg.append("g")
 
-  
+	filterData(x.domain())
     displayGlucose();
     svg.call(zoom);
 
     //Filtern der Daten durch Domain
     function filterData(domain){
+		var t0 = performance.now();
       filteredGlucoseData = glucoseData.filter((d) => domain[0] <= d.time && d.time <= domain[1])
+	  var t1 = performance.now();
+console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.");
+	  if(milliSecondsToMinutes(domain[1] - domain[0]) > 60*24*4){
+		var test = d3.nest()
+					.key(function(d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours())})
+					.rollup(function(v) { return {
+						value: d3.mean(v, function(d) { return d.value;}),
+						time: new Date(d3.mean(v, function(d) { return d.time;}))
+					};})
+					.entries(filteredGlucoseData); 
+		filteredGlucoseData = test.map(d => d.value);
+		return;
+	  }
+	  
+	  if(milliSecondsToMinutes(domain[1] - domain[0]) > 60*24){
+		var test = d3.nest()
+					.key(function(d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes()%20))})
+					.rollup(function(v) { return {
+						value: d3.mean(v, function(d) { return d.value;}),
+						time: new Date(d3.mean(v, function(d) { return d.time;}))
+					};})
+					.entries(filteredGlucoseData); 
+		filteredGlucoseData = test.map(d => d.value);
+		return;
+	  }
+		  
+	  //Wenn groeßer als 10 std.
+	  if(milliSecondsToMinutes(domain[1] - domain[0]) > 600){
+		var test = d3.nest()
+					.key(function(d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes()%10))})
+					.rollup(function(v) { return {
+						value: d3.mean(v, function(d) { return d.value;}),
+						time: new Date(d3.mean(v, function(d) { return d.time;}))
+					};})
+					.entries(filteredGlucoseData); 
+		filteredGlucoseData = test.map(d => d.value);
+		return;
+	  }
     }
+	function milliSecondsToMinutes(ms){
+		return ms/60000
+	}
 
     //Einfuegen und Updaten der Kreise
     function displayGlucose(){
