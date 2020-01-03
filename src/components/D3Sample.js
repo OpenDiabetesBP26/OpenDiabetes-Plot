@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {hot} from 'react-hot-loader';
 import * as d3 from 'd3';
+import DataManager from './DataManager.js';
 
 //import { geoMercator, geoPath } from 'd3-geo'
 
@@ -14,6 +15,11 @@ class D3Sample extends Component {
   }
 
   initD3(data) {
+	var dm = new DataManager();
+	dm.readData(data);
+	console.log(dm.getData());
+	console.log(dm.getGlucoseCGMData());
+	
     var svg = d3.select("svg"),
     margin = {top: 20, right: 20, bottom: 110, left: 40},
     margin2 = {top: 430, right: 20, bottom: 30, left: 40},
@@ -44,15 +50,11 @@ class D3Sample extends Component {
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
-    //Debug Data
-    var glucoseData = data.data.filter((d) => d.type == "GLUCOSE_CGM")
-    glucoseData.forEach((d) => d.time = new Date(d.epoch))
-    var filteredGlucoseData = glucoseData
 
 
     //Initial domains
-    x.domain(d3.extent(glucoseData, function(d) { return d.time}))
-    y.domain(d3.extent(glucoseData, function(d) { return +d.value}))
+    x.domain(d3.extent(dm.getGlucoseCGMData(), function(d) { return d.time}))
+    y.domain(d3.extent(dm.getGlucoseCGMData(), function(d) { return +d.value}))
     xBase.domain(x.domain());
 
     //X Achse
@@ -88,60 +90,14 @@ class D3Sample extends Component {
         .attr("fill", "#faafaa")
     var circsG = svg.append("g")
 
-	filterData(x.domain())
     displayGlucose();
     svg.call(zoom);
+	
 
-    //Filtern der Daten durch Domain
-    function filterData(domain){
-		var t0 = performance.now();
-      filteredGlucoseData = glucoseData.filter((d) => domain[0] <= d.time && d.time <= domain[1])
-	  var t1 = performance.now();
-console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.");
-	  if(milliSecondsToMinutes(domain[1] - domain[0]) > 60*24*4){
-		var test = d3.nest()
-					.key(function(d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours())})
-					.rollup(function(v) { return {
-						value: d3.mean(v, function(d) { return d.value;}),
-						time: new Date(d3.mean(v, function(d) { return d.time;}))
-					};})
-					.entries(filteredGlucoseData); 
-		filteredGlucoseData = test.map(d => d.value);
-		return;
-	  }
-	  
-	  if(milliSecondsToMinutes(domain[1] - domain[0]) > 60*24){
-		var test = d3.nest()
-					.key(function(d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes()%20))})
-					.rollup(function(v) { return {
-						value: d3.mean(v, function(d) { return d.value;}),
-						time: new Date(d3.mean(v, function(d) { return d.time;}))
-					};})
-					.entries(filteredGlucoseData); 
-		filteredGlucoseData = test.map(d => d.value);
-		return;
-	  }
-		  
-	  //Wenn groeßer als 10 std.
-	  if(milliSecondsToMinutes(domain[1] - domain[0]) > 600){
-		var test = d3.nest()
-					.key(function(d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes()%10))})
-					.rollup(function(v) { return {
-						value: d3.mean(v, function(d) { return d.value;}),
-						time: new Date(d3.mean(v, function(d) { return d.time;}))
-					};})
-					.entries(filteredGlucoseData); 
-		filteredGlucoseData = test.map(d => d.value);
-		return;
-	  }
-    }
-	function milliSecondsToMinutes(ms){
-		return ms/60000
-	}
 
     //Einfuegen und Updaten der Kreise
     function displayGlucose(){
-      var circs = circsG.selectAll('circle').data(filteredGlucoseData).join(
+      var circs = circsG.selectAll('circle').data(dm.getGlucoseCGMData()).join(
         (enter) => enter.append('circle')
                           .attr('r', 3)
                           .attr('cy', d => y(+d.value))
@@ -164,7 +120,7 @@ console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.");
       focus.select(".axis--x").call(d3.axisBottom(x));
 
       //Filter Data
-      filterData(x.domain())
+      dm.updateDomain(x.domain())
       //Update Glucose Chart
       displayGlucose();
     }
