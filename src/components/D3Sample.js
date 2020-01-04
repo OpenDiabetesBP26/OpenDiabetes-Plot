@@ -150,12 +150,14 @@ class D3Sample extends Component {
     this.load(true);
   }
 
-	componentDidMount(){
-    fetch("/data/2019-11-20-1349_export-data.json").then(response=>{
-      response.json().then(data=> {
-        this.initD3(data);
-      }).finally(()=>{ this.load(false); });
-    });
+	async componentDidMount(){
+    try {
+      const data = await (await fetch("/data/2019-11-20-1349_export-data.json")).json();
+      this.initD3(data); 
+    }
+    finally {
+      this.load(false);
+    }
   }
 }
 

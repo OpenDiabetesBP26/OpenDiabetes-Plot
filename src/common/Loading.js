@@ -9,9 +9,10 @@ class Loading extends Component {
     render() {
         return this.props.visible ? <div style={{
             zIndex: 9998,
-            overflow: 'show',
             content: '',
-            display: 'block',
+            display:'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             position: 'fixed',
             top: 0,
             left: 0,
@@ -22,8 +23,7 @@ class Loading extends Component {
         }}> <div className="spinner-border" style={{
             zIndex: 9999,
             width: '3rem', 
-            height: '3rem',
-            margin: '45% 45%'
+            height: '3rem'
         }} role="status"><span className="sr-only">Loading...</span></div></div> : '';
     }
 }
