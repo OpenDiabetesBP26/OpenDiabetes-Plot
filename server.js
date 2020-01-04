@@ -6,8 +6,32 @@ const app = express();
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, 'dist/data')));
 
-app.get('/data/2019-11-20-1349_export-data.json', (req,res) => {
-    res.sendFile(path.join(__dirname,'dist/data/2019-11-20-1349_export-data.json'));
+app.get('/data/*', (req,res) => {
+    res.sendFile(path.join(__dirname,'dist/data' + req.url));
+});
+
+app.get('/favicon*', (req,res) => {
+    res.sendFile(path.join(__dirname,'dist' + req.url));
+});
+
+app.get('/android-icon*', (req,res) => {
+    res.sendFile(path.join(__dirname,'dist' + req.url));
+});
+
+app.get('/apple-icon*', (req,res) => {
+    res.sendFile(path.join(__dirname,'dist' + req.url));
+});
+
+app.get('/ms-icon*', (req,res) => {
+    res.sendFile(path.join(__dirname,'dist' + req.url));
+});
+
+app.get('/manifest.json', (req,res) => {
+    res.sendFile(path.join(__dirname,'dist/' + req.url));
+});
+
+app.get('/browserconfig.xml', (req,res) => {
+    res.sendFile(path.join(__dirname,'dist/' + req.url));
 });
 
 // An api endpoint that returns a short list of items
