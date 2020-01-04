@@ -17,8 +17,6 @@ class D3Sample extends Component {
   initD3(data) {
 	var dm = new DataManager();
 	dm.readData(data);
-	console.log(dm.getData());
-	console.log(dm.getGlucoseCGMData());
 	
     var svg = d3.select("svg"),
     margin = {top: 20, right: 20, bottom: 110, left: 40},
@@ -54,7 +52,7 @@ class D3Sample extends Component {
 
     //Initial domains
     x.domain(d3.extent(dm.getGlucoseCGMData(), function(d) { return d.time}))
-    y.domain(d3.extent(dm.getGlucoseCGMData(), function(d) { return +d.value}))
+    y.domain([0,400])
     xBase.domain(x.domain());
 
     //X Achse
@@ -89,6 +87,10 @@ class D3Sample extends Component {
         .attr("width", width)
         .attr("fill", "#faafaa")
     var circsG = svg.append("g")
+    var rectsG = svg.append("g")
+    var rectsQuantile = rectsG.append("g")
+    var rectsMinMax = rectsG.append("g")
+   
 
     displayGlucose();
     svg.call(zoom);
@@ -97,16 +99,65 @@ class D3Sample extends Component {
 
     //Einfuegen und Updaten der Kreise
     function displayGlucose(){
-      var circs = circsG.selectAll('circle').data(dm.getGlucoseCGMData()).join(
-        (enter) => enter.append('circle')
-                          .attr('r', 3)
-                          .attr('cy', d => y(+d.value))
-                          .attr('cx', d => x(d.time)),
-        (update) => update
-                          .attr('cy', d => y(+d.value))
-                          .attr('cx', d => x(d.time))
-      )
-      .attr('transform', 'translate(' + margin.left + ' ' + margin.top +')');
+	  var gd = dm.getGlucoseCGMData();
+      if(gd.type == 'intraday'){
+          displayGlucose_intraday(gd);
+      }
+      if(gd.type == 'hourly'){
+          displayGlucose_hourly(gd);
+      }
+      if(gd.type == 'daily'){
+        displayGlucose_hourly(gd);
+      }
+      if(gd.type == 'weekly'){
+          displayGlucose_hourly(gd);
+      }
+    }
+	function displayGlucose_intraday(data){
+        //Remove Rects
+        rectsG.selectAll('rect').remove()
+		var circs = circsG.selectAll('circle').data(data).join(
+			(enter) => enter.append('circle')
+							  .attr('r', 3)
+							  .attr('cy', d => y(+d.value))
+							  .attr('cx', d => x(d.time)),
+			(update) => update
+							  .attr('cy', d => y(+d.value))
+							  .attr('cx', d => x(d.time))
+		  )
+          .attr('transform', 'translate(' + margin.left + ' ' + margin.top +')');
+          
+    }
+    function displayGlucose_hourly(data){
+        //Remove Circs
+        circsG.selectAll('circle').remove();
+
+        var rectsM = rectsMinMax.selectAll('rect').data(data).join(
+			(enter) => enter.append('rect')
+                              .attr('width', 6)
+                              .attr('height', d =>  y(d.value_min) - y(d.value_max))
+							  .attr('y', d => y(d.value_max))
+							  .attr('x', d => x(d.time)-3),
+            (update) => update
+                            .attr('height', d =>  y(d.value_min) - y(d.value_max))
+                            .attr('y', d => y(d.value_max))
+                            .attr('x', d => x(d.time)-3),
+		  )
+          .attr('transform', 'translate(' + margin.left + ' ' + margin.top +')')
+          .style('opacity', 0.3);
+          var rectsQ = rectsQuantile.selectAll('rect').data(data).join(
+			(enter) => enter.append('rect')
+                              .attr('width', 6)
+                              .attr('height', d =>  y(d.value_lower_perc) - y(d.value_higher_perc))
+							  .attr('y', d => y(d.value_higher_perc))
+							  .attr('x', d => x(d.time)-3),
+            (update) => update
+                            .attr('height', d =>  y(d.value_lower_perc) - y(d.value_higher_perc))
+                            .attr('y', d => y(d.value_higher_perc))
+                            .attr('x', d => x(d.time)-3),
+		  )
+          .attr('transform', 'translate(' + margin.left + ' ' + margin.top +')');
+          
     }
 
 
