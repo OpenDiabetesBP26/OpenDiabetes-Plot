@@ -112,6 +112,9 @@ class D3Sample extends Component {
       if(gd.type == 'weekly'){
           displayGlucose_hourly(gd);
       }
+      if(gd.type == 'monthly'){
+          displayGlucose_hourly(gd);
+      }
     }
 	function displayGlucose_intraday(data){
         //Remove Rects
