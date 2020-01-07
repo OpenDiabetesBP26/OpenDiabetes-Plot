@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Loading from '../common/Loading'
 import {hot} from 'react-hot-loader';
 import * as d3 from 'd3';
-import DataManager from './DataManager.js';
+import DataManager from '../services/DataManager.js';
 
 //import { geoMercator, geoPath } from 'd3-geo'
 
