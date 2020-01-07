@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Loading from '../common/Loading'
 import {hot} from 'react-hot-loader';
 import * as d3 from 'd3';
 import DataManager from './DataManager.js';
@@ -8,10 +9,16 @@ import DataManager from './DataManager.js';
 class D3Sample extends Component {
   constructor(props){
     super(props);
+    this.state = {loading:true}
   }
 
   render() {
-      return <div><h2 id="d3sample_pagetitle">D3 Sample</h2><div id="my_dataviz"></div><svg id="d3sample" width="1000" height="500"></svg></div>;
+      return <div>
+          <Loading visible={this.state.loading} />
+          <h2 id="d3sample_pagetitle">D3 Sample</h2>
+          <div id="my_dataviz"></div>
+          <svg id="d3sample" width="1000" height="500"></svg>
+      </div>;
   }
 
   initD3(data) {
@@ -186,13 +193,23 @@ class D3Sample extends Component {
     }
   }
 
-	componentDidMount(){
-    fetch("/data/2019-11-20-1349_export-data.json").then(response=>{
-      response.json().then(data=> {
-        this.initD3(data);
-      });
-    });
-	}
+  load(loading) {
+    this.setState({loading:(loading ? true : false)});
+  }
+
+  componentWillMount(){
+    this.load(true);
+  }
+
+	async componentDidMount(){
+    try {
+      const data = await (await fetch("/data/2019-11-20-1349_export-data.json")).json();
+      this.initD3(data); 
+    }
+    finally {
+      this.load(false);
+    }
+  }
 }
 
 export default hot ? hot(module)(D3Sample) : D3Sample;

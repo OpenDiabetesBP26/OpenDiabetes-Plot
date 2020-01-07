@@ -2,7 +2,7 @@ var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
-  entry: './src/index.js',
+  entry: ['./src/index.js'],
   mode: "production",
   performance: {hints:false},
   output: {
