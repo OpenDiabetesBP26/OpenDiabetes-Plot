@@ -108,14 +108,16 @@ class D3Sample extends Component {
         .style("border-radius", "8px")
         .style("font", "sans-serif")
 
-  
+    
     displayGlucose();
     svg.call(zoom);
+    mouseactions();
 
     //Filtern der Daten durch Domain
     function filterData(domain){
       filteredGlucoseData = glucoseData.filter((d) => domain[0] <= d.time && d.time <= domain[1])
     }
+
 
     //Einfuegen und Updaten der Kreise
     function displayGlucose(){
@@ -128,7 +130,7 @@ class D3Sample extends Component {
                           .attr('cy', d => y(+d.value))
                           .attr('cx', d => x(d.time))
       )
-      .attr('transform', 'translate(' + margin.left + ' ' + margin.top +')');
+      .attr('transform', 'translate(' + margin.left + ' ' + margin.top +')')
     }
 
     //mouse actions 
@@ -146,7 +148,7 @@ class D3Sample extends Component {
       }
     function mousemove_tp(d){
       tooltip
-        .html("Time: " + d.time + "<br/>" + "value: " + d.value)
+        .html("time: " + d.time + "<br/>" + "value: " + d.value + "<br/>" + "source: " + d.source)
         .style("left", (d3.event.pageX +30)  +"px")
         .style("top", (d3.event.pageY) +"px")
       }
@@ -162,12 +164,16 @@ class D3Sample extends Component {
         .attr('r', 3);
       }
 
-     svg.selectAll('circle')
+      function  mouseactions() {
+        d3.selectAll('circle')
      //mouse actions
      .on("mouseover", mouseover_tp)
      .on("mousemove", mousemove_tp)
      .on("mouseout", mouseout_tp)
+      }
 
+
+    var cs;
 
     function zoomed() {
       //Wir benutzen xBase, da wir x brauchen um die Punkte zu updaten
@@ -180,6 +186,8 @@ class D3Sample extends Component {
       filterData(x.domain())
       //Update Glucose Chart
       displayGlucose();
+      //update all circles for mouse actions
+      mouseactions();
     }
 
     function type(d) {
