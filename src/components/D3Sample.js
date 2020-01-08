@@ -20,10 +20,10 @@ class D3Sample extends Component {
             <svg id="d3sample" width="1000" height="500"></svg>
         </div>;
     }
+    async initD3(data) {
 
-    initD3(data) {
         var dm = new DataManager();
-        dm.readData(data);
+        await dm.readData(data);
 
         var svg = d3.select("svg"),
             margin = { top: 20, right: 20, bottom: 110, left: 40 },
@@ -31,8 +31,53 @@ class D3Sample extends Component {
             width = +svg.attr("width") - margin.left - margin.right,
             height = +svg.attr("height") - margin.top - margin.bottom,
             height2 = +svg.attr("height") - margin2.top - margin2.bottom;
+        //Tooltips style
+        var tooltip = d3.select('body')
+            .append("div")
+            .style("text-align", "left")
+            .style("position", "absolute")
+            .style("opacity", 0)
+            .attr("class", "tooltip")
+            .style("padding", "2px")
+            .style("background-color", "lightsteelblue")
+            .style("border-radius", "8px")
+            .style("font", "sans-serif")
+        //mouse actions 
+        function mouseover_tp() {
+            tooltip
+                .style("opacity", 1)
+            d3.select(this)
+                .style("stroke", "green")
+                .style("opacity", 1)
+                .transition()
+                .duration(300)
+                .attr('fill', 'yellow')
+                .attr('opacity', 1)
+                .attr('r', 3 * 3)
+        }
+        function mousemove_tp(d) {
+            tooltip
+                .html("Time: " + d.time + "<br/>" + "value: " + d.value)
+                .style("left", (d3.event.pageX + 30) + "px")
+                .style("top", (d3.event.pageY) + "px")
+        }
+        function mouseout_tp() {
+            tooltip
+                .style("opacity", 0)
+            d3.select(this)
+                .style("stroke", "none")
+                .transition()
+                .duration(500)
+                .attr('fill', 'black')
+                .attr('opacity', 1)
+                .attr('r', 3);
+        }
 
-        var parseDate = d3.timeParse("%b %Y");
+        svg.selectAll('circle')
+            //mouse actions
+            .on("mouseover", mouseover_tp)
+            .on("mousemove", mousemove_tp)
+            .on("mouseout", mouseout_tp)
 
         var x = d3.scaleTime().range([0, width]),
             xBase = d3.scaleTime().range([0, width]),
@@ -40,7 +85,6 @@ class D3Sample extends Component {
 
         var xAxis = d3.axisBottom(x),
             yAxis = d3.axisLeft(y);
-
 
         //Zoom Objekt siehe
         //https://github.com/d3/d3-zoom
@@ -54,11 +98,8 @@ class D3Sample extends Component {
             .attr("class", "focus")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
-
-
         //Initial domains
-        x.domain(d3.extent(dm.getGlucoseCGMData(), function (d) { return d.time }))
+        x.domain(d3.extent(dm.getGlucoseCGMData(), d => d.time))
         y.domain([0, 400])
         xBase.domain(x.domain());
 
@@ -98,11 +139,8 @@ class D3Sample extends Component {
         var rectsQuantile = rectsG.append("g")
         var percentilGroup = rectsG.append("g").classed('percentilGraph', true)
 
-
         displayGlucose();
         svg.call(zoom);
-
-
 
         //Einfuegen und Updaten der Kreise
         function displayGlucose() {
@@ -130,7 +168,11 @@ class D3Sample extends Component {
                 (enter) => enter.append('circle')
                     .attr('r', 3)
                     .attr('cy', d => y(+d.value))
-                    .attr('cx', d => x(d.time)),
+                    .attr('cx', d => x(d.time))
+                    //mouse actions
+                    .on("mouseover", mouseover_tp)
+                    .on("mousemove", mousemove_tp)
+                    .on("mouseout", mouseout_tp),
                 (update) => update
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
@@ -229,12 +271,6 @@ class D3Sample extends Component {
             dm.updateDomain(x.domain())
             //Update Glucose Chart
             displayGlucose();
-        }
-
-        function type(d) {
-            d.date = parseDate(d.date);
-            d.price = +d.price;
-            return d;
         }
     }
 

@@ -9,12 +9,9 @@ class DataManager {
 	parseTime() {
 		this.data.forEach(d => d.time = new Date(d.epoch));
 	}
-	readDataFromURL(url) {
-		fetch(url).then(response => {
-			response.json().then(data => {
-				this.readData(data);
-			});
-		});
+	async readDataFromURL(url) {
+		let data = awiat (await fetch(url)).json();
+		this.readData(data);
 	}
 	readData(data) {
 		this.data = data.data;
@@ -24,15 +21,15 @@ class DataManager {
 		this.glucoseData = this.data.filter(d => d.type == "GLUCOSE_CGM");
 		
 		//Compute all groups now
-		this.glucoseData_min_10 = this.compGlucoseCGMData(this.glucoseData, function (d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes() % 10)) });
-		this.glucoseData_min_20 = this.compGlucoseCGMData(this.glucoseData, function (d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes() % 20)) });
-		this.glucoseData_hour = this.compGlucoseCGMData(this.glucoseData, function (d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), (d.time.getHours() - d.time.getHours() % 6) / 6) });
-		this.glucoseData_day = this.compGlucoseCGMData(this.glucoseData, function (d) {return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate())});
-		this.glucoseData_week = this.compGlucoseCGMData(this.glucoseData, function (d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate() - d.time.getDay()) });
-		this.glucoseData_month = this.compGlucoseCGMData(this.glucoseData, function (d) { return new Date(d.time.getFullYear(), d.time.getMonth()) });
+		this.glucoseData_min_10 = this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes() % 10)));
+		this.glucoseData_min_20 = this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes() % 20)));
+		this.glucoseData_hour = this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), (d.time.getHours() - d.time.getHours() % 6) / 6));
+		this.glucoseData_day = this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate()));
+		this.glucoseData_week = this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate() - d.time.getDay()));
+		this.glucoseData_month = this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth()));
 
 		//Update current domain to max domain from data
-		this.updateDomain(d3.extent(this.data, function (d) { return d.time }))
+		this.updateDomain(d3.extent(this.data, d => d.time))
 
 	}
 	updateDomain(newDomain) {
@@ -117,8 +114,8 @@ class DataManager {
 					value: d3.median(v, function (d) { return +d.value; }),
 					value_min: +d3.min(v, function (d) { return +d.value; }),
 					value_max: +d3.max(v, function (d) { return +d.value; }),
-					value_lower_perc: d3.quantile(v.map(function (d) { return +d.value; }).sort(function (a, b) { return (+a) - (+b) }), 0.25),
-					value_higher_perc: d3.quantile(v.map(function (d) { return +d.value; }).sort(function (a, b) { return (+a) - (+b) }), 0.75),
+					value_lower_perc: d3.quantile(v.map( d => +d.value).sort((a,b) => (+a) - (+b)), 0.25),
+					value_higher_perc: d3.quantile(v.map( d => +d.value).sort((a,b) => (+a) - (+b)), 0.75),
 					time: new Date(d3.mean(v, function (d) { return d.time; }))
 				};
 			})
