@@ -26,7 +26,7 @@ class DataManager {
 		//Compute all groups now
 		this.glucoseData_min_10 = this.compGlucoseCGMData(this.glucoseData, function (d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes() % 10)) });
 		this.glucoseData_min_20 = this.compGlucoseCGMData(this.glucoseData, function (d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes() % 20)) });
-		this.glucoseData_hour = this.compGlucoseCGMData(this.glucoseData, function (d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours()) });
+		this.glucoseData_hour = this.compGlucoseCGMData(this.glucoseData, function (d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), (d.time.getHours() - d.time.getHours() % 6) / 6) });
 		this.glucoseData_day = this.compGlucoseCGMData(this.glucoseData, function (d) {return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate())});
 		this.glucoseData_week = this.compGlucoseCGMData(this.glucoseData, function (d) { return new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate() - d.time.getDay()) });
 		this.glucoseData_month = this.compGlucoseCGMData(this.glucoseData, function (d) { return new Date(d.time.getFullYear(), d.time.getMonth()) });
@@ -85,14 +85,14 @@ class DataManager {
 			gd.type = 'daily';
 			return gd;
 		}
-		//Wenn groesser als eine Woche
-		if (this.milliSecondsToMinutes(timeDelta) > 60 * 24 * 7) {
+		//Wenn groesser als 2 Woche
+		if (this.milliSecondsToMinutes(timeDelta) > 60 * 24 * 7 * 2) {
 			let gd = this.glucoseData_hour_f.filter(filterCurrentDomain);
 			gd.type = 'hourly';
 			return gd;
 		}
-		//Wenn groesser als 24 std.
-		if (this.milliSecondsToMinutes(timeDelta) > 60 * 24) {
+		//Wenn groesser als 3 Tage
+		if (this.milliSecondsToMinutes(timeDelta) > 60 * 24 * 3) {
 			let gd = this.glucoseData_min_20_f.filter(filterCurrentDomain);
 			gd.type = 'intraday';
 			return gd;
