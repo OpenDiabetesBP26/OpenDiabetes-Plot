@@ -27,10 +27,8 @@ class D3Sample extends Component {
 
         var svg = d3.select("svg"),
             margin = { top: 20, right: 20, bottom: 110, left: 40 },
-            margin2 = { top: 430, right: 20, bottom: 30, left: 40 },
             width = +svg.attr("width") - margin.left - margin.right,
-            height = +svg.attr("height") - margin.top - margin.bottom,
-            height2 = +svg.attr("height") - margin2.top - margin2.bottom;
+            height = +svg.attr("height") - margin.top - margin.bottom
         //Tooltips style
         var tooltip = d3.select('body')
             .append("div")
@@ -72,13 +70,6 @@ class D3Sample extends Component {
                 .attr('opacity', 1)
                 .attr('r', 3);
         }
-
-        svg.selectAll('circle')
-            //mouse actions
-            .on("mouseover", mouseover_tp)
-            .on("mousemove", mousemove_tp)
-            .on("mouseout", mouseout_tp)
-
         var x = d3.scaleTime().range([0, width]),
             xBase = d3.scaleTime().range([0, width]),
             y = d3.scaleLinear().range([height, 0])
@@ -136,7 +127,6 @@ class D3Sample extends Component {
             .attr("fill", "#faafaa")
         var circsG = svg.append("g")
         var rectsG = svg.append("g")
-        var rectsQuantile = rectsG.append("g")
         var percentilGroup = rectsG.append("g").classed('percentilGraph', true)
 
         displayGlucose();
