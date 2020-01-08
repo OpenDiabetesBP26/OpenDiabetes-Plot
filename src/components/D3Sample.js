@@ -96,6 +96,18 @@ class D3Sample extends Component {
         .attr("fill", "#faafaa")
     var circsG = svg.append("g")
 
+    //Tooltips style
+    var tooltip = d3.select('body')
+        .append("div")
+        .style("text-align", "left")
+        .style("position", "absolute")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("padding", "2px")
+        .style("background-color", "lightsteelblue")
+        .style("border-radius", "8px")
+        .style("font", "sans-serif")
+
   
     displayGlucose();
     svg.call(zoom);
@@ -119,7 +131,42 @@ class D3Sample extends Component {
       .attr('transform', 'translate(' + margin.left + ' ' + margin.top +')');
     }
 
+    //mouse actions 
+    function mouseover_tp() {
+      tooltip
+       .style("opacity", 1)
+      d3.select(this)
+        .style("stroke", "green")
+        .style("opacity", 1)
+        .transition()
+        .duration(300)
+        .attr('fill', 'yellow')
+        .attr('opacity', 1)
+        .attr('r', 3 * 3)
+      }
+    function mousemove_tp(d){
+      tooltip
+        .html("Time: " + d.time + "<br/>" + "value: " + d.value)
+        .style("left", (d3.event.pageX +30)  +"px")
+        .style("top", (d3.event.pageY) +"px")
+      }
+    function mouseout_tp(){
+      tooltip
+        .style("opacity", 0)
+      d3.select(this)
+        .style("stroke", "none")
+        .transition()
+        .duration(500)
+        .attr('fill', 'black')
+        .attr('opacity', 1)
+        .attr('r', 3);
+      }
 
+     svg.selectAll('circle')
+     //mouse actions
+     .on("mouseover", mouseover_tp)
+     .on("mousemove", mousemove_tp)
+     .on("mouseout", mouseout_tp)
 
 
     function zoomed() {
