@@ -55,7 +55,7 @@ class D3Sample extends Component {
         }
         function mousemove_tp(d) {
             tooltip
-                .html("Time: " + d.time + "<br/>" + "value: " + d.value)
+                .html("time: " + d.time + "<br/>" + "value: " + d.value + "<br/>" + "source: " + d.source)
                 .style("left", (d3.event.pageX + 30) + "px")
                 .style("top", (d3.event.pageY) + "px")
         }
@@ -103,6 +103,7 @@ class D3Sample extends Component {
         focus.append("g")
             .attr("class", "axis axis--y")
             .call(yAxis);
+
         //Farbige Anzeige fuer Glukose
         var gcHigh = svg.append("rect")
             .attr("class", "gcHigh")
@@ -125,16 +126,45 @@ class D3Sample extends Component {
             .attr("height", y(0) - y(65))
             .attr("width", width)
             .attr("fill", "#faafaa")
+            
+        //rect for displayGlucose_intraday
+        var rectTag = svg.append("rect")
+                 .attr("x", 1)
+                 .attr("y",  2)
+                 .attr("height", 390 - margin.top)
+                 .attr("width", 3)
+                 .style("opacity", 0)
+
+
         var circsG = svg.append("g")
         var rectsG = svg.append("g")
+        var spaltsG = svg.append("g")
         var percentilGroup = rectsG.append("g").classed('percentilGraph', true)
 
         displayGlucose();
         svg.call(zoom);
 
+
+
+
+        //rect in displayGlucose_intraday
+        function changRectTag(x,y,w){
+            rectTag
+                 .attr("x", x)
+                 .attr("y",  y)
+                 .attr("width", w)
+                 .style("opacity", 0)
+        }
+
+
+
+
         //Einfuegen und Updaten der Kreise
-        function displayGlucose() {
+        function displayGlucose(d) {
+            
             var gd = dm.getGlucoseCGMData();
+        
+
             if (gd.type == 'intraday') {
                 displayGlucose_intraday(gd);
             }
@@ -152,6 +182,10 @@ class D3Sample extends Component {
             }
         }
         function displayGlucose_intraday(data) {
+            var firstright = x(x.ticks()[0])
+                changRectTag(margin.left, y(400) + margin.top, firstright)
+                rectTag
+                .style("opacity", 0.3)
             //Remove Rects
             removePercentil()
             var circs = circsG.selectAll('circle').data(data).join(
@@ -167,7 +201,7 @@ class D3Sample extends Component {
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
             )
-                .attr('transform', 'translate(' + margin.left + ' ' + margin.top + ')');
+                .attr('transform', 'translate(' + margin.left + ' ' + margin.top + ')')
 
         }
         function removePercentil() {
