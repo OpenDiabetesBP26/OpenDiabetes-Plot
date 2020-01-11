@@ -126,19 +126,11 @@ class D3Sample extends Component {
             .attr("height", y(0) - y(65))
             .attr("width", width)
             .attr("fill", "#faafaa")
-            
-        //rect for displayGlucose_intraday
-        var rectTag = svg.append("rect")
-                 .attr("x", 1)
-                 .attr("y",  2)
-                 .attr("height", 390 - margin.top)
-                 .attr("width", 3)
-                 .style("opacity", 0)
 
-
+        var spaltsG = svg.append("g")
+        var spaltGroup = spaltsG.append("g").classed('spaltGraph', true)
         var circsG = svg.append("g")
         var rectsG = svg.append("g")
-        var spaltsG = svg.append("g")
         var percentilGroup = rectsG.append("g").classed('percentilGraph', true)
 
         displayGlucose();
@@ -146,46 +138,35 @@ class D3Sample extends Component {
 
 
 
-
-        //rect in displayGlucose_intraday
-        function changRectTag(x,y,w){
-            rectTag
-                 .attr("x", x)
-                 .attr("y",  y)
-                 .attr("width", w)
-                 .style("opacity", 0)
-        }
-
-
-
-
         //Einfuegen und Updaten der Kreise
-        function displayGlucose(d) {
+        function displayGlucose(d, x) {
             
             var gd = dm.getGlucoseCGMData();
-        
 
             if (gd.type == 'intraday') {
-                displayGlucose_intraday(gd);
+                getSpalt()
+                displayGlucose_intraday(gd)
             }
             if (gd.type == 'hourly') {
+                getSpalt()
                 displayGlucose_percentil(gd);
             }
             if (gd.type == 'daily') {
+                getSpalt()
                 displayGlucose_percentil(gd);
             }
             if (gd.type == 'weekly') {
+                getSpalt()
                 displayGlucose_percentil(gd);
             }
             if (gd.type == 'monthly') {
+                getSpalt()
                 displayGlucose_percentil(gd);
             }
         }
+
+
         function displayGlucose_intraday(data) {
-            var firstright = x(x.ticks()[0])
-                changRectTag(margin.left, y(400) + margin.top, firstright)
-                rectTag
-                .style("opacity", 0.3)
             //Remove Rects
             removePercentil()
             var circs = circsG.selectAll('circle').data(data).join(
@@ -204,9 +185,54 @@ class D3Sample extends Component {
                 .attr('transform', 'translate(' + margin.left + ' ' + margin.top + ')')
 
         }
+
+
         function removePercentil() {
             percentilGroup.selectAll('g').remove()
         }
+
+        //random color für Tests
+        function RandomColor(){
+            var random=parseInt(Math.random()*Math.pow(32,4));
+            var v=('00000'+random.toString(16)).substr(-4);
+            return v
+        }
+
+        //universal Scala-Spalt
+        // entwurf process 
+        //--> 1.lokalisiere layout von Spalten(context und Zusammenhang mit anderen layout) 
+        //--> 2.absolute Locations von x-scala(https://github.com/d3/d3/wiki/API--%E4%B8%AD%E6%96%87%E6%89%8B%E5%86%8C
+        //quelle Codes von axis.js Zeile 125. und ad Zeile 45.) 
+        //--> 3.grobe Implemmentierung(benutze hilfe Functiuonen um attributen von Spalten zu bekommen)
+        //--> 4.Codes rekunstruieren(versuche mit breitstehendes Code-style übereinstimmen, **performence noch nicht getestet**)
+        //--> 5.löse Problem: mit separaten Spalten jeweils Scala oder mit interative sich abdeckende Spalten um natürliche Abstufung darzustellen
+        //muss noch diskudieren wegen Performence und Style
+        //--> 6.(noch nicht!) Style mit back-ground anzupassen
+        //--> 7.(noch nicht!) Animation beim Zoomen
+        //--> 8.(noch nicht!) ??? nach feedback
+        function getSpalt(){
+            var ticksGroup = spaltGroup.selectAll('g').data(x.ticks()).join(
+                
+                function (enter) {
+                    let group = enter.append('g').classed('spalt', true)
+                    group.append('rect')
+                        .attr('x', (d, i) => x(d) - x(x.ticks()[i]))
+                        .attr('y', y(400))
+                        .attr('height', 390 - margin.top)
+                        .attr('width', d => x(d))
+                        .style("fill", "gray")
+                        .style("opacity", 0.1)
+                        .classed("tag", true)
+                    group.attr('transform', 'translate(' + margin.left + ' ' + margin.top + ')');
+                },
+                function (update) {
+                    update.select('rect.tag')
+                    .attr('x', (d, i) => x(d) - x(x.ticks()[i]))
+                    .attr('width', d => x(d))
+                }
+                )
+        }
+
         function displayGlucose_percentil(data) {
             function getHeightHigher(d) {
                 let height = (d.value_lower_perc >= gcHigh ? y(d.value_lower_perc) : y(gcHigh)) - y(d.value_higher_perc);
@@ -230,6 +256,7 @@ class D3Sample extends Component {
             const gcHigh = 180;
             const gcLow = 70;
             const width = 6;
+
             var dataGroup = percentilGroup.selectAll('g').data(data).join(
                 function (enter) {
                     let rectGroup = enter.append('g').classed('percentil', true)
@@ -260,7 +287,6 @@ class D3Sample extends Component {
                         .attr('y', d => y(d.value_higher_perc <= gcLow ? d.value_higher_perc : gcLow))
                         .attr('x', d => x(d.time) - width / 2)
                         .classed("low", true)
-
                     rectGroup.attr('transform', 'translate(' + margin.left + ' ' + margin.top + ')');
                 },
                 function (update) {
@@ -294,7 +320,7 @@ class D3Sample extends Component {
             //Filter Data
             dm.updateDomain(x.domain())
             //Update Glucose Chart
-            displayGlucose();
+            displayGlucose()
         }
     }
 
