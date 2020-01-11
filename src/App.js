@@ -3,6 +3,7 @@ import Home from './components/Home';
 import About from './components/About';
 import D3Sample from './components/D3Sample';
 import NotFound from './components/NotFound';
+import Chart from './components/Chart';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import {hot} from 'react-hot-loader';
 const NavItem = props => {
@@ -33,6 +34,7 @@ export class App extends Component {
                                     <NavItem id="nav_home" path="/" name="Home" />
                                     <NavItem id="nav_d3sample" path="/d3sample" name="D3Sample" />
                                     <NavItem id="nav_about" path="/about" name="About" />
+                                    <NavItem id="nav_chart" path="/chart" name="Chart" />
                                 </ul>
                             </div>
                         </nav>
@@ -41,6 +43,7 @@ export class App extends Component {
                     <Switch>
                         <Route exact path='/' component={Home} />
                         <Route exact path='/d3sample' component={(props) => <D3Sample {...props} />}/>
+                        <Route exact path='/chart' component={(props) => <Chart {...props} />}/>
                         <Route exact path='/about' component={About} />
                         <Route path="*" component={NotFound} />
                     </Switch>
