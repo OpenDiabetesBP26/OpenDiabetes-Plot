@@ -53,12 +53,14 @@ class D3Sample extends Component {
                 .attr('opacity', 1)
                 .attr('r', 3 * 3)
         }
+
         function mousemove_tp(d) {
             tooltip
                 .html("time: " + d.time + "<br/>" + "value: " + d.value + "<br/>" + "source: " + d.source)
                 .style("left", (d3.event.pageX + 30) + "px")
                 .style("top", (d3.event.pageY) + "px")
         }
+
         function mouseout_tp() {
             tooltip
                 .style("opacity", 0)
@@ -81,8 +83,14 @@ class D3Sample extends Component {
         //https://github.com/d3/d3-zoom
         var zoom = d3.zoom()
             //Wie viel man unzoomen und zoomen kann
-            .translateExtent([[0, 0], [width, height]])
-            .extent([[0, 0], [width, height]])
+            .translateExtent([
+                [0, 0],
+                [width, height]
+            ])
+            .extent([
+                [0, 0],
+                [width, height]
+            ])
             .on("zoom", zoomed);
 
         var focus = svg.append("g")
@@ -140,7 +148,7 @@ class D3Sample extends Component {
 
         //Einfuegen und Updaten der Kreise
         function displayGlucose(d, x) {
-            
+
             var gd = dm.getGlucoseCGMData();
 
             if (gd.type == 'intraday') {
@@ -170,7 +178,7 @@ class D3Sample extends Component {
             //Remove Rects
             removePercentil()
             var circs = circsG.selectAll('circle').data(data).join(
-                (enter) => enter.append('circle')
+                    (enter) => enter.append('circle')
                     .attr('r', 3)
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
@@ -178,10 +186,10 @@ class D3Sample extends Component {
                     .on("mouseover", mouseover_tp)
                     .on("mousemove", mousemove_tp)
                     .on("mouseout", mouseout_tp),
-                (update) => update
+                    (update) => update
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
-            )
+                )
                 .attr('transform', 'translate(' + margin.left + ' ' + margin.top + ')')
 
         }
@@ -191,11 +199,84 @@ class D3Sample extends Component {
             percentilGroup.selectAll('g').remove()
         }
 
-        //random color für Tests
-        function RandomColor(){
-            var random=parseInt(Math.random()*Math.pow(32,4));
-            var v=('00000'+random.toString(16)).substr(-4);
-            return v
+
+        //color Array für test der Spalt
+        function gradientColor(startColor, endColor, step) {
+            var startRGB = colorToRgb(startColor);
+            var startR = startRGB[0];
+            var startG = startRGB[1];
+            var startB = startRGB[2];
+
+            var endRGB = colorToRgb(endColor);
+            var endR = endRGB[0];
+            var endG = endRGB[1];
+            var endB = endRGB[2];
+
+            var sR = (endR - startR) / step; 
+            var sG = (endG - startG) / step;
+            var sB = (endB - startB) / step;
+
+            var colorArr = [];
+            for (var i = 0; i < step; i++) {
+                var hex = colorToHex('rgb(' + parseInt((sR * i + startR)) + ',' + parseInt((sG * i + startG)) + ',' + parseInt((sB * i + startB)) + ')');
+                colorArr.push(hex);
+            }
+            return colorArr;
+        }
+        function colorToRgb(sColor) {
+            var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+            var sColor = sColor.toLowerCase();
+            if (sColor && reg.test(sColor)) {
+                if (sColor.length === 4) {
+                    var sColorNew = "#";
+                    for (var i = 1; i < 4; i += 1) {
+                        sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1));
+                    }
+                    sColor = sColorNew;
+                }
+                var sColorChange = [];
+                for (var i = 1; i < 7; i += 2) {
+                    sColorChange.push(parseInt("0x" + sColor.slice(i, i + 2)));
+                }
+                return sColorChange;
+            } else {
+                return sColor;
+            }
+        };
+
+        function colorToHex(rgb) {
+            var _this = rgb;
+            var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+            if (/^(rgb|RGB)/.test(_this)) {
+                var aColor = _this.replace(/(?:\(|\)|rgb|RGB)*/g, "").split(",");
+                var strHex = "#";
+                for (var i = 0; i < aColor.length; i++) {
+                    var hex = Number(aColor[i]).toString(16);
+                    hex = hex < 10 ? 0 + '' + hex : hex; 
+                    if (hex === "0") {
+                        hex += hex;
+                    }
+                    strHex += hex;
+                }
+                if (strHex.length !== 7) {
+                    strHex = _this;
+                }
+
+                return strHex;
+            } else if (reg.test(_this)) {
+                var aNum = _this.replace(/#/, "").split("");
+                if (aNum.length === 6) {
+                    return _this;
+                } else if (aNum.length === 3) {
+                    var numHex = "#";
+                    for (var i = 0; i < aNum.length; i += 1) {
+                        numHex += (aNum[i] + aNum[i]);
+                    }
+                    return numHex;
+                }
+            } else {
+                return _this;
+            }
         }
 
         //universal Scala-Spalt
@@ -210,27 +291,30 @@ class D3Sample extends Component {
         //--> 6.(noch nicht!) Style mit back-ground anzupassen
         //--> 7.(noch nicht!) Animation beim Zoomen
         //--> 8.(noch nicht!) ??? nach feedback
-        function getSpalt(){
-            var ticksGroup = spaltGroup.selectAll('g').data(x.ticks()).join(
-                
-                function (enter) {
+        function getSpalt() {
+            var arr = x.ticks()
+            var arr_len = arr.push(x.ticks()[0])
+            //var colorarr = gradientColor('#4e72b8','#130c0e', 40)
+            var ticksGroup = spaltGroup.selectAll('g').data(arr).join(
+                function(enter) {
                     let group = enter.append('g').classed('spalt', true)
                     group.append('rect')
-                        .attr('x', (d, i) => x(d) - x(x.ticks()[i]))
+                        .attr('x', (d, i) => i == 0 ? 0 : x(x.ticks()[i - 1]))
                         .attr('y', y(400))
                         .attr('height', 390 - margin.top)
-                        .attr('width', d => x(d))
+                        .attr('width', (d, i) => i == 0 ? x(d) : i == (arr_len - 1) ? width - x(x.ticks()[i - 1]) : x(d) - x(x.ticks()[i - 1]))
+                        //.style("fill", (d, i) => colorarr[i*2])
                         .style("fill", "gray")
-                        .style("opacity", 0.1)
+                        .style("opacity", (d, i) => 1 - (i / 16 + 0.001))
                         .classed("tag", true)
                     group.attr('transform', 'translate(' + margin.left + ' ' + margin.top + ')');
                 },
-                function (update) {
+                function(update) {
                     update.select('rect.tag')
-                    .attr('x', (d, i) => x(d) - x(x.ticks()[i]))
-                    .attr('width', d => x(d))
+                        .attr('x', (d, i) => i == 0 ? 0 : x(x.ticks()[i - 1]))
+                        .attr('width', (d, i) => i == 0 ? x(d) : i == (arr_len - 1) ? width - x(x.ticks()[i - 1]) : x(d) - x(x.ticks()[i - 1]))
                 }
-                )
+            )
         }
 
         function displayGlucose_percentil(data) {
@@ -245,6 +329,7 @@ class D3Sample extends Component {
                 if (height < 0) return 0
                 return height
             }
+
             function getHeightLow(d) {
                 let height = y(d.value_lower_perc) - y(d.value_higher_perc <= gcLow ? d.value_higher_perc : gcLow)
                 if (height < 0) return 0
@@ -258,7 +343,7 @@ class D3Sample extends Component {
             const width = 6;
 
             var dataGroup = percentilGroup.selectAll('g').data(data).join(
-                function (enter) {
+                function(enter) {
                     let rectGroup = enter.append('g').classed('percentil', true)
 
                     rectGroup.append('rect')
@@ -289,7 +374,7 @@ class D3Sample extends Component {
                         .classed("low", true)
                     rectGroup.attr('transform', 'translate(' + margin.left + ' ' + margin.top + ')');
                 },
-                function (update) {
+                function(update) {
                     update.select('rect.high')
                         .attr('x', d => x(d.time) - width / 2)
                         .attr('y', d => y(d.value_higher_perc))
@@ -336,8 +421,7 @@ class D3Sample extends Component {
         try {
             const data = await (await fetch("/data/2019-11-20-1349_export-data.json")).json();
             this.initD3(data);
-        }
-        finally {
+        } finally {
             this.load(false);
         }
     }
