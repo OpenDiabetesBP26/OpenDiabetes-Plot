@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import {hot} from 'react-hot-loader';
 import * as d3 from 'd3';
-class DailyChart extends Component {
+class SixHourlyChart extends Component {
     render() {
         return (
-            <g id='daily' ref={g => this.g = g}></g>
+            <g id='sixhourly' ref={g => this.g = g}></g>
          );
     }
     drawChart(props){
@@ -25,4 +25,4 @@ class DailyChart extends Component {
         return false;
     }
 }
-export default hot ? hot(module)(DailyChart) : DailyChart;
+export default hot ? hot(module)(SixHourlyChart) : SixHourlyChart;

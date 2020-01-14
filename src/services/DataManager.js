@@ -6,12 +6,19 @@ class DataManager {
 		this.buffer = [0, 0];
 		this.dataDomain = [];
 		this.display = 'yearly'
+		this.glucoseLevels = {
+			reallyLow: 50,
+			low: 80,
+			ok: 150,
+			high: 250,
+			reallyHigh: 400
+		}
 	}
 	parseTime(data) {
 		data.forEach(d => d.time = new Date(d.epoch));
 	}
 	async readDataFromURL(url) {
-		let data = awiat(await fetch(url)).json();
+		let data = await(await fetch(url)).json();
 		this.readData(data);
 	}
 	readData(data) {
@@ -46,18 +53,27 @@ class DataManager {
 			weekly: this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), (d.time.getHours() - d.time.getHours() % 6) / 6)),
 			monthly: this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate()))
 		}
+		this.bolus
 		//Init buffered data
-		this.glucoseData_grouped_buffered = this.glucoseData_grouped;
+		//Create copies with slice()
+		this.glucoseData_grouped_buffered = {
+			intraday: this.glucoseData_grouped.intraday.slice(),
+			hourly3: this.glucoseData_grouped.hourly3.slice(),
+			hourly6: this.glucoseData_grouped.hourly6.slice(),
+			daily: this.glucoseData_grouped.daily.slice(),
+			weekly: this.glucoseData_grouped.weekly.slice(),
+			monthly: this.glucoseData_grouped.monthly.slice()
+		}
 
 
-		//Keep for old code for now
-		//Compute all groups now
+		//** OLD ----------------------------------------------------------------*/
 		this.glucoseData_min_10 = this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes() % 10)));
 		this.glucoseData_min_20 = this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes() % 20)));
 		this.glucoseData_hour = this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), (d.time.getHours() - d.time.getHours() % 6) / 6));
 		this.glucoseData_day = this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate()));
 		this.glucoseData_week = this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate() - d.time.getDay()));
 		this.glucoseData_month = this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth()));
+		//** OLD END ------------------------------------------------------------*/
 
 		//Update current domain to max domain from data
 		this.updateDomain(d3.extent(this.data, d => d.time))
@@ -66,7 +82,7 @@ class DataManager {
 	getMaxDomain(){
 		return this.maxDomain;
 	}
-	updateDomain(newDomain) {
+	async updateDomain(newDomain) {
 		this.domain = newDomain;
 
 		//Update Pre Filtered 
@@ -75,8 +91,8 @@ class DataManager {
 		const timeDelta = this.domain[1] - this.domain[0];
 		if (
 			//Buffer too small -> zoom out
-			this.buffer[0] > this.domain[0] ||
-			this.buffer[1] < this.domain[1] ||
+			this.buffer[0] + timeDelta * (1/6) > this.domain[0] ||
+			this.buffer[1] - timeDelta * (1/6) < this.domain[1] ||
 			//Buffer too large -> zoom in
 			this.buffer[0] + timeDelta * (5 / 6) < this.domain[0] ||
 			this.buffer[1] - timeDelta * (5 / 6) > this.domain[1]
@@ -84,7 +100,7 @@ class DataManager {
 
 			//Generate new bufer
 			this.buffer = [this.domain[0] - timeDelta / 2, (+this.domain[1]) + timeDelta / 2];
-			this.bufferData();
+			await this.bufferData();
 
 			//Update Buffered Data for old
 			this.glucoseData_f = this.glucoseData.filter((d) => this.buffer[0] <= d.time && d.time <= this.buffer[1]);
@@ -99,16 +115,18 @@ class DataManager {
 	bufferData(){
 		//Update only the buffer for the current display
 		let bufferfilter = data => data.filter((d) => this.buffer[0] <= d.time && d.time <= this.buffer[1]);
-		switch(this.display){
-			case 'intraday': this.glucoseData_grouped_buffered.intraday = bufferfilter(this.glucoseData_grouped.intraday);
-            case '3hourly': this.glucoseData_grouped_buffered.hourly3 = bufferfilter(this.glucoseData_grouped.hourly3);
-            case '6hourlly': this.glucoseData_grouped_buffered.hourly6 = bufferfilter(this.glucoseData_grouped.hourly6);
-            case 'daily': this.glucoseData_grouped_buffered.daily = bufferfilter(this.glucoseData_grouped.daily);
-			case 'weekly': this.glucoseData_grouped_buffered.weekly = bufferfilter(this.glucoseData_grouped.weekly);
-            case 'monthly': this.glucoseData_grouped_buffered.monthly = bufferfilter(this.glucoseData_grouped.monthly);
-            default:
-                return null;
-		}
+		return new Promise(resolve => {
+			switch(this.display){
+				case 'intraday': this.glucoseData_grouped_buffered.intraday =  this.glucoseData_grouped.intraday.filter((d) => this.buffer[0] <= d.time && d.time <= this.buffer[1]);
+				case '3hourly': this.glucoseData_grouped_buffered.hourly3 =  bufferfilter(this.glucoseData_grouped.hourly3.slice());
+				case '6hourly': this.glucoseData_grouped_buffered.hourly6 =  bufferfilter(this.glucoseData_grouped.hourly6.slice());
+				case 'daily': this.glucoseData_grouped_buffered.daily =  bufferfilter(this.glucoseData_grouped.daily.slice());
+				case 'weekly': this.glucoseData_grouped_buffered.weekly =  bufferfilter(this.glucoseData_grouped.weekly.slice());
+				case 'monthly': this.glucoseData_grouped_buffered.monthly =  bufferfilter(this.glucoseData_grouped.monthly.slice());
+				default:
+				resolve()
+			}
+		})
 	}
 	changeDisplay(display){
 		this.display = display;
@@ -118,15 +136,23 @@ class DataManager {
 	getData() {
 		return this.data;
 	}
-	getDailyData(){
+	getIntradayData(){
 		const filterCurrentDomain = (d) => this.domain[0] <= d.time && d.time <= this.domain[1];
 		//Filter Buffered Data
 		let glucose = this.glucoseData_grouped_buffered.intraday.filter(filterCurrentDomain);
 
+		let stats = {
+			reallyLow: glucose.filter(d => d.value < this.glucoseLevels.reallyLow).length / glucose.length,
+			low: glucose.filter(d => d.value > this.glucoseLevels.reallyLow && d.value < this.glucoseLevels.low).length / glucose.length,
+			ok: glucose.filter(d => d.value > this.glucoseLevels.low && d.value < this.glucoseLevels.ok).length / glucose.length,
+			high: glucose.filter(d => d.value > this.glucoseLevels.ok && d.value < this.glucoseLevels.high).length / glucose.length,
+			reallyHigh: glucose.filter(d => d.value > this.glucoseLevels.high && d.value < this.glucoseLevels.reallyHigh).length / glucose.length
+		}
 
 		//Pack all data into one object
 		let data = {
-			glucose: glucose
+			glucose: glucose,
+			stats: stats
 		}
 		return data;
 	}

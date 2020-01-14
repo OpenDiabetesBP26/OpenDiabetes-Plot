@@ -3,6 +3,9 @@ import {hot} from 'react-hot-loader';
 import Loading from '../common/Loading';
 import * as d3 from 'd3';
 import DataManager from '../services/DataManager';
+import IntradayChart from './charts/IntradayChart';
+import ThreeHourlyChart from './charts/ThreeHourlyChart';
+import SixHourlyChart from './charts/SixHourlyChart';
 import DailyChart from './charts/DailyChart';
 
 class Chart extends Component {
@@ -12,9 +15,7 @@ class Chart extends Component {
 
     }
     render() {
-        console.log('Render Chart');
         let display = this.getDisplayComponent(this.state.display);
-        console.log(display);
         return (
             <div>
             <Loading visible={this.state.loading} />
@@ -25,10 +26,9 @@ class Chart extends Component {
         );
     }
     getDisplayComponent(display){
-        console.log('Get Display' + display)
         switch(display){
             case 'intraday':
-                return <DailyChart data={this.state.data_manager != null ? this.state.data_manager.getDailyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin}/>
+                return <IntradayChart data={this.state.data_manager != null ? this.state.data_manager.getIntradayData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin}/>
             case '3hourly':
                 return <div>Platzhalter 3hourly</div>
             case '6hourlly':
@@ -96,9 +96,8 @@ class Chart extends Component {
 
     zoomed(){
       let x = d3.event.transform.rescaleX(this.state.xBase);
+
       this.state.data_manager.updateDomain(x.domain());
-      //Debug
-      console.log(x.domain());
 
       //Update Display
 
@@ -118,8 +117,6 @@ class Chart extends Component {
     }
     //Wird aufgerufen, sobald sich der state ändert
     componentDidUpdate(){
-        console.log('Update Chart');
-        console.log(this.state.display);
     }
     getDisplay(hours){
         if(hours > 24 * 30 * 12){
