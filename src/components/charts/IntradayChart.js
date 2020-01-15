@@ -22,21 +22,21 @@ class IntradayChart extends Component {
 
             let comp = d3.select("g#intraday");
 
-            var gcHigh = comp.append("rect")
+            this.gcHigh = comp.append("rect")
             .attr("class", "gcHigh")
             .attr("y", y(400) + margin.top)
             .attr("x", margin.left)
             .attr("height", y(185) - y(400))
             .attr("width", width)
             .attr("fill", "#f5f0b8")
-            var gcNormal = comp.append("rect")
+            this.gcNormal = comp.append("rect")
             .attr("class", "gcNormal")
             .attr("y", y(180) + margin.top)
             .attr("x", margin.left)
             .attr("height", y(70) - y(180))
             .attr("width", width)
             .attr("fill", "#e0e0e0")
-            var gcLow = comp.append("rect")
+            this.gcLow = comp.append("rect")
             .attr("class", "gcLow")
             .attr("y", y(65) + margin.top)
             .attr("x", margin.left)
@@ -67,10 +67,22 @@ class IntradayChart extends Component {
             )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + this.props.margin.top + ')');
         }
+        //Update Normals for now
+        if(this.gcHigh){
+            this.gcHigh.attr('width', props.x.range()[1]);
+        }
+        if(this.gcNormal){
+            this.gcNormal.attr('width', props.x.range()[1]);
+        }
+        if(this.gcLow){
+            this.gcLow.attr('width', props.x.range()[1]);
+        }
+        
     }
     componentWillReceiveProps(nextProps){
         //Wir können Daten hier neu rendern
         this.drawChart(nextProps);
+        console.log(nextProps.xSize);
     }
     shouldComponentUpdate(){
         //Update ausgeschaltet -> wird nicht neu gerendert

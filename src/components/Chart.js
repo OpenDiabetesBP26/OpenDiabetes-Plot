@@ -12,6 +12,7 @@ class Chart extends Component {
     constructor(props){
         super(props);
         this.state = { loading: true, display: 'intraday'}
+        this.svg = React.createRef()
 
     }
     render() {
@@ -19,7 +20,7 @@ class Chart extends Component {
         return (
             <div>
             <Loading visible={this.state.loading} />
-            <svg id="d3sample" width="1000" height="500" ref={(svg) => this.svg = svg}>
+            <svg id="d3sample" width="100%" height="500" ref={(svg) => this.svg = svg}>
             {display}
             </svg>
         </div>
@@ -53,50 +54,75 @@ class Chart extends Component {
             
         }
         finally {
-            this.setState({loading: false})
             let dm = new DataManager();
             dm.readData(this.data);
-            this.setState({data_manager: dm})
+            let maxZoom = dm.getMaxZoom();
+            this.setState({loading: false, data_manager: dm, maxZoom: maxZoom});
+
+            //Add d3 stuff
+            let svg = d3.select("svg");
+            let width = 1000,
+            height = 400,
+            margin = { top: 20, right: 40, bottom: 110, left: 40 }
+
+            //Domains
+            let xBase = d3.scaleTime().range([0, width]),
+            x = d3.scaleTime().range([0, width]),
+            y = d3.scaleLinear().range([height, 0]);
+            
+            //Set max domains
+            x.domain(this.state.data_manager.getMaxDomain());
+            y.domain([0, 400])
+            xBase.domain(x.domain());
+
+            //TODO set base domain through data manager
+
+            //Update State with domains
+            this.setState({xBase: xBase, x: x, y: y, margin: margin})
+            
+
+            this.zoom = d3.zoom()
+            //Wie viel man unzoomen und zoomen kann
+            //TODO vom DataManager berechnen lassen
+            .scaleExtent([1, maxZoom])
+            .translateExtent([[0, 0], [width, height]])
+            .on("zoom", () => this.zoomed());
+
+            svg.call(this.zoom);
+            this.d3svg = svg;
+
+            //Append resize listener
+            window.addEventListener("resize", this.updateDimensions.bind(this));
+            //Call resize to set first state
+            this.updateDimensions();
         }
-        //Add d3 stuff
-        let svg = d3.select("svg");
-        let width = 1000,
-        height = 400,
-        margin = { top: 20, right: 20, bottom: 110, left: 40 }
+    }
+    updateDimensions(){
+        if(this.svg){
+            let newWidth = this.svg.getBoundingClientRect().width - this.state.margin.left - this.state.margin.right;
+            //Update Base and x range
+            let xBase = this.state.xBase.range([0, newWidth]);
+            let x = this.state.x.range([0, newWidth]);
 
-        //Domains
-        let xBase = d3.scaleTime().range([0, width]),
-        x = d3.scaleTime().range([0, width]),
-        y = d3.scaleLinear().range([height, 0]);
-        
-        //Set max domains
-        x.domain(this.state.data_manager.getMaxDomain());
-        y.domain([0, 400])
-        xBase.domain(x.domain());
+            //Update Zoom
+            //Fix, as d3.event.transform is null in webpack
+            let oldRange = this.state.xBase.range()[1] - this.state.xBase.range()[0];
+            let s = this.state.x.domain().map(x => xBase(x));
+            let k = oldRange / (s[1] - s[0]);
 
-        //TODO set base domain through data manager
+            let newXOffset = -xBase(x.domain()[0]);
+            d3.select("svg").call(this.zoom.transform, d3.zoomIdentity.scale(k).translate(newXOffset, 0));
 
-        //Update State with domains
-        this.setState({xBase: xBase, x: x, y: y, margin: margin})
-        
+            //Update State
+            this.setState({xBase: xBase, x: x});
 
-        let zoom = d3.zoom()
-        //Wie viel man unzoomen und zoomen kann
-        //TODO vom DataManager berechnen lassen
-        .translateExtent([[0, 0], [width, height]])
-        .extent([[0, 0], [width, height]])
-        .on("zoom", () => this.zoomed());
-
-        svg.call(zoom);
-
-        
-
-        
+        }
     }
 
     zoomed(){
+      console.log(d3.event.transform);
       let x = d3.event.transform.rescaleX(this.state.xBase);
-
+      console.log(x.domain());
       this.state.data_manager.updateDomain(x.domain());
 
       //Update Display

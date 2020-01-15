@@ -32,7 +32,6 @@ export class App extends Component {
                             <div className="collapse navbar-collapse" id="navbarNav">
                                 <ul className="navbar-nav">
                                     <NavItem id="nav_home" path="/" name="Home" />
-                                    <NavItem id="nav_d3sample" path="/d3sample" name="D3Sample" />
                                     <NavItem id="nav_about" path="/about" name="About" />
                                     <NavItem id="nav_chart" path="/chart" name="Chart" />
                                 </ul>
@@ -42,7 +41,6 @@ export class App extends Component {
                     <main>
                     <Switch>
                         <Route exact path='/' component={Home} />
-                        <Route exact path='/d3sample' component={(props) => <D3Sample {...props} />}/>
                         <Route exact path='/chart' component={(props) => <Chart {...props} />}/>
                         <Route exact path='/about' component={About} />
                         <Route path="*" component={NotFound} />
