@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import Home from './components/Home';
 import About from './components/About';
-import D3Sample from './components/D3Sample';
 import NotFound from './components/NotFound';
 import Chart from './components/Chart';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
