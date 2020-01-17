@@ -3,6 +3,8 @@ import Loading from '../common/Loading'
 import { hot } from 'react-hot-loader';
 import * as d3 from 'd3';
 import DataManager from '../services/DataManager.js';
+import BackGround from '../services/BackGround.js';
+
 
 //import { geoMercator, geoPath } from 'd3-geo'
 
@@ -141,34 +143,31 @@ class D3Sample extends Component {
         var rectsG = svg.append("g")
         var percentilGroup = rectsG.append("g").classed('percentilGraph', true)
 
-        displayGlucose();
+        displayGlucose(data, x);
         svg.call(zoom);
 
-
-
         //Einfuegen und Updaten der Kreise
-        function displayGlucose(d, x) {
-
+        function displayGlucose() {
             var gd = dm.getGlucoseCGMData();
 
             if (gd.type == 'intraday') {
-                getSpalt()
+                creatBackGround()
                 displayGlucose_intraday(gd)
             }
             if (gd.type == 'hourly') {
-                getSpalt()
+                creatBackGround()
                 displayGlucose_percentil(gd);
             }
             if (gd.type == 'daily') {
-                getSpalt()
+                creatBackGround()
                 displayGlucose_percentil(gd);
             }
             if (gd.type == 'weekly') {
-                getSpalt()
+                creatBackGround()
                 displayGlucose_percentil(gd);
             }
             if (gd.type == 'monthly') {
-                getSpalt()
+                creatBackGround()
                 displayGlucose_percentil(gd);
             }
         }
@@ -200,85 +199,6 @@ class D3Sample extends Component {
         }
 
 
-        //color Array für test der Spalt
-        function gradientColor(startColor, endColor, step) {
-            var startRGB = colorToRgb(startColor);
-            var startR = startRGB[0];
-            var startG = startRGB[1];
-            var startB = startRGB[2];
-
-            var endRGB = colorToRgb(endColor);
-            var endR = endRGB[0];
-            var endG = endRGB[1];
-            var endB = endRGB[2];
-
-            var sR = (endR - startR) / step; 
-            var sG = (endG - startG) / step;
-            var sB = (endB - startB) / step;
-
-            var colorArr = [];
-            for (var i = 0; i < step; i++) {
-                var hex = colorToHex('rgb(' + parseInt((sR * i + startR)) + ',' + parseInt((sG * i + startG)) + ',' + parseInt((sB * i + startB)) + ')');
-                colorArr.push(hex);
-            }
-            return colorArr;
-        }
-        function colorToRgb(sColor) {
-            var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
-            var sColor = sColor.toLowerCase();
-            if (sColor && reg.test(sColor)) {
-                if (sColor.length === 4) {
-                    var sColorNew = "#";
-                    for (var i = 1; i < 4; i += 1) {
-                        sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1));
-                    }
-                    sColor = sColorNew;
-                }
-                var sColorChange = [];
-                for (var i = 1; i < 7; i += 2) {
-                    sColorChange.push(parseInt("0x" + sColor.slice(i, i + 2)));
-                }
-                return sColorChange;
-            } else {
-                return sColor;
-            }
-        };
-
-        function colorToHex(rgb) {
-            var _this = rgb;
-            var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
-            if (/^(rgb|RGB)/.test(_this)) {
-                var aColor = _this.replace(/(?:\(|\)|rgb|RGB)*/g, "").split(",");
-                var strHex = "#";
-                for (var i = 0; i < aColor.length; i++) {
-                    var hex = Number(aColor[i]).toString(16);
-                    hex = hex < 10 ? 0 + '' + hex : hex; 
-                    if (hex === "0") {
-                        hex += hex;
-                    }
-                    strHex += hex;
-                }
-                if (strHex.length !== 7) {
-                    strHex = _this;
-                }
-
-                return strHex;
-            } else if (reg.test(_this)) {
-                var aNum = _this.replace(/#/, "").split("");
-                if (aNum.length === 6) {
-                    return _this;
-                } else if (aNum.length === 3) {
-                    var numHex = "#";
-                    for (var i = 0; i < aNum.length; i += 1) {
-                        numHex += (aNum[i] + aNum[i]);
-                    }
-                    return numHex;
-                }
-            } else {
-                return _this;
-            }
-        }
-
         //universal Scala-Spalt
         // entwurf process 
         //--> 1.lokalisiere layout von Spalten(context und Zusammenhang mit anderen layout) 
@@ -291,31 +211,39 @@ class D3Sample extends Component {
         //--> 6.(noch nicht!) Style mit back-ground anzupassen
         //--> 7.(noch nicht!) Animation beim Zoomen
         //--> 8.(noch nicht!) ??? nach feedback
-        function getSpalt() {
-            var arr = x.ticks()
-            var arr_len = arr.push(x.ticks()[0])
-            //var colorarr = gradientColor('#4e72b8','#130c0e', 40)
-            var ticksGroup = spaltGroup.selectAll('g').data(arr).join(
+        function creatBackGround() {
+            var bg = new BackGround();
+            var readTicks = bg.readTicks(x);
+            var opacityArr = bg.creatOpacity();
+            var xPos = bg.creatXpos(x);
+            var wdArr = bg.getWds();
+            console.log("ticks", x.ticks())
+            console.log("opacityArr", opacityArr)
+            console.log("xPos", xPos)
+            console.log("wdArr", wdArr)
+            var ticksGroup = spaltGroup.selectAll('g').data(xPos).join(
                 function(enter) {
                     let group = enter.append('g').classed('spalt', true)
                     group.append('rect')
-                        .attr('x', (d, i) => i == 0 ? 0 : x(x.ticks()[i - 1]))
+                        .attr('x', d => d)
                         .attr('y', y(400))
                         .attr('height', 390 - margin.top)
-                        .attr('width', (d, i) => i == 0 ? x(d) : i == (arr_len - 1) ? width - x(x.ticks()[i - 1]) : x(d) - x(x.ticks()[i - 1]))
-                        //.style("fill", (d, i) => colorarr[i*2])
+                        .attr('width', (d, i) => wdArr[i])
                         .style("fill", "gray")
-                        .style("opacity", (d, i) => 1 - (i / 16 + 0.001))
+                        .style("opacity", (d, i) => opacityArr[i])
                         .classed("tag", true)
                     group.attr('transform', 'translate(' + margin.left + ' ' + margin.top + ')');
                 },
                 function(update) {
                     update.select('rect.tag')
-                        .attr('x', (d, i) => i == 0 ? 0 : x(x.ticks()[i - 1]))
-                        .attr('width', (d, i) => i == 0 ? x(d) : i == (arr_len - 1) ? width - x(x.ticks()[i - 1]) : x(d) - x(x.ticks()[i - 1]))
+                        .attr('x', d => d)
+                        .attr('width', (d, i) => wdArr[i])
+                        .style("opacity", (d, i) => opacityArr[i])
                 }
             )
         }
+
+
 
         function displayGlucose_percentil(data) {
             function getHeightHigher(d) {
