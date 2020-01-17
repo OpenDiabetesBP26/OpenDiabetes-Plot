@@ -348,8 +348,14 @@ class D3Sample extends Component {
     async componentDidMount() {
         try {
             const data = await (await fetch("/data/2019-11-20-1349_export-data.json")).json();
+<<<<<<< HEAD:src/components/D3Sample.js
             this.initD3(data);
         } finally {
+=======
+            this.initD3(data.data);
+        }
+        finally {
+>>>>>>> master:src/components/old_D3Sample.js
             this.load(false);
         }
     }
