@@ -36,18 +36,43 @@ class DataManager {
 		this.basal_temp = this.data.filter(d =>d.type == 'BASAL_TEMP');
 		this.refined_vault = this.data.filter(d =>d.type == 'REFINED_VAULT_ENTRY');
 
+		let refined = d3.nest()
+		.key(d => d.time)
+		.entries(this.refined_vault);
+		refined = refined.map(function(key){
+			key.time = key.key;
+			key.predictions = key.values.map(function(item){
+				//Rename a few
+				item.values = item.valueExtension;
+				//Delete unnecessary items to save space
+				delete item.valueExtension;
+				delete item.refinedType;
+				delete item.type;
+				delete item.isoTime;
+				return item;
+			});
+			delete key.key;
+			delete key.values;
+			return key;
+		});
 		//DEBUG OUTPRINT
-		console.log(this.glucoseData);
-		console.log(this.bolus_normal);
-		console.log(this.bolus_square);
-		console.log(this.basal_profile);
-		console.log(this.basal_temp);
-		console.log(this.refined_vault);
+		//
+		//console.log(this.glucoseData);
+		//console.log(this.bolus_normal);
+		//console.log(this.bolus_square);
+		//console.log(this.basal_profile);
+		//console.log(this.basal_temp);
+		//console.log(this.refined_vault);
+		console.log(refined);
 
 		//Use ungrouped data for intraday viz
 		this.glucoseData_grouped = {
 			intraday: {
-				glucose: this.glucoseData
+				glucose: this.glucoseData,
+				bolus: this.bolues_normal,
+				basal_profile: this.basal_profile,
+				basal_temp: this.basal_temp
+
 			},
 			hourly3: this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes() % 10))),
 			hourly6: this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes() % 20))),
