@@ -14,6 +14,7 @@ zurück
 
 class BackGround {
     constructor() {
+        this.xLen = -1;
         this.rectH = 370;//reguläre Hight von rects, fertig!
         this.rectWs = [];//widths von rects für output, fertig!
         this.xPos = []; //xposition von ticks für output, fertig!
@@ -22,11 +23,11 @@ class BackGround {
         this.in12StufeOpacity = [0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35]//12 stufen Opacity für innere Verwendung
         this.in7tufeOpacity = [0.9, 0.8, 0.7, 0.6, 0.5, 0.6, 0.5]//7 stufen Opacity für innere Verwendung
         this.in15StufeOpacity = [0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25, 0.2]//15 stufen Opacity für innere Verwendung
-
     }
     //füge ein ein date-pading ein, die Zeitabstand stimmt mit der von folgenden Ticks überein.
     //读取ticks的日期，并且在index0位置加入一个与后续等距的date
     readTicks(d) {
+        this.xLen = d.range()[1];
         this.tickArray = d.ticks();
         var firstDate = d.ticks()[0] - (d.ticks()[1] - d.ticks()[0]);
         var oldfirst = this.tickArray[0]
@@ -39,7 +40,7 @@ class BackGround {
         var firstDate = new Date(oldfirst.getTime() - (oldsecond.getTime() - oldfirst.getTime()) + 24 * 60 * 60 * 1000 + 60 * 60 * 1000)
         this.tickArray.splice(0, 0, firstDate);
         //this.tickArray.splice(0, 0, new Date());
-        console.log(this.tickArray)
+        //console.log(this.tickArray)
         return this.tickArray;
     }
     //erzeuge ein Array mit x-position von allen ticks
@@ -49,12 +50,13 @@ class BackGround {
         for (var i = 1; i < this.tickArray.length; i++) {
             this.xPos.push(d(this.tickArray[i]))
         }
+        //console.log("xPos", this.xPos)
         return this.xPos;
     }
     // erzeuge widths für allen rects.
     getWds() {
-        this.xPos.forEach((d, i) => i == this.xPos.length - 1 ? this.rectWs[i] = 940 - this.xPos[i] : this.rectWs[i] = this.xPos[i + 1] - d)
-        console.log("rectWs_bevor: " , this.rectWs)
+        this.xPos.forEach((d, i) => i == this.xPos.length - 1 ? this.rectWs[i] = this.xLen - this.xPos[i] : this.rectWs[i] = this.xPos[i + 1] - d)
+        //console.log("rectWs_bevor: " , this.rectWs)
         this.rectWs.forEach((d, i) => d > 1 ? this.rectWs[i] -= 1 : d)
         return this.rectWs;
 
@@ -65,7 +67,6 @@ class BackGround {
             return 'intraday';
         } else {
             var tickStep = this.tickArray[2].getTime() - this.tickArray[1].getTime()
-            console.log()
             var result = tickStep >= 350 * 24 * 60 * 60 * 1000 ? 'yearly' : tickStep >= 4 * 7 * 24 * 60 * 60 * 1000 ? 'monthly' : tickStep >= 7 * 24 * 60 * 60 * 1000 ? 'weekly' : tickStep >= 12 * 60 * 60 * 1000 ? 'daily' : tickStep >= 60 * 60 * 1000 ? 'hourly' : tickStep >= 30 * 60 * 1000 ? 'halfhour' : tickStep >= 15 * 60 * 1000 ? 'quarter' : tickStep >= 5*60*1000 ? '5min' : 'min'
             return result;
         }
@@ -123,7 +124,7 @@ class BackGround {
     creatWeeklyOpacity() {
         var OpacitySeed = []
         var rectOpacity = []
-        console.log("creatWeeklyOpacity")
+        //console.log("creatWeeklyOpacity")
         //星期数一样，那么就是一周一个刻度
         if (this.tickArray[1].getDay() == this.tickArray[2].getDay()) {
             OpacitySeed = this.in15StufeOpacity
@@ -143,7 +144,7 @@ class BackGround {
     creatInDailyOpcaity() {
         var OpacitySeed = []
         var rectOpacity = []
-        console.log("creatInDailyOpcaity")
+        //console.log("creatInDailyOpcaity")
         OpacitySeed = this.in15StufeOpacity
         this.tickArray.forEach((d, i) => rectOpacity[i] = OpacitySeed[d.getDate() % 15]);
         return rectOpacity;
