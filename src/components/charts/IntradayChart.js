@@ -77,12 +77,11 @@ class IntradayChart extends Component {
         if(this.gcLow){
             this.gcLow.attr('width', props.x.range()[1]);
         }
-        
+        console.log(props.data);
     }
     componentWillReceiveProps(nextProps){
         //Wir können Daten hier neu rendern
         this.drawChart(nextProps);
-        console.log(nextProps.xSize);
     }
     shouldComponentUpdate(){
         //Update ausgeschaltet -> wird nicht neu gerendert

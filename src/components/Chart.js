@@ -7,6 +7,7 @@ import IntradayChart from './charts/IntradayChart';
 import ThreeHourlyChart from './charts/ThreeHourlyChart';
 import SixHourlyChart from './charts/SixHourlyChart';
 import DailyChart from './charts/DailyChart';
+import Statistics from './charts/Statistics';
 
 class Chart extends Component {
     constructor(props){
@@ -18,12 +19,19 @@ class Chart extends Component {
     render() {
         let display = this.getDisplayComponent(this.state.display);
         return (
-            <div>
-            <Loading visible={this.state.loading} />
-            <svg id="d3sample" width="100%" height="500" ref={(svg) => this.svg = svg}>
-            {display}
-            </svg>
-        </div>
+            <div className="container-fluid">
+                <Loading visible={this.state.loading} />
+                <div className="row">
+                <div className="col-md-8 col-sm-12">
+                    <svg id="d3sample" width="100%" height="500" ref={(svg) => this.svg = svg}>
+                    {display}
+                    </svg>
+                </div>
+                <div className="col-md-4 col-sm-12">
+                    <Statistics stats={this.state.data_manager != null ? this.state.data_manager.getStatistics() : null} />
+                </div>
+                </div>
+            </div>
         );
     }
     getDisplayComponent(display){
@@ -31,9 +39,9 @@ class Chart extends Component {
             case 'intraday':
                 return <IntradayChart data={this.state.data_manager != null ? this.state.data_manager.getIntradayData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin}/>
             case '3hourly':
-                return <div>Platzhalter 3hourly</div>
+                return <ThreeHourlyChart data={this.state.data_manager != null ? this.state.data_manager.getThreeHourlyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin}/>
             case '6hourlly':
-                return <div>Platzhalter 6hourly</div>
+                return <SixHourlyChart data={this.state.data_manager != null ? this.state.data_manager.getIntradayData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin}/>
             case 'daily':
                 return <div>Platzhalter daily</div>
             case 'weekly':
@@ -56,8 +64,8 @@ class Chart extends Component {
         finally {
             let dm = new DataManager();
             dm.readData(this.data);
-            let maxZoom = dm.getMaxZoom();
-            this.setState({loading: false, data_manager: dm, maxZoom: maxZoom});
+            this.maxZoom = dm.getMaxZoom();
+            this.setState({loading: false, data_manager: dm, maxZoom: this.maxZoom});
 
             //Add d3 stuff
             let svg = d3.select("svg");
@@ -84,8 +92,8 @@ class Chart extends Component {
             this.zoom = d3.zoom()
             //Wie viel man unzoomen und zoomen kann
             //TODO vom DataManager berechnen lassen
-            .scaleExtent([1, maxZoom])
-            .translateExtent([[0, 0], [width, height]])
+            .scaleExtent([1, this.maxZoom])
+            .translateExtent([[0,0], [width, 0]])
             .on("zoom", () => this.zoomed());
 
             svg.call(this.zoom);
@@ -111,6 +119,8 @@ class Chart extends Component {
             let k = oldRange / (s[1] - s[0]);
 
             let newXOffset = -xBase(x.domain()[0]);
+            console.log(this.zoom.translateExtent());
+            this.fixExtent();
             d3.select("svg").call(this.zoom.transform, d3.zoomIdentity.scale(k).translate(newXOffset, 0));
 
             //Update State
@@ -118,8 +128,22 @@ class Chart extends Component {
 
         }
     }
+    /** translateExtent locks panning after specific point.
+     *  However, it seems buggy while zooming and resizing
+     *  Code below needs to be applied to fix it
+     * 
+     */
+    fixExtent(){
+        //Get current svg size
+        let width = this.svg.getBoundingClientRect().width - this.state.margin.left - this.state.margin.right;
+        //Get currrent zoom
+        let k = (d3.event != null ? d3.event.transform.k : 1);
+        //From https://stackoverflow.com/questions/44120372/d3-v4-how-to-limit-left-right-panning-on-an-x-zoom-line-graph
+        this.zoom.translateExtent([[0,0], [width + ((this.state.margin.left + this.state.margin.right) / k), 0]])
+    }
 
     zoomed(){
+      this.fixExtent();
       console.log(d3.event.transform);
       let x = d3.event.transform.rescaleX(this.state.xBase);
       console.log(x.domain());
@@ -133,7 +157,7 @@ class Chart extends Component {
       if(this.state.display != display){
           this.state.data_manager.changeDisplay(display);
       }
-
+      
       //Set State
       this.setState({
           x: x,
