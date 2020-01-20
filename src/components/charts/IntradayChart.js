@@ -211,8 +211,8 @@ class IntradayChart extends Component {
             d3.select(".legendeCircleH").attr('cx', x.range()[1] - 20);
             d3.select(".legendeCircleN").attr('cx', x.range()[1] - 40);
             d3.select(".legendeCircleL").attr('cx', x.range()[1] - 60);
-            d3.select(".legendeCircTextL").attr("x", x.range()[1]);
-            d3.select(".legendeCircTextH").attr("x", x.range()[1] - 105);
+            d3.select(".legendeCircTextH").attr("x", x.range()[1]);
+            d3.select(".legendeCircTextL").attr("x", x.range()[1] - 105);
             d3.select(".dashLineH_N").attr("x2", this.props.margin.left + x.range()[1]);
             d3.select(".dashLineN_L").attr("x2", this.props.margin.left + x.range()[1]);
         }
