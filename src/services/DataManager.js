@@ -7,11 +7,11 @@ class DataManager {
 		this.dataDomain = [];
 		this.display = 'yearly'
 		this.glucoseLevels = {
-			reallyLow: 50,
+			hypo: 60,
 			low: 80,
-			ok: 150,
+			normal: 150,
 			high: 250,
-			reallyHigh: 400
+			hyper: 400
 		}
 	}
 	parseTime(data) {
@@ -31,7 +31,6 @@ class DataManager {
 
 		//Set max domain
 		this.maxDomain = d3.extent(this.data, d => d.time);
-		console.log('Max domain is ' + this.maxDomain);
 
 		//Get all glucose data
 		this.glucoseData = this.data.filter(d => d.type == 'GLUCOSE_CGM');
@@ -238,15 +237,19 @@ class DataManager {
 		const filterCurrentDomain = (d) => this.domain[0] <= d.time && d.time <= this.domain[1];
 		let glucose = this.buffer_stats.glucose.filter(filterCurrentDomain);
 		let glucoseSize = glucose.length;
+		let timeFrame = this.domain;
 		let stats = {
+			timeFrame: timeFrame,
 			glucose: {
-				reallyLow: glucose.filter(d => d.value < this.glucoseLevels.reallyLow).length / glucoseSize,
-				low: glucose.filter(d => d.value > this.glucoseLevels.reallyLow && d.value < this.glucoseLevels.low).length / glucoseSize,
-				ok: glucose.filter(d => d.value > this.glucoseLevels.low && d.value < this.glucoseLevels.ok).length / glucoseSize,
-				high: glucose.filter(d => d.value > this.glucoseLevels.ok && d.value < this.glucoseLevels.high).length /glucoseSize,
-				reallyHigh: glucose.filter(d => d.value > this.glucoseLevels.high && d.value < this.glucoseLevels.reallyHigh).length / glucoseSize
+				hypo: glucoseSize == 0 ? 0 : glucose.filter(d => d.value < this.glucoseLevels.hypo).length / glucoseSize,
+				low: glucoseSize == 0 ? 0 : glucose.filter(d => d.value > this.glucoseLevels.hypo && d.value < this.glucoseLevels.low).length / glucoseSize,
+				normal: glucoseSize == 0 ? 0 : glucose.filter(d => d.value > this.glucoseLevels.low && d.value < this.glucoseLevels.normal).length / glucoseSize,
+				high: glucoseSize == 0 ? 0 : glucose.filter(d => d.value > this.glucoseLevels.normal && d.value < this.glucoseLevels.high).length /glucoseSize,
+				hyper: glucoseSize == 0 ? 0 : glucose.filter(d => d.value > this.glucoseLevels.high && d.value < this.glucoseLevels.hyper).length / glucoseSize,
+				average: glucoseSize == 0 ? 0 : d3.mean(glucose.map(d => d.value)),
 			},
 			glucoseLevels: this.glucoseLevels
+
 		}
 		return stats
 	}
