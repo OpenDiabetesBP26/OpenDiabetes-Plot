@@ -19,6 +19,7 @@ class IntradayChart extends Component {
 
             let yAxis = d3.axisLeft(this.props.y);
             let y = this.props.y;
+            let x = this.props.x;
             let margin = this.props.margin;
             let width = 1000;
 
@@ -55,6 +56,7 @@ class IntradayChart extends Component {
 
 
 
+            //alle css Teilen muessen nacharbeitet werden.
             //svg graph für background
             this.background = comp.append("g")
             //add background für bar am top
@@ -74,16 +76,53 @@ class IntradayChart extends Component {
                 .attr("height", 33)
                 .attr("width", this.props.x.range()[1])
                 .style("opacity", 0.3)
-                .style("fill", "#F8F9F9") //"#F8F9F9"
-
-            
+                .style("fill", "#F8F9F9")
+                //drei Kreise von Legende
+            this.lengdeCircH = comp.append("circle")
+                .attr("class", "legendeCircleH")
+                .attr('cx', x.range()[1] - 20)
+                .attr('cy', margin.top + 45)
+                .attr('r', 6)
+                .attr('fill', '#3498DB')
+            this.lengdeCircN = comp.append("circle")
+                .attr("class", "legendeCircleN")
+                .attr('cx', x.range()[1] - 40)
+                .attr('cy', margin.top + 45)
+                .attr('r', 6)
+                .attr('fill', '#58D68D')
+            this.lengdeCircL = comp.append("circle")
+                .attr("class", "legendeCircleL")
+                .attr('cx', x.range()[1] - 60)
+                .attr('cy', margin.top + 45)
+                .attr('r', 6)
+                .attr('fill', '#DC7633')
+                //Text1 von Legende
+            this.legendeCircTextL = comp.append("text")
+                .attr("class", "legendeCircTextL")
+                .text("low")
+                .attr("x", x.range()[1] - 105)
+                .attr("y", margin.top + 50)
+                .style("font", "sans-serif")
+                .attr("fill", "gray")
+            this.legendeCircTextH = comp.append("text")
+                .attr("class", "legendeCircTextH")
+                .text("high")
+                .attr("x", x.range()[1])
+                .attr("y", margin.top + 50)
+                .style("font", "sans-serif")
+                .attr("fill", "gray")
+                //Text2 von Legende
             this.legendeText = comp.append("text")
                 .text("BLOOD BLUCOSE     mg/dL")
                 .attr("class", "legendeText")
                 .attr("x", margin.left + 5)
-                .attr("y", margin.top + 47)
+                .attr("y", margin.top + 50)
                 .style("font", "sans-serif")
                 .attr("fill", "black")
+
+                //Bereich von Analystische Darstellung
+            this.analysis = comp.append("g")
+
 
             //svg graph für x und y achse
             //init x und y achse
@@ -97,7 +136,7 @@ class IntradayChart extends Component {
 
             this.yAxis_graph = comp.append("g")
                 .attr("class", "yline")
-                .attr("transform", "translate(" + margin.left + "," + (margin.top + 60)+ ")")
+                .attr("transform", "translate(" + margin.left + "," + (margin.top + 60) + ")")
                 .call(yAxis);
 
             this.circs = comp.append('g');
@@ -138,8 +177,7 @@ class IntradayChart extends Component {
                     .attr('width', (d, i) => wdArr[i])
                     .style("opacity", (d, i) => opacityArr[i])
                 )
-                .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top +60) + ')');
-
+                .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
         }
 
         //circle_color 
@@ -148,6 +186,7 @@ class IntradayChart extends Component {
         }
 
         if (this.circs != null) {
+            console.log(props.data.glucose)
             var circles = this.circs.selectAll('circle').data(props.data.glucose).join(
                     (enter) => enter.append('circle')
                     .attr('r', 3)
@@ -166,6 +205,11 @@ class IntradayChart extends Component {
         if (this.topbar) {
             this.topbar.attr("width", this.props.x.range()[1]);
             this.legendeBackground.attr("width", this.props.x.range()[1]);
+            this.lengdeCircH.attr('cx', x.range()[1] - 20);
+            this.lengdeCircN.attr('cx', x.range()[1] - 40);
+            this.lengdeCircL.attr('cx', x.range()[1] - 60);
+            this.legendeCircTextH.attr("x", x.range()[1]);
+            this.legendeCircTextL.attr("x", x.range()[1]-105);
         }
         //Update Normals for now
         if (this.gcHigh) {
@@ -179,12 +223,6 @@ class IntradayChart extends Component {
         }
 
     }
-    /*
-    creatColor(data){
-        var color = data.value >= this.props.y(185) ? '#3498DB' : data.value >= this.props.y(70) ? '##27AE60' : data.value >= this.props.y(0) ? '#DC7633' : '#FDFEFE'
-        return color;
-    }
-    */
 
 
     componentWillReceiveProps(nextProps) {
