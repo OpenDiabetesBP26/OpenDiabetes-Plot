@@ -26,32 +26,6 @@ class IntradayChart extends Component {
 
             let comp = d3.select("g#intraday");
 
-            this.gcHigh = comp.append("rect")
-                .attr("class", "gcHigh")
-                .attr("y", y(400) + margin.top)
-                .attr("x", margin.left)
-                .attr("height", y(185) - y(400))
-                .attr("width", width)
-                .attr("fill", "#f5f0b8")
-                .attr("transform", "translate(" + 0 + "," + 60 + ")")
-
-            this.gcNormal = comp.append("rect")
-                .attr("class", "gcNormal")
-                .attr("y", y(180) + margin.top)
-                .attr("x", margin.left)
-                .attr("height", y(70) - y(180))
-                .attr("width", width)
-                .attr("fill", "#e0e0e0")
-                .attr("transform", "translate(" + 0 + "," + 60 + ")")
-
-            this.gcLow = comp.append("rect")
-                .attr("class", "gcLow")
-                .attr("y", y(65) + margin.top)
-                .attr("x", margin.left)
-                .attr("height", y(0) - y(65))
-                .attr("width", width)
-                .attr("fill", "#faafaa")
-                .attr("transform", "translate(" + 0 + "," + 60 + ")")
 
 
 
@@ -77,50 +51,80 @@ class IntradayChart extends Component {
                 .attr("width", this.props.x.range()[1])
                 .style("opacity", 0.3)
                 .style("fill", "#F8F9F9")
-                //drei Kreise von Legende
-            this.lengdeCircH = comp.append("circle")
+            //drei Kreise von Legende
+            this.lengdeCircs =
+                comp.append("circle")
                 .attr("class", "legendeCircleH")
                 .attr('cx', x.range()[1] - 20)
                 .attr('cy', margin.top + 45)
                 .attr('r', 6)
                 .attr('fill', '#3498DB')
-            this.lengdeCircN = comp.append("circle")
+            comp.append("circle")
                 .attr("class", "legendeCircleN")
                 .attr('cx', x.range()[1] - 40)
                 .attr('cy', margin.top + 45)
                 .attr('r', 6)
                 .attr('fill', '#58D68D')
-            this.lengdeCircL = comp.append("circle")
+            comp.append("circle")
                 .attr("class", "legendeCircleL")
                 .attr('cx', x.range()[1] - 60)
                 .attr('cy', margin.top + 45)
                 .attr('r', 6)
                 .attr('fill', '#DC7633')
-                //Text1 von Legende
-            this.legendeCircTextL = comp.append("text")
+            //Text von Legende
+            this.legendeText =
+                comp.append("text")
                 .attr("class", "legendeCircTextL")
                 .text("low")
                 .attr("x", x.range()[1] - 105)
                 .attr("y", margin.top + 50)
                 .style("font", "sans-serif")
-                .attr("fill", "gray")
-            this.legendeCircTextH = comp.append("text")
+                .attr("fill", "lightgray")
+            comp.append("text")
                 .attr("class", "legendeCircTextH")
                 .text("high")
                 .attr("x", x.range()[1])
                 .attr("y", margin.top + 50)
                 .style("font", "sans-serif")
-                .attr("fill", "gray")
-                //Text2 von Legende
-            this.legendeText = comp.append("text")
-                .text("BLOOD BLUCOSE     mg/dL")
-                .attr("class", "legendeText")
+                .attr("fill", "lightgray")
+            comp.append("text")
+                .text("BLOOD BLUCOSE")
+                .attr("class", "legendeText1")
                 .attr("x", margin.left + 5)
                 .attr("y", margin.top + 50)
                 .style("font", "sans-serif")
                 .attr("fill", "black")
+            comp.append("text")
+                .text("mg/dL")
+                .attr("class", "legendeText2")
+                .attr("x", margin.left + 140)
+                .attr("y", margin.top + 50)
+                .style("font", "sans-serif")
+                .attr("fill", "gray");
 
-                //Bereich von Analystische Darstellung
+            this.dashLine =
+                comp.append("line")
+                .attr("class", "dashLineH_N")
+                .attr("x1", margin.left + x.range()[0])
+                .attr("y1", margin.top + 60 + y(185))
+                .attr("x2", margin.left + x.range()[1])
+                .attr("y2", margin.top + 60 + y(185))
+                .style("stroke-dasharray", "4 7")
+                .style("stroke", "#F4F6F7")
+                .style("stroke-width", 2)
+            comp.append("line")
+                .attr("class", "dashLineN_L")
+                .attr("x1", margin.left + x.range()[0])
+                .attr("y1", margin.top + 60 + y(65))
+                .attr("x2", margin.left + x.range()[1])
+                .attr("y2", margin.top + 60 + y(65))
+                .style("stroke-dasharray", "4 7")
+                .style("stroke", "#F4F6F7")
+                .style("stroke-width", 2)
+
+
+
+            //Bereich von Analystische Darstellung
             this.analysis = comp.append("g")
 
 
@@ -156,21 +160,20 @@ class IntradayChart extends Component {
         //wenn xAxis neue Scale bekommt, erneue Graph von xAxis und draw Background
         if (this.xAxis_graph) {
             //neue xAxis Daten von props
-            var newxAxis = d3.axisTop(x)
+            let newxAxis = d3.axisTop(x)
             this.xAxis_graph.call(newxAxis)
-            var bg = new BackGround();
-            var readTicks = bg.readTicks(x);
-            var opacityArr = bg.creatOpacity();
-            var xPos = bg.creatXpos(x);
-            var wdArr = bg.getWds();
-            //console.log("opacityArr", opacityArr)
-            var ticksGroup = this.background.selectAll('rect').data(xPos).join(
+            let bg = new BackGround();
+            let readTicks = bg.readTicks(x);
+            let opacityArr = bg.creatOpacity();
+            let xPos = bg.creatXpos(x);
+            let wdArr = bg.getWds();
+            let ticksGroup = this.background.selectAll('rect').data(xPos).join(
                     (enter) => enter.append('rect')
                     .attr('x', d => d)
                     .attr('y', y(400))
                     .attr('height', 400)
                     .attr('width', (d, i) => wdArr[i])
-                    .style("fill", "gray")
+                    .style("fill", "lightgray")
                     .style("opacity", (d, i) => opacityArr[i]),
                     (update) => update
                     .attr('x', d => d)
@@ -181,13 +184,13 @@ class IntradayChart extends Component {
         }
 
         //circle_color 
-        var circleColor = function(d) {
+        let circleColor = function(d) {
             return d.value >= 185 ? '#3498DB' : d.value >= 65 ? '#58D68D' : '#DC7633';
         }
 
         if (this.circs != null) {
-            console.log(props.data.glucose)
-            var circles = this.circs.selectAll('circle').data(props.data.glucose).join(
+            console.log("props.data.glucose", props.data.glucose)
+            let circles = this.circs.selectAll('circle').data(props.data.glucose).join(
                     (enter) => enter.append('circle')
                     .attr('r', 3)
                     .attr('cy', d => y(+d.value))
@@ -205,23 +208,14 @@ class IntradayChart extends Component {
         if (this.topbar) {
             this.topbar.attr("width", this.props.x.range()[1]);
             this.legendeBackground.attr("width", this.props.x.range()[1]);
-            this.lengdeCircH.attr('cx', x.range()[1] - 20);
-            this.lengdeCircN.attr('cx', x.range()[1] - 40);
-            this.lengdeCircL.attr('cx', x.range()[1] - 60);
-            this.legendeCircTextH.attr("x", x.range()[1]);
-            this.legendeCircTextL.attr("x", x.range()[1]-105);
+            d3.select(".legendeCircleH").attr('cx', x.range()[1] - 20);
+            d3.select(".legendeCircleN").attr('cx', x.range()[1] - 40);
+            d3.select(".legendeCircleL").attr('cx', x.range()[1] - 60);
+            d3.select(".legendeCircTextL").attr("x", x.range()[1]);
+            d3.select(".legendeCircTextH").attr("x", x.range()[1] - 105);
+            d3.select(".dashLineH_N").attr("x2", this.props.margin.left + x.range()[1]);
+            d3.select(".dashLineN_L").attr("x2", this.props.margin.left + x.range()[1]);
         }
-        //Update Normals for now
-        if (this.gcHigh) {
-            this.gcHigh.attr('width', props.x.range()[1]);
-        }
-        if (this.gcNormal) {
-            this.gcNormal.attr('width', props.x.range()[1]);
-        }
-        if (this.gcLow) {
-            this.gcLow.attr('width', props.x.range()[1]);
-        }
-
     }
 
 
