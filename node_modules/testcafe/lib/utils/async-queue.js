@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const actions = {};
+function isInQueue(key) {
+    return actions[key];
+}
+exports.isInQueue = isInQueue;
+function addToQueue(key, asyncAction) {
+    const action = actions[key] || Promise.resolve();
+    actions[key] = action.then(() => asyncAction());
+    return actions[key];
+}
+exports.addToQueue = addToQueue;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXN5bmMtcXVldWUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvdXRpbHMvYXN5bmMtcXVldWUuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7QUFBQSxNQUFNLE9BQU8sR0FBRyxFQUFHLENBQUM7QUFFcEIsU0FBZ0IsU0FBUyxDQUFFLEdBQUc7SUFDMUIsT0FBTyxPQUFPLENBQUMsR0FBRyxDQUFDLENBQUM7QUFDeEIsQ0FBQztBQUZELDhCQUVDO0FBRUQsU0FBZ0IsVUFBVSxDQUFFLEdBQUcsRUFBRSxXQUFXO0lBQ3hDLE1BQU0sTUFBTSxHQUFHLE9BQU8sQ0FBQyxHQUFHLENBQUMsSUFBSSxPQUFPLENBQUMsT0FBTyxFQUFFLENBQUM7SUFFakQsT0FBTyxDQUFDLEdBQUcsQ0FBQyxHQUFHLE1BQU0sQ0FBQyxJQUFJLENBQUMsR0FBRyxFQUFFLENBQUMsV0FBVyxFQUFFLENBQUMsQ0FBQztJQUVoRCxPQUFPLE9BQU8sQ0FBQyxHQUFHLENBQUMsQ0FBQztBQUN4QixDQUFDO0FBTkQsZ0NBTUMiLCJzb3VyY2VzQ29udGVudCI6WyJjb25zdCBhY3Rpb25zID0geyB9O1xuXG5leHBvcnQgZnVuY3Rpb24gaXNJblF1ZXVlIChrZXkpIHtcbiAgICByZXR1cm4gYWN0aW9uc1trZXldO1xufVxuXG5leHBvcnQgZnVuY3Rpb24gYWRkVG9RdWV1ZSAoa2V5LCBhc3luY0FjdGlvbikge1xuICAgIGNvbnN0IGFjdGlvbiA9IGFjdGlvbnNba2V5XSB8fCBQcm9taXNlLnJlc29sdmUoKTtcblxuICAgIGFjdGlvbnNba2V5XSA9IGFjdGlvbi50aGVuKCgpID0+IGFzeW5jQWN0aW9uKCkpO1xuXG4gICAgcmV0dXJuIGFjdGlvbnNba2V5XTtcbn1cbiJdfQ==

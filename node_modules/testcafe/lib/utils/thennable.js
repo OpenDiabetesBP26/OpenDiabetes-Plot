@@ -1,0 +1,7 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+function isThennable(target) {
+    return target && typeof target === 'object' && 'then' in target && typeof target.then === 'function';
+}
+exports.isThennable = isThennable;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidGhlbm5hYmxlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL3V0aWxzL3RoZW5uYWJsZS5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQUFBLFNBQWdCLFdBQVcsQ0FBRSxNQUFNO0lBQy9CLE9BQU8sTUFBTSxJQUFJLE9BQU8sTUFBTSxLQUFLLFFBQVEsSUFBSSxNQUFNLElBQUksTUFBTSxJQUFJLE9BQU8sTUFBTSxDQUFDLElBQUksS0FBSyxVQUFVLENBQUM7QUFDekcsQ0FBQztBQUZELGtDQUVDIiwic291cmNlc0NvbnRlbnQiOlsiZXhwb3J0IGZ1bmN0aW9uIGlzVGhlbm5hYmxlICh0YXJnZXQpIHtcbiAgICByZXR1cm4gdGFyZ2V0ICYmIHR5cGVvZiB0YXJnZXQgPT09ICdvYmplY3QnICYmICd0aGVuJyBpbiB0YXJnZXQgJiYgdHlwZW9mIHRhcmdldC50aGVuID09PSAnZnVuY3Rpb24nO1xufVxuIl19

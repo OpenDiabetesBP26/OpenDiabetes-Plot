@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+// -------------------------------------------------------------
+// WARNING: this file is used by both the client and the server.
+// Do not use any browser or node-specific API!
+// -------------------------------------------------------------
+exports.MARK_BYTES_PER_PIXEL = 4;
+exports.MARK_LENGTH = 32;
+exports.MARK_HEIGHT = 10;
+exports.MARK_RIGHT_MARGIN = 10;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiY29uc3RhbnRzLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL3NjcmVlbnNob3RzL2NvbnN0YW50cy5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOztBQUFBLGdFQUFnRTtBQUNoRSxnRUFBZ0U7QUFDaEUsK0NBQStDO0FBQy9DLGdFQUFnRTtBQUNuRCxRQUFBLG9CQUFvQixHQUFHLENBQUMsQ0FBQztBQUN6QixRQUFBLFdBQVcsR0FBWSxFQUFFLENBQUM7QUFDMUIsUUFBQSxXQUFXLEdBQVksRUFBRSxDQUFDO0FBQzFCLFFBQUEsaUJBQWlCLEdBQU0sRUFBRSxDQUFDIiwic291cmNlc0NvbnRlbnQiOlsiLy8gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxuLy8gV0FSTklORzogdGhpcyBmaWxlIGlzIHVzZWQgYnkgYm90aCB0aGUgY2xpZW50IGFuZCB0aGUgc2VydmVyLlxuLy8gRG8gbm90IHVzZSBhbnkgYnJvd3NlciBvciBub2RlLXNwZWNpZmljIEFQSSFcbi8vIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbmV4cG9ydCBjb25zdCBNQVJLX0JZVEVTX1BFUl9QSVhFTCA9IDQ7XG5leHBvcnQgY29uc3QgTUFSS19MRU5HVEggICAgICAgICAgPSAzMjtcbmV4cG9ydCBjb25zdCBNQVJLX0hFSUdIVCAgICAgICAgICA9IDEwO1xuZXhwb3J0IGNvbnN0IE1BUktfUklHSFRfTUFSR0lOICAgID0gMTA7XG4iXX0=

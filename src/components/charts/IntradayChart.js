@@ -123,10 +123,11 @@ class IntradayChart extends Component {
                 .attr("y2", margin.top +60 +y(0))
             
 
-            this.circs = comp.append('g');
-
-
-
+            this.circs = comp.append('g')
+				.attr("class", "circless");
+				
+			let tooltips = d3.select('body').append('g').style("opacity", 0)
+			
             this.drawChart(this.props);
 
 
@@ -136,7 +137,7 @@ class IntradayChart extends Component {
     drawChart(props) {
         let y = props.y;
         let x = props.x;
-
+		
         //wenn xAxis neue Scale bekommt, erneue Graph von xAxis und draw Background
         if (this.xAxis_graph) {
             //neue xAxis Daten von props
@@ -168,7 +169,7 @@ class IntradayChart extends Component {
             return d.value >= 185 ? '#3498DB' : d.value >= 65 ? '#58D68D' : '#DC7633';
         }
 
-        if (this.circs != null) {
+        if (this.circs != null ) {
             console.log("props.data.glucose", props.data.glucose)
             let circles = this.circs.selectAll('circle').data(props.data.glucose).join(
                     (enter) => enter.append('circle')
@@ -181,7 +182,43 @@ class IntradayChart extends Component {
                     .attr('cx', d => x(d.time))
                     .attr('fill', circleColor)
                 )
-                .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
+                .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')')
+				.on('mouseover', mouseover_tp)
+				.on('mouseout', mouseout_tp);
+
+			//mouse actions 
+			function mouseover_tp() {
+				d3.select(this)
+                .style("opacity", 1)
+                .transition()
+                .duration(300)
+                .attr('opacity', 1)
+				.attr('fill', 'yellow')
+                .attr('r', 3 * 3)
+				
+				if (this.tooltips != null )
+					this.tooltips.style("opacity", 1)
+					.html("Time: " + d.time + "<br />" + "value: " + d.value)
+			}
+			
+			function mousemove_tp(d) {
+				if (this.tooltips != null )
+					this.tooltips
+						.html("Time: " + d.time + "<br />" + "value: " + d.value)
+						.attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
+			}
+			function mouseout_tp() {
+				d3.select(this)
+                .style("stroke", "none")
+                .transition()
+                .duration(500)
+                .attr('opacity', 1)
+				.attr('fill', circleColor)
+                .attr('r', 3);
+				
+				if (this.tooltips != null )
+					this.tooltips.style("opacity", 0)
+			}
         }
 
         //update topbar

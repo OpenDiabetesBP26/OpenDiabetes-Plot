@@ -68,9 +68,18 @@ body {
         stroke: white;
         stroke-width: 3
         }
-
-
-
+		.circle:hover{
+			fill: #22a6b3
+		}
+		.tooltips{
+			position: absolute;
+			font: sans-serif;
+			text-align: center;
+			border-style: solid; 
+			border-width: 1px;
+			background-color: lightsteelblue;
+			border-radius: 8px;
+		}
     }
-
 }
+
