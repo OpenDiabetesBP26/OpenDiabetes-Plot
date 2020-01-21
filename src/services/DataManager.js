@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import crossfilter from 'crossfilter2';
 
 class DataManager {
 	constructor() {
@@ -28,7 +29,10 @@ class DataManager {
 	readData(data) {
 		this.parseTime(data);
 		this.data = data;
-
+		let cdata = crossfilter(data);
+		let cdata_byTime = cdata.dimension(d => d.time);
+		this.testdata =cdata_byTime;
+		console.log(cdata_byTime);
 		//Set max domain
 		this.maxDomain = d3.extent(this.data, d => d.time);
 
@@ -105,7 +109,7 @@ class DataManager {
 		//Create copies with slice()
 		this.buffer_data = {
 			intraday: {
-				glucose: this.raw_data.intraday.glucose.slice(),
+				glucose: [],
 				bolus: this.raw_data.intraday.bolus.slice(),
 				basal_profile: this.raw_data.intraday.basal_profile.slice(),
 				basal_temp: this.raw_data.intraday.basal_temp.slice(),
@@ -125,6 +129,16 @@ class DataManager {
 			},
 			monthly: {
 				glucose: this.raw_data.monthly.glucose.slice()
+			}
+		}
+		this.buffer_data_cross = {
+			intraday: {
+				glucose: crossfilter(this.raw_data.intraday.glucose),
+			}
+		}
+		this.buffer_data_dim = {
+			intraday: {
+				glucose: this.buffer_data_cross.intraday.glucose.dimension(d => d.time),
 			}
 		}
 
@@ -169,7 +183,6 @@ class DataManager {
 		) {
 			this.buffer = [this.domain[0] - timeDelta / 2, (+this.domain[1]) + timeDelta / 2];
 			this.bufferData()
-			let now = new Date;
 		}
 	}
 	bufferData() {
@@ -177,11 +190,14 @@ class DataManager {
 			let bufferfilter = data => data.filter((d) => this.buffer[0] <= d.time && d.time <= this.buffer[1]);
 			switch (this.display) {
 				case 'intraday':
-					this.buffer_data.intraday.glucose = bufferfilter(this.raw_data.intraday.glucose);
-					this.buffer_data.intraday.bolus = bufferfilter(this.raw_data.intraday.bolus);
-					this.buffer_data.intraday.basal_profile = bufferfilter(this.raw_data.intraday.basal_profile);
-					this.buffer_data.intraday.basal_temp = bufferfilter(this.raw_data.intraday.basal_temp);
-					this.buffer_data.intraday.predictions = bufferfilter(this.raw_data.intraday.predictions);
+					//Update dim filter
+					this.buffer_data_dim.intraday.glucose.filterRange(this.buffer);
+					this.buffer_data.intraday.glucose = this.buffer_data_cross.intraday.glucose.allFiltered();
+					//Get data
+					// this.buffer_data.intraday.bolus = bufferfilter(this.raw_data.intraday.bolus);
+					// this.buffer_data.intraday.basal_profile = bufferfilter(this.raw_data.intraday.basal_profile);
+					// this.buffer_data.intraday.basal_temp = bufferfilter(this.raw_data.intraday.basal_temp);
+					// this.buffer_data.intraday.predictions = bufferfilter(this.raw_data.intraday.predictions);
 					break;
 				case '3hourly':
 					this.buffer_data.hourly3.glucose = bufferfilter(this.raw_data.hourly3.glucose);
@@ -202,10 +218,11 @@ class DataManager {
 					break;
 			}
 			//Update stats buffer
-			this.buffer_stats.glucose = bufferfilter(this.raw_data.intraday.glucose);
-			this.buffer_stats.bolus = bufferfilter(this.raw_data.intraday.bolus);
-			this.buffer_stats.basal_profile = bufferfilter(this.raw_data.intraday.basal_profile);
-			this.buffer_stats.basal_temp = bufferfilter(this.raw_data.intraday.basal_temp);
+			this.buffer_data_dim.intraday.glucose.filterRange(this.buffer);
+			this.buffer_stats.glucose = this.buffer_data_cross.intraday.glucose.allFiltered();
+			// this.buffer_stats.bolus = bufferfilter(this.raw_data.intraday.bolus);
+			// this.buffer_stats.basal_profile = bufferfilter(this.raw_data.intraday.basal_profile);
+			// this.buffer_stats.basal_temp = bufferfilter(this.raw_data.intraday.basal_temp);
 	}
 	changeDisplay(display) {
 		this.display = display;
@@ -217,12 +234,16 @@ class DataManager {
 	}
 	getIntradayData() {
 		const filterCurrentDomain = (d) => this.domain[0] <= d.time && d.time <= this.domain[1];
+		let then = new Date;
+		let glucose = this.buffer_data.intraday.glucose.filter(filterCurrentDomain);
+		let now = new Date;
+		console.log('Filtering took ' + (now-then) + ' ms');
 		let data = {
-			glucose: this.buffer_data.intraday.glucose.filter(filterCurrentDomain),
-			bolus: this.buffer_data.intraday.bolus.filter(filterCurrentDomain),
-			basal_profile: this.buffer_data.intraday.basal_profile.filter(filterCurrentDomain),
-			basal_temp: this.buffer_data.intraday.basal_temp.filter(filterCurrentDomain),
-			predictions: this.buffer_data.intraday.predictions.filter(filterCurrentDomain)
+			glucose: glucose,
+			// bolus: this.buffer_data.intraday.bolus.filter(filterCurrentDomain),
+			// basal_profile: this.buffer_data.intraday.basal_profile.filter(filterCurrentDomain),
+			// basal_temp: this.buffer_data.intraday.basal_temp.filter(filterCurrentDomain),
+			// predictions: this.buffer_data.intraday.predictions.filter(filterCurrentDomain)
 		}
 
 		return data;
@@ -263,7 +284,6 @@ class DataManager {
 		return data;
 	}
 	getStatistics() {
-		
 			const filterCurrentDomain = (d) => this.domain[0] <= d.time && d.time <= this.domain[1];
 			let glucoseSize = 0;
 			let timeFrame = this.domain;
@@ -275,7 +295,7 @@ class DataManager {
 				average = 0;
 
 			if(this.display == 'intraday'){
-				let glucose = this.buffer_stats.glucose.filter(filterCurrentDomain);
+				let glucose = this.buffer_data.intraday.glucose.filter(filterCurrentDomain);
 				glucoseSize = glucose.length;
 				glucose.forEach(d => {
 					average = parseFloat(average) + parseFloat(d.value);

@@ -18,7 +18,13 @@ div.stat-container{
         height:100%;
     }
 }
-
+.average-bg{
+	font-size: 20px;
+	.average-value{
+		font-style:bold;
+		font-size: 30px;
+	}
+}
 
 div.stat-container.hyper{
     background-color: #b3a0da;

@@ -60,6 +60,7 @@ class Chart extends Component {
         try {
             //TODO Implement DataManager
             let data = await (await fetch("/data/2019-11-20-1349_export-data.json")).json()
+            console.log(data);
             data = data.data;
             this.data = data;
             

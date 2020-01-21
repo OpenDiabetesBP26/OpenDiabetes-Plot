@@ -19,11 +19,11 @@ class Statistics extends Component {
         <div className="bg-light">
             <h2>Glucose distribution</h2>
             <div className="time-frame">
-            <p>from {this.state.stats.timeFrame[0].toDateString()} - {this.state.stats.timeFrame[1].toDateString()}</p>
+            <p>from {this.state.stats.timeFrame[0].toDateString()} {this.state.stats.timeFrame[0].getHours()}:{this.state.stats.timeFrame[0].getMinutes()} - {this.state.stats.timeFrame[1].toDateString()} {this.state.stats.timeFrame[1].getHours()}:{this.state.stats.timeFrame[1].getMinutes()}</p>
             </div>
             <div className="average-bg">
             <p>
-                {this.state.stats.glucose.average == 0 ? '-' : Math.round(this.state.stats.glucose.average)}
+                Avg. <span className='average-value'>{this.state.stats.glucose.average == 0 ? '-' : Math.round(this.state.stats.glucose.average)} </span> mg/dl
             </p>
             </div>
             <div className="stat-container hyper">
