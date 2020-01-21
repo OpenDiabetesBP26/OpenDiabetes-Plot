@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { hot } from 'react-hot-loader';
 import * as d3 from 'd3';
 import BackGround from '../../services/BackGround.js';
+import '../../style.scss';
 
 class IntradayChart extends Component {
     constructor(props) {
@@ -30,7 +31,6 @@ class IntradayChart extends Component {
 
 
 
-            //alle css Teilen muessen nacharbeitet werden.
             //svg graph für background
             this.background = comp.append("g")
             //add background für bar am top
@@ -40,8 +40,6 @@ class IntradayChart extends Component {
                 .attr("y", margin.top)
                 .attr("height", 25)
                 .attr("width", this.props.x.range()[1])
-                .attr("fill", "#2E86C1")
-                .style("opacity", 0.6)
             //Chart Legende
             this.legendeBackground = comp.append("rect")
                 .attr("class", "legendeBackground")
@@ -49,8 +47,6 @@ class IntradayChart extends Component {
                 .attr("y", margin.top + 26)
                 .attr("height", 33)
                 .attr("width", this.props.x.range()[1])
-                .style("opacity", 0.3)
-                .style("fill", "#F8F9F9")
             //drei Kreise von Legende
             this.lengdeCircs =
                 comp.append("circle")
@@ -58,49 +54,33 @@ class IntradayChart extends Component {
                 .attr('cx', x.range()[1] - 20)
                 .attr('cy', margin.top + 45)
                 .attr('r', 6)
-                .attr('fill', '#3498DB')
             comp.append("circle")
                 .attr("class", "legendeCircleN")
                 .attr('cx', x.range()[1] - 40)
                 .attr('cy', margin.top + 45)
                 .attr('r', 6)
-                .attr('fill', '#58D68D')
             comp.append("circle")
                 .attr("class", "legendeCircleL")
                 .attr('cx', x.range()[1] - 60)
                 .attr('cy', margin.top + 45)
                 .attr('r', 6)
-                .attr('fill', '#DC7633')
             //Text von Legende
             this.legendeText =
                 comp.append("text")
-                .attr("class", "legendeCircTextL")
-                .text("low")
-                .attr("x", x.range()[1] - 105)
+                .attr("class", "legendeCircText")
+                .text("low high")
+                .attr("x", x.range()[1] - 110)
                 .attr("y", margin.top + 50)
-                .style("font", "sans-serif")
-                .attr("fill", "lightgray")
-            comp.append("text")
-                .attr("class", "legendeCircTextH")
-                .text("high")
-                .attr("x", x.range()[1])
-                .attr("y", margin.top + 50)
-                .style("font", "sans-serif")
-                .attr("fill", "lightgray")
             comp.append("text")
                 .text("BLOOD BLUCOSE")
                 .attr("class", "legendeText1")
                 .attr("x", margin.left + 5)
                 .attr("y", margin.top + 50)
-                .style("font", "sans-serif")
-                .attr("fill", "black")
             comp.append("text")
                 .text("mg/dL")
                 .attr("class", "legendeText2")
                 .attr("x", margin.left + 140)
                 .attr("y", margin.top + 50)
-                .style("font", "sans-serif")
-                .attr("fill", "gray");
 
             this.dashLine =
                 comp.append("line")
@@ -109,18 +89,12 @@ class IntradayChart extends Component {
                 .attr("y1", margin.top + 60 + y(185))
                 .attr("x2", margin.left + x.range()[1])
                 .attr("y2", margin.top + 60 + y(185))
-                .style("stroke-dasharray", "4 7")
-                .style("stroke", "#F4F6F7")
-                .style("stroke-width", 2)
             comp.append("line")
                 .attr("class", "dashLineN_L")
                 .attr("x1", margin.left + x.range()[0])
                 .attr("y1", margin.top + 60 + y(65))
                 .attr("x2", margin.left + x.range()[1])
                 .attr("y2", margin.top + 60 + y(65))
-                .style("stroke-dasharray", "4 7")
-                .style("stroke", "#F4F6F7")
-                .style("stroke-width", 2)
 
 
 
@@ -132,7 +106,6 @@ class IntradayChart extends Component {
             //init x und y achse
             this.xAxis_graph = comp.append("g")
                 .attr("class", "xline")
-                .style("color", "white")
                 .attr("transform", "translate(" + margin.left + "," + (margin.top + 25) + ")")
                 .call(xAxis);
 
@@ -142,6 +115,13 @@ class IntradayChart extends Component {
                 .attr("class", "yline")
                 .attr("transform", "translate(" + margin.left + "," + (margin.top + 60) + ")")
                 .call(yAxis);
+            this.yAbdeckung = comp.append("line")
+                .attr("class", "yAbdeckung")
+                .attr("x1", margin.left)
+                .attr("y1", margin.top + 60 + y(400))
+                .attr("x2", margin.left)
+                .attr("y2", margin.top +60 +y(0))
+            
 
             this.circs = comp.append('g');
 
@@ -211,8 +191,7 @@ class IntradayChart extends Component {
             d3.select(".legendeCircleH").attr('cx', x.range()[1] - 20);
             d3.select(".legendeCircleN").attr('cx', x.range()[1] - 40);
             d3.select(".legendeCircleL").attr('cx', x.range()[1] - 60);
-            d3.select(".legendeCircTextH").attr("x", x.range()[1]);
-            d3.select(".legendeCircTextL").attr("x", x.range()[1] - 105);
+            d3.select(".legendeCircText").attr("x", x.range()[1]-110);
             d3.select(".dashLineH_N").attr("x2", this.props.margin.left + x.range()[1]);
             d3.select(".dashLineN_L").attr("x2", this.props.margin.left + x.range()[1]);
         }

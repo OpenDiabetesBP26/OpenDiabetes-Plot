@@ -2,6 +2,75 @@
 
 body {
     h1 {
-        color:green;
+        color: green;
     }
+
+    main {
+
+        //x-Achse
+        .xline {
+            color: white;
+        }
+
+        //dashline
+        .dashLineH_N {
+            stroke-dasharray: 4, 7;
+            stroke: #F4F6F7;
+            stroke-width: 2;
+        }
+
+        .dashLineN_L {
+            stroke-dasharray: 4, 7;
+            stroke: #F4F6F7;
+            stroke-width: 2;
+        }
+
+        //Legende
+        .legendeBackground {
+            opacity: 0.3;
+            fill: #F8F9F9;
+        }
+
+        .legendeCircleH {
+            fill: #3498DB;
+        }
+
+        .legendeCircleN {
+            fill: #58D68D;
+        }
+
+        .legendeCircleL {
+            fill: #DC7633;
+        }
+
+        .legendeCircText {
+            word-spacing: 80px;
+            font: sans-serif;
+            fill: lightgray;
+        }
+
+        .legendeText1 {
+            font: sans-serif;
+            fill: black;
+        }
+
+        .legendeText2 {
+            font: sans-serif;
+            fill: gray;
+        }
+
+        //top bar
+        .topbar {
+            fill: #2E86C1;
+            opacity: 0.6;
+        }
+        .yAbdeckung{
+        stroke: white;
+        stroke-width: 3
+        }
+
+
+
+    }
+
 }
