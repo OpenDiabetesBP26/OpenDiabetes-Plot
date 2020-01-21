@@ -263,6 +263,7 @@ class DataManager {
 		return data;
 	}
 	getStatistics() {
+		
 			const filterCurrentDomain = (d) => this.domain[0] <= d.time && d.time <= this.domain[1];
 			let glucoseSize = 0;
 			let timeFrame = this.domain;
@@ -313,6 +314,7 @@ class DataManager {
 					default:
 						break;
 				}
+				if(glucose != null) {
 				glucose.glucose.forEach(d => {
 					hypo = hypo + parseFloat(d.value_count_hypo);
 					low = low + parseFloat(d.value_count_low);
@@ -322,6 +324,7 @@ class DataManager {
 					average = average + parseFloat(d.value_sum);
 					glucoseSize = glucoseSize + parseFloat(d.value_count);
 				})
+			}
 			}
 
 			let stats = {
