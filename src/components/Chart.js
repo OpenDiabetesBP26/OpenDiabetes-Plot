@@ -7,6 +7,9 @@ import IntradayChart from './charts/IntradayChart';
 import ThreeHourlyChart from './charts/ThreeHourlyChart';
 import SixHourlyChart from './charts/SixHourlyChart';
 import DailyChart from './charts/DailyChart';
+import WeeklyChart from './charts/WeeklyChart';
+import MonthlyChart from './charts/MonthlyChart';
+
 import Statistics from './charts/Statistics';
 
 class Chart extends Component {
@@ -28,7 +31,7 @@ class Chart extends Component {
                     </svg>
                 </div>
                 <div className="col-md-4 col-sm-12">
-                    <Statistics stats={this.state.data_manager != null ? this.state.data_manager.getStatistics() : null} />
+                    <Statistics domain={this.state.x != null ? this.state.x.domain() : null} dm={this.state.data_manager != null ? this.state.data_manager : null} />
                 </div>
                 </div>
             </div>
@@ -40,14 +43,14 @@ class Chart extends Component {
                 return <IntradayChart data={this.state.data_manager != null ? this.state.data_manager.getIntradayData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin}/>
             case '3hourly':
                 return <ThreeHourlyChart data={this.state.data_manager != null ? this.state.data_manager.getThreeHourlyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin}/>
-            case '6hourlly':
-                return <SixHourlyChart data={this.state.data_manager != null ? this.state.data_manager.getIntradayData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin}/>
+            case '6hourly':
+                return <SixHourlyChart data={this.state.data_manager != null ? this.state.data_manager.getSixHourlyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin}/>
             case 'daily':
-                return <div>Platzhalter daily</div>
+                return <DailyChart data={this.state.data_manager != null ? this.state.data_manager.getDailyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin}/>
             case 'weekly':
-                return <div>Platzhalter weekly</div>
+                 return <WeeklyChart data={this.state.data_manager != null ? this.state.data_manager.getWeeklyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin}/>
             case 'monthly':
-                return <div>Platzhalter monthly</div>
+                return <MonthlyChart data={this.state.data_manager != null ? this.state.data_manager.getMonthlyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin}/>
             default:
                 return null;
         }
@@ -143,12 +146,12 @@ class Chart extends Component {
     }
 
     zoomed(){
-      this.fixExtent();
-      console.log(d3.event.transform);
-      let x = d3.event.transform.rescaleX(this.state.xBase);
-      console.log(x.domain());
-      this.state.data_manager.updateDomain(x.domain());
+      //this.fixExtent();
 
+      let x = d3.event.transform.rescaleX(this.state.xBase);
+      //Update Domain in sync
+      this.state.data_manager.updateDomain(x.domain());
+      //Update Buffe async, may take a while
       //Update Display
 
       //time difference in hours
@@ -164,9 +167,6 @@ class Chart extends Component {
           display: display
         });
 
-    }
-    //Wird aufgerufen, sobald sich der state ändert
-    componentDidUpdate(){
     }
     getDisplay(hours){
         if(hours > 24 * 30 * 12){
