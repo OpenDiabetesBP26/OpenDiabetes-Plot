@@ -118,12 +118,52 @@ class IntradayChart extends Component {
             this.yAbdeckung = comp.append("line")
                 .attr("class", "yAbdeckung")
                 .attr("x1", margin.left)
-                .attr("y1", margin.top + 60 + y(400))
+                .attr("y1", margin.top + y(400))
                 .attr("x2", margin.left)
-                .attr("y2", margin.top +60 +y(0))
-            
+                .attr("y2", margin.top + 60 + y(0))
+
+
+
 
             this.circs = comp.append('g');
+
+            //tooltips background
+            this.tooltipbg = comp.append('rect')
+                .attr("class", "tooltipbg")
+                .attr("x", margin.left)
+                .attr("y", margin.top)
+                .attr('rx', "3px")
+                .attr('ry', "3px")
+                .attr("width", 440)
+                .attr("height", 100)
+                .style("opacity", 0);
+            //tooltips Text
+            this.tooltipText =
+                comp.append('text')
+                .attr("class", "tooltipTextT")
+                .attr("x", margin.left)
+                .attr("y", margin.top)
+                .style("opacity", 0)
+            comp.append('text')
+                .attr("class", "tooltipTextV")
+                .attr("x", margin.left)
+                .attr("y", margin.top)
+                .style("opacity", 0)
+            comp.append('text')
+                .attr("class", "tooltipTextS")
+                .attr("x", margin.left)
+                .attr("y", margin.top)
+                .style("opacity", 0)
+            /*
+                        this.rectH = comp.append('rect')
+                        .attr('x', margin.left +100)
+                        .attr('y',y(200))
+                        .attr('width', "5px")
+                        .attr('height', "20px")
+                        .attr('rx', "5px")
+                        .attr('ry', "5px")
+            */
+
 
 
 
@@ -163,10 +203,7 @@ class IntradayChart extends Component {
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
         }
 
-        //circle_color 
-        let circleColor = function(d) {
-            return d.value >= 185 ? '#3498DB' : d.value >= 65 ? '#58D68D' : '#DC7633';
-        }
+
 
         if (this.circs != null) {
             console.log("props.data.glucose", props.data.glucose)
@@ -175,11 +212,13 @@ class IntradayChart extends Component {
                     .attr('r', 3)
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
-                    .attr('fill', circleColor),
+                    .attr('fill', d => this.circleColor(d.value))
+                    .on("mouseover", this.mouseover_tp)
+                    .on("mouseout", this.mouseout_tp),
                     (update) => update
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
-                    .attr('fill', circleColor)
+                    .attr('fill', d => this.circleColor(d.value))
                 )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
         }
@@ -191,12 +230,58 @@ class IntradayChart extends Component {
             d3.select(".legendeCircleH").attr('cx', x.range()[1] - 20);
             d3.select(".legendeCircleN").attr('cx', x.range()[1] - 40);
             d3.select(".legendeCircleL").attr('cx', x.range()[1] - 60);
-            d3.select(".legendeCircText").attr("x", x.range()[1]-110);
+            d3.select(".legendeCircText").attr("x", x.range()[1] - 110);
             d3.select(".dashLineH_N").attr("x2", this.props.margin.left + x.range()[1]);
             d3.select(".dashLineN_L").attr("x2", this.props.margin.left + x.range()[1]);
         }
     }
+    //circle_color 
+    circleColor(d) {
+        return d >= 185 ? '#3498DB' : d >= 65 ? '#58D68D' : '#DC7633';
+    }
 
+    mouseover_tp(d) {
+        d3.select(this)
+            .transition()
+            .duration(300)
+            .attr('r', 3 * 3)
+        d3.select(".tooltipbg")
+            .attr("x", d3.event.pageX + 30)
+            .attr("y", d3.event.pageY - 105)
+            .style("opacity", 0.6)
+        d3.select(".tooltipTextT")
+            .attr("x", d3.event.pageX + 40)
+            .attr("y", d3.event.pageY - 80)
+            .text("time: " + d.time)
+            .style("opacity", 1)
+        d3.select(".tooltipTextV")
+            .attr("x", d3.event.pageX + 40)
+            .attr("y", d3.event.pageY - 50)
+            .text("value: " + d.value)
+            .style("opacity", 1)
+        d3.select(".tooltipTextS")
+            .attr("x", d3.event.pageX + 40)
+            .attr("y", d3.event.pageY - 20)
+            .text("source: " + d.source)
+            .style("opacity", 1)
+    }
+
+
+
+    mouseout_tp() {
+        d3.select(this)
+            .transition()
+            .duration(300)
+            .attr('r', 3)
+        d3.select(".tooltipbg")
+            .style("opacity", 0)
+        d3.select(".tooltipTextS")
+            .style("opacity", 0)
+        d3.select(".tooltipTextT")
+            .style("opacity", 0)
+        d3.select(".tooltipTextV")
+            .style("opacity", 0)
+    }
 
     componentWillReceiveProps(nextProps) {
         //Wir können Daten hier neu rendern

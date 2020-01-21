@@ -66,9 +66,23 @@ body {
         }
         .yAbdeckung{
         stroke: white;
-        stroke-width: 3
+        stroke-width: 2;
         }
+        .tooltipbg{
+        fill: lightgray;//#EB984E;
+        stroke:gray; //#EB984E;
+        stroke-width:3;
+        }
+        .tooltipTextT{
+        fill: black;
 
+        }
+        .tooltipTextV{
+        fill: black;
+        }
+        .tooltipTextS{
+        fill: black;
+        }
 
 
     }
