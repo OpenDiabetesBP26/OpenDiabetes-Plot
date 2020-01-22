@@ -219,6 +219,8 @@ class IntradayChart extends Component {
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
                     .attr('fill', d => this.circleColor(d.value))
+                    .on("mouseover", this.mouseover_tp)
+                    .on("mouseout", this.mouseout_tp)
                 )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
         }
