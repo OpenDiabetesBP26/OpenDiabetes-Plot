@@ -71,9 +71,9 @@ class BackGround {
             } else if (tickStep >= 15 * 60 * 1000) {
                 result = 'quarter'
             } else if (tickStep >= 5 * 60 * 1000) {
-                '5min'
+                result = '5min'
             } else {
-                'min'
+                result = 'min'
             }
             return result;
         }
