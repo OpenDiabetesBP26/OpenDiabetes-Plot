@@ -263,7 +263,8 @@ class IntradayChart extends Component {
             d3.select(".dashLineN_L").attr("x2", this.props.margin.left + x.range()[1]);
         }
         //Update Normals for now
-        if (this.gcHigh) {
+    
+		if (this.gcHigh) {
             this.gcHigh.attr('width', props.x.range()[1]);
         }
         if (this.gcNormal) {
@@ -272,7 +273,7 @@ class IntradayChart extends Component {
         if (this.gcLow) {
             this.gcLow.attr('width', props.x.range()[1]);
         }
-
+	
     }
     /*
     creatColor(data){
