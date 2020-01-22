@@ -32,7 +32,10 @@ class BackGround {
         let firstDate = new Date(d.ticks()[0].getTime() - diff);
         this.tickArray[0] = firstDate;
         this.tickArray = this.tickArray.concat(d.ticks());
+<<<<<<< HEAD
         //console.log("tickArray",this.tickArray);
+=======
+>>>>>>> master
         return this.tickArray;
     }
     //erzeuge ein Array mit x-position von allen ticks
@@ -72,9 +75,15 @@ class BackGround {
             } else if (tickStep >= 15 * 60 * 1000) {
                 result = 'quarter'
             } else if (tickStep >= 5 * 60 * 1000) {
+<<<<<<< HEAD
                 result ='5min'
             } else {
                 result = 'min'
+=======
+                '5min'
+            } else {
+                'min'
+>>>>>>> master
             }
             return result;
         }
@@ -109,9 +118,16 @@ class BackGround {
 
 
     creatYearlyOpacity() {
+<<<<<<< HEAD
         let rectOpacity = []
         //console.log("creatYearlyOpacity")
         let OpacitySeed = this.in6tufeOpacity
+=======
+        let OpacitySeed = []
+        let rectOpacity = []
+        //console.log("creatYearlyOpacity")
+        OpacitySeed = this.in6tufeOpacity
+>>>>>>> master
         let yearBase = this.tickArray[0].getFullYear()
         this.tickArray.forEach((d, i) => rectOpacity[i] = OpacitySeed[d.getFullYear() - yearBase])
         return rectOpacity;
@@ -120,9 +136,16 @@ class BackGround {
 
     //erzeuge monthlyOpacity
     creatMonthlyOpacity() {
+<<<<<<< HEAD
         let OpacitySeed = this.in6StufeOpacity
         let rectOpacity = []
         //console.log("creatMonthlyOpacity")
+=======
+        let OpacitySeed = []
+        let rectOpacity = []
+        //console.log("creatMonthlyOpacity")
+        OpacitySeed = this.in6StufeOpacity
+>>>>>>> master
         this.tickArray.forEach((d, i) => rectOpacity[i] = OpacitySeed[d.getMonth() % 6]);
         return rectOpacity;
     }
@@ -148,9 +171,16 @@ class BackGround {
 
 
     creatInDailyOpcaity() {
+<<<<<<< HEAD
         let rectOpacity = []
         //console.log("creatInDailyOpcaity")
         let OpacitySeed = this.in15StufeOpacity
+=======
+        let OpacitySeed = []
+        let rectOpacity = []
+        //console.log("creatInDailyOpcaity")
+        OpacitySeed = this.in15StufeOpacity
+>>>>>>> master
         this.tickArray.forEach((d, i) => rectOpacity[i] = OpacitySeed[d.getDate() % 15]);
         return rectOpacity;
 
@@ -159,8 +189,14 @@ class BackGround {
 
     creatHourlyOpacity() {
         //console.log("creatHourlyOpacity")
+<<<<<<< HEAD
         let rectOpacity = []
         let OpacitySeed = this.in12StufeOpacity
+=======
+        let OpacitySeed = []
+        let rectOpacity = []
+        OpacitySeed = this.in12StufeOpacity
+>>>>>>> master
         this.tickArray.forEach((d, i) => rectOpacity[i] = OpacitySeed[d.getHours() % 12]);
         return rectOpacity;
 
@@ -169,23 +205,42 @@ class BackGround {
 
     creatQuarterOpacity() {
         //console.log("creatQuarterOpacity")
+<<<<<<< HEAD
         let rectOpacity = []
         let OpacitySeed = this.in6StufeOpacity
+=======
+        let OpacitySeed = []
+        let rectOpacity = []
+        OpacitySeed = this.in6StufeOpacity
+>>>>>>> master
         this.tickArray.forEach((d, i) => rectOpacity[i] = OpacitySeed[(d.getHours() * 60 + d.getMinutes()) % 4]);
         return rectOpacity;
     }
     creathalfhourlyOpacity() {
+<<<<<<< HEAD
         console.log("creathalfhourlyOpacity")
         let rectOpacity = []
         let OpacitySeed = this.in12StufeOpacity
+=======
+        //console.log("creathalfhourlyOpacity")
+        let OpacitySeed = []
+        let rectOpacity = []
+        OpacitySeed = this.in12StufeOpacity
+>>>>>>> master
         this.tickArray.forEach((d, i) => rectOpacity[i] = OpacitySeed[(d.getHours() * 60 + d.getMinutes()) % 12]);
         return rectOpacity;
     }
 
     creat5minOpacity() {
         //console.log("creat5minOpacity")
+<<<<<<< HEAD
         let rectOpacity = []
         let OpacitySeed = this.in12StufeOpacity
+=======
+        let OpacitySeed = []
+        let rectOpacity = []
+        OpacitySeed = this.in12StufeOpacity
+>>>>>>> master
         this.tickArray.forEach((d, i) => rectOpacity[i] = OpacitySeed[(d.getHours() * 60 + d.getMinutes()) % 12]);
         return rectOpacity;
     }

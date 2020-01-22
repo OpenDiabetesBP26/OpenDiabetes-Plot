@@ -2,7 +2,10 @@ import React, { Component } from 'react';
 import { hot } from 'react-hot-loader';
 import * as d3 from 'd3';
 import BackGround from '../../services/BackGround.js';
+<<<<<<< HEAD
 import '../../style.scss';
+=======
+>>>>>>> master
 
 class IntradayChart extends Component {
     constructor(props) {
@@ -27,6 +30,35 @@ class IntradayChart extends Component {
 
             let comp = d3.select("g#intraday");
 
+<<<<<<< HEAD
+=======
+            this.gcHigh = comp.append("rect")
+                .attr("class", "gcHigh")
+                .attr("y", y(400) + margin.top)
+                .attr("x", margin.left)
+                .attr("height", y(185) - y(400))
+                .attr("width", width)
+                .attr("fill", "#f5f0b8")
+                .attr("transform", "translate(" + 0 + "," + 60 + ")")
+
+            this.gcNormal = comp.append("rect")
+                .attr("class", "gcNormal")
+                .attr("y", y(180) + margin.top)
+                .attr("x", margin.left)
+                .attr("height", y(70) - y(180))
+                .attr("width", width)
+                .attr("fill", "#e0e0e0")
+                .attr("transform", "translate(" + 0 + "," + 60 + ")")
+
+            this.gcLow = comp.append("rect")
+                .attr("class", "gcLow")
+                .attr("y", y(65) + margin.top)
+                .attr("x", margin.left)
+                .attr("height", y(0) - y(65))
+                .attr("width", width)
+                .attr("fill", "#faafaa")
+                .attr("transform", "translate(" + 0 + "," + 60 + ")")
+>>>>>>> master
 
 
 
@@ -40,6 +72,11 @@ class IntradayChart extends Component {
                 .attr("y", margin.top)
                 .attr("height", 25)
                 .attr("width", this.props.x.range()[1])
+<<<<<<< HEAD
+=======
+                .attr("fill", "#2E86C1")
+                .style("opacity", 0.6)
+>>>>>>> master
             //Chart Legende
             this.legendeBackground = comp.append("rect")
                 .attr("class", "legendeBackground")
@@ -47,6 +84,7 @@ class IntradayChart extends Component {
                 .attr("y", margin.top + 26)
                 .attr("height", 33)
                 .attr("width", this.props.x.range()[1])
+<<<<<<< HEAD
             //drei Kreise von Legende
             this.lengdeCircs =
                 comp.append("circle")
@@ -101,11 +139,28 @@ class IntradayChart extends Component {
             //Bereich von Analystische Darstellung
             this.analysis = comp.append("g")
 
+=======
+                .style("opacity", 0.3)
+                .style("fill", "#F8F9F9") //"#F8F9F9"
+
+            
+            this.legendeText = comp.append("text")
+                .text("BLOOD BLUCOSE     mg/dL")
+                .attr("class", "legendeText")
+                .attr("x", margin.left + 5)
+                .attr("y", margin.top + 47)
+                .style("font", "sans-serif")
+                .attr("fill", "black")
+>>>>>>> master
 
             //svg graph für x und y achse
             //init x und y achse
             this.xAxis_graph = comp.append("g")
                 .attr("class", "xline")
+<<<<<<< HEAD
+=======
+                .style("color", "white")
+>>>>>>> master
                 .attr("transform", "translate(" + margin.left + "," + (margin.top + 25) + ")")
                 .call(xAxis);
 
@@ -113,6 +168,7 @@ class IntradayChart extends Component {
 
             this.yAxis_graph = comp.append("g")
                 .attr("class", "yline")
+<<<<<<< HEAD
                 .attr("transform", "translate(" + margin.left + "," + (margin.top + 60) + ")")
                 .call(yAxis);
             this.yAbdeckung = comp.append("line")
@@ -165,6 +221,13 @@ class IntradayChart extends Component {
             */
 
 
+=======
+                .attr("transform", "translate(" + margin.left + "," + (margin.top + 60)+ ")")
+                .call(yAxis);
+
+            this.circs = comp.append('g');
+
+>>>>>>> master
 
 
             this.drawChart(this.props);
@@ -180,6 +243,7 @@ class IntradayChart extends Component {
         //wenn xAxis neue Scale bekommt, erneue Graph von xAxis und draw Background
         if (this.xAxis_graph) {
             //neue xAxis Daten von props
+<<<<<<< HEAD
             let newxAxis = d3.axisTop(x)
             this.xAxis_graph.call(newxAxis)
             let bg = new BackGround();
@@ -188,18 +252,34 @@ class IntradayChart extends Component {
             let xPos = bg.creatXpos(x);
             let wdArr = bg.getWds();
             let ticksGroup = this.background.selectAll('rect').data(xPos).join(
+=======
+            var newxAxis = d3.axisTop(x)
+            this.xAxis_graph.call(newxAxis)
+            var bg = new BackGround();
+            var readTicks = bg.readTicks(x);
+            var opacityArr = bg.creatOpacity();
+            var xPos = bg.creatXpos(x);
+            var wdArr = bg.getWds();
+            //console.log("opacityArr", opacityArr)
+            var ticksGroup = this.background.selectAll('rect').data(xPos).join(
+>>>>>>> master
                     (enter) => enter.append('rect')
                     .attr('x', d => d)
                     .attr('y', y(400))
                     .attr('height', 400)
                     .attr('width', (d, i) => wdArr[i])
+<<<<<<< HEAD
                     .style("fill", "lightgray")
+=======
+                    .style("fill", "gray")
+>>>>>>> master
                     .style("opacity", (d, i) => opacityArr[i]),
                     (update) => update
                     .attr('x', d => d)
                     .attr('width', (d, i) => wdArr[i])
                     .style("opacity", (d, i) => opacityArr[i])
                 )
+<<<<<<< HEAD
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
         }
 
@@ -208,10 +288,24 @@ class IntradayChart extends Component {
         if (this.circs != null) {
             console.log("props.data.glucose", props.data.glucose)
             let circles = this.circs.selectAll('circle').data(props.data.glucose).join(
+=======
+                .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top +60) + ')');
+
+        }
+
+        //circle_color 
+        var circleColor = function(d) {
+            return d.value >= 185 ? '#3498DB' : d.value >= 65 ? '#58D68D' : '#DC7633';
+        }
+
+        if (this.circs != null) {
+            var circles = this.circs.selectAll('circle').data(props.data.glucose).join(
+>>>>>>> master
                     (enter) => enter.append('circle')
                     .attr('r', 3)
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
+<<<<<<< HEAD
                     .attr('fill', d => this.circleColor(d.value))
                     .on("mouseover", this.mouseover_tp)
                     .on("mouseout", this.mouseout_tp),
@@ -284,6 +378,41 @@ class IntradayChart extends Component {
         d3.select(".tooltipTextV")
             .style("opacity", 0)
     }
+=======
+                    .attr('fill', circleColor),
+                    (update) => update
+                    .attr('cy', d => y(+d.value))
+                    .attr('cx', d => x(d.time))
+                    .attr('fill', circleColor)
+                )
+                .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
+        }
+
+        //update topbar
+        if (this.topbar) {
+            this.topbar.attr("width", this.props.x.range()[1]);
+            this.legendeBackground.attr("width", this.props.x.range()[1]);
+        }
+        //Update Normals for now
+        if (this.gcHigh) {
+            this.gcHigh.attr('width', props.x.range()[1]);
+        }
+        if (this.gcNormal) {
+            this.gcNormal.attr('width', props.x.range()[1]);
+        }
+        if (this.gcLow) {
+            this.gcLow.attr('width', props.x.range()[1]);
+        }
+
+    }
+    /*
+    creatColor(data){
+        var color = data.value >= this.props.y(185) ? '#3498DB' : data.value >= this.props.y(70) ? '##27AE60' : data.value >= this.props.y(0) ? '#DC7633' : '#FDFEFE'
+        return color;
+    }
+    */
+
+>>>>>>> master
 
     componentWillReceiveProps(nextProps) {
         //Wir können Daten hier neu rendern
