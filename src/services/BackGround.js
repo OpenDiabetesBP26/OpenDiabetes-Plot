@@ -81,8 +81,6 @@ class BackGround {
     //erzeuge Opacity für allen ticks, hängt von mod und Abstand zwischen Ticks ab, bzw. 'yearly' ...usw.
 
     creatOpacity() {
-        console.log(this.ticksFormat())
-        console.log(this.creathalfhourlyOpacity())
         var ticksFormat = this.ticksFormat()
         switch (ticksFormat) {
             case 'yearly':
@@ -125,7 +123,6 @@ class BackGround {
         let OpacitySeed = []
         let rectOpacity = []
         //console.log("creatMonthlyOpacity")
-        console.log("in6StufeOpacity")
         OpacitySeed = this.in6StufeOpacity
         this.tickArray.forEach((d, i) => rectOpacity[i] = OpacitySeed[d.getMonth() % 6]);
         return rectOpacity;
@@ -182,8 +179,6 @@ class BackGround {
         return rectOpacity;
     }
     creathalfhourlyOpacity() {
-        console.log("creathalfhourlyOpacity")
-        console.log("d", this.tickArray)
         let OpacitySeed = []
         let rectOpacity = []
         OpacitySeed = this.in6StufeOpacity
@@ -194,7 +189,6 @@ class BackGround {
     }
 
     creat5minOpacity() {
-        console.log("creat5minOpacity")
         let OpacitySeed = []
         let rectOpacity = []
         OpacitySeed = this.in12StufeOpacity
