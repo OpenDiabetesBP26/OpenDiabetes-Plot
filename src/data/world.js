@@ -1,3 +1,0 @@
-export default {"type":"FeatureCollection","features":[
-    {"type":"Feature","id":"AFG","properties":{"name":"Afghanistan"},"geometry":{
-         "type":"Polygon","coordinates":[[[61.210817,35.650072],...
