@@ -16,5 +16,6 @@ steps:
 
 - script: |
     npm install
+    npm run-script lint
     npm run-script test-prod
   displayName: 'npm test prod'
