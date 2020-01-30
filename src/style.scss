@@ -1,5 +1,64 @@
 @import "~bootstrap/scss/bootstrap";
 
+div.stat-container{
+    width:100%;
+    height:100px;
+    position: relative;
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+    .description{
+        position: absolute;
+        float:left;
+        top:10px;
+        left:40px;
+    }
+    .stat-fill{
+        display:block;
+        height:100%;
+    }
+}
+.average-bg{
+	font-size: 20px;
+	.average-value{
+		font-style:bold;
+		font-size: 30px;
+	}
+}
+
+div.stat-container.hyper{
+    background-color: #b3a0da;
+    .stat-fill.hyper{
+        background-color: #8058bd;
+    }
+}
+
+div.stat-container.high{
+    background-color: #bbb1f4;
+    .stat-fill.high{
+        background-color: #8e7de5;
+    }
+}
+div.stat-container.normal{
+    background-color: #96adeb;
+    .stat-fill.normal{
+        background-color: #4272d7;
+    }
+}
+div.stat-container.low{
+    background-color: #f9b98f;
+    .stat-fill.low{
+        background-color: #e98c38;
+    }
+}
+div.stat-container.hypo{
+    background-color: #f89291;
+    .stat-fill.hypo{
+        background-color: #eb4847;
+    }
+}
+
+
 body {
     h1 {
         color: green;
