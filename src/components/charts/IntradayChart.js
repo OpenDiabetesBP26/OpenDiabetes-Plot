@@ -25,7 +25,7 @@ class IntradayChart extends Component {
 
 
             let comp = d3.select("g#intraday");
- 
+
             //svg graph für background
             this.background = comp.append("g")
             //add background für bar am top
@@ -89,9 +89,7 @@ class IntradayChart extends Component {
                 .attr("x1", margin.left + x.range()[0])
                 .attr("y1", margin.top + 60 + y(65))
                 .attr("x2", margin.left + x.range()[1])
-                .attr("y2", margin.top + 60 + y(65))
-
-
+                .attr("y2", margin.top + 60 + y(65));
 
             //Bereich von Analystische Darstellung
             this.analysis = comp.append("g")
@@ -110,6 +108,7 @@ class IntradayChart extends Component {
                 .attr("class", "yline")
                 .attr("transform", "translate(" + margin.left + "," + (margin.top + 60) + ")")
                 .call(yAxis);
+
             this.yAbdeckung = comp.append("line")
                 .attr("class", "yAbdeckung")
                 .attr("x1", margin.left)
@@ -120,18 +119,9 @@ class IntradayChart extends Component {
 
 
 
+
             this.circs = comp.append('g');
 
-            //tooltips background
-            this.tooltipbg = comp.append('rect')
-                .attr("class", "tooltipbg")
-                .attr("x", margin.left)
-                .attr("y", margin.top)
-                .attr('rx', "3px")
-                .attr('ry', "3px")
-                .attr("width", 440)
-                .attr("height", 100)
-                .style("opacity", 0);
             //tooltips Text
             this.tooltipText =
                 comp.append('text')
@@ -149,31 +139,44 @@ class IntradayChart extends Component {
                 .attr("x", margin.left)
                 .attr("y", margin.top)
                 .style("opacity", 0)
-            /*
-                        this.rectH = comp.append('rect')
-                        .attr('x', margin.left +100)
-                        .attr('y',y(200))
-                        .attr('width', "5px")
-                        .attr('height', "20px")
-                        .attr('rx', "5px")
-                        .attr('ry', "5px")
-            */
-
-
-
 
             this.drawChart(this.props);
 
+            //erstelle ein neue Ebene, damit die focus-Elementen fliessend dargestellt werden.
+            this.overlay = comp.append('rect')
+                .attr("class", "overlay")
+                .attr("x", margin.left + x.range()[0])
+                .attr("y", margin.top + 60 + y(400))
+                .attr("height", 400)
 
+            //focus-Elementen
+            let focusLineX = comp.append('line')
+                .attr('id', 'focusLineX')
+                .attr('class', 'focusLine');
+
+            let focusLineY = comp.append('line')
+                .attr('id', 'focusLineY')
+                .attr('class', 'focusLine');
+
+            let focusCircle = comp.append('circle')
+                .attr('id', 'focusCircle')
+                .attr('r', 8)
+                .attr('class', 'focusCircle');
+            let focusCircleInne = comp.append('circle')
+                .attr('id', 'focusCircleInne')
+                .attr('r', 5)
+                .attr('class', 'focusCircleInne');
         }
 
     }
     drawChart(props) {
         let y = props.y;
         let x = props.x;
-
         //wenn xAxis neue Scale bekommt, erneue Graph von xAxis und draw Background
         if (this.xAxis_graph) {
+            //ebene und focus-Elementen werden dargestellt
+            d3.select('.overlay').attr("width", x.range()[1] - x.range()[0]);
+            this.mouseCatchMove(props);
             //neue xAxis Daten von props
             let newxAxis = d3.axisTop(x)
             this.xAxis_graph.call(newxAxis)
@@ -182,6 +185,7 @@ class IntradayChart extends Component {
             let opacityArr = bg.creatOpacity();
             let xPos = bg.creatXpos(x);
             let wdArr = bg.getWds();
+
             let ticksGroup = this.background.selectAll('rect').data(xPos).join(
                     (enter) => enter.append('rect')
                     .attr('x', d => d)
@@ -201,21 +205,16 @@ class IntradayChart extends Component {
 
 
         if (this.circs != null) {
-            console.log("props.data.glucose", props.data.glucose)
             let circles = this.circs.selectAll('circle').data(props.data.glucose).join(
                     (enter) => enter.append('circle')
                     .attr('r', 3)
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
-                    .attr('fill', d => this.circleColor(d.value))
-                    .on("mouseover", this.mouseover_tp)
-                    .on("mouseout", this.mouseout_tp),
+                    .attr('fill', d => this.circleColor(d.value)),
                     (update) => update
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
                     .attr('fill', d => this.circleColor(d.value))
-                    .on("mouseover", this.mouseover_tp)
-                    .on("mouseout", this.mouseout_tp)
                 )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
         }
@@ -236,48 +235,101 @@ class IntradayChart extends Component {
     circleColor(d) {
         return d >= 185 ? '#3498DB' : d >= 65 ? '#58D68D' : '#DC7633';
     }
+    //focus zeigt zuerst automatisch, wenn man mouse click halten, dann focus sich verbergt, 
+    //nach dem verschieben oder zoomen, mit ein mal mouseclick wird focus wieder dargestellt.
+    mouseCatchMove(props, focusLineX) {
+        let data = props.data.glucose;
+        let y = props.y;
+        let x = props.x;
+        d3.select(".overlay")
+            .on('mouseover', function() {
+                d3.select('#focusLineX').style('display', null);
+                d3.select('#focusLineY').style('display', null);
+                d3.select('#focusCircle').style('display', null);
+                d3.select('#focusCircleInne').style('display', null)
+                d3.select('.tooltipTextT').style('display', null)
+                d3.select('.tooltipTextV').style('display', null)
+                d3.select('.tooltipTextS').style('display', null);
+            })
+            .on('mouseout', function() {
+                d3.select('#focusLineX').style('display', 'none');
+                d3.select('#focusLineY').style('display', 'none');
+                d3.select('#focusCircle').style('display', 'none');
+                d3.select('#focusCircleInne').style('display', 'none')
+                d3.select('.tooltipTextT').style('display', 'none')
+                d3.select('.tooltipTextV').style('display', 'none')
+                d3.select('.tooltipTextS').style('display', 'none');
+            })
+            .on('mousemove', function() {
+                let mouse = d3.mouse(this);
+                let mouseDate = x.invert(mouse[0] - props.margin.left <= x(data[data.length - 1].time) ? mouse[0] - props.margin.left : x(data[data.length - 1].time));
+                let bisectDate = d3.bisector(function(d) { return d.time; }).left;
+                let index = bisectDate(data, mouseDate);
+                let dPre = data[index - 1]
+                let dSuf = data[index];
+                let d = mouseDate.getTime() - dPre.time.getTime() > dSuf.time.getTime() - mouseDate.getTime() ? dSuf : dPre;
+                let xPos = x(d.time);
+                let yPos = y(d.value);
 
-    mouseover_tp(d) {
-        d3.select(this)
-            .transition()
-            .duration(300)
-            .attr('r', 3 * 3)
-        d3.select(".tooltipbg")
-            .attr("x", d3.event.pageX + 30)
-            .attr("y", d3.event.pageY - 105)
-            .style("opacity", 0.6)
-        d3.select(".tooltipTextT")
-            .attr("x", d3.event.pageX + 40)
-            .attr("y", d3.event.pageY - 80)
-            .text("time: " + d.time)
-            .style("opacity", 1)
-        d3.select(".tooltipTextV")
-            .attr("x", d3.event.pageX + 40)
-            .attr("y", d3.event.pageY - 50)
-            .text("value: " + d.value)
-            .style("opacity", 1)
-        d3.select(".tooltipTextS")
-            .attr("x", d3.event.pageX + 40)
-            .attr("y", d3.event.pageY - 20)
-            .text("source: " + d.source)
-            .style("opacity", 1)
-    }
-
-
-
-    mouseout_tp() {
-        d3.select(this)
-            .transition()
-            .duration(300)
-            .attr('r', 3)
-        d3.select(".tooltipbg")
-            .style("opacity", 0)
-        d3.select(".tooltipTextS")
-            .style("opacity", 0)
-        d3.select(".tooltipTextT")
-            .style("opacity", 0)
-        d3.select(".tooltipTextV")
-            .style("opacity", 0)
+                d3.select('#focusCircle')
+                    .transition()
+                    .duration(10)
+                    .attr('cx', xPos + props.margin.left)
+                    .attr('cy', yPos + 60 + props.margin.top)
+                    .attr('fill', d.value >= 185 ? '#3498DB' : d.value >= 65 ? '#58D68D' : '#DC7633');
+                d3.select('#focusCircleInne')
+                    .transition()
+                    .duration(10)
+                    .attr('cx', xPos + props.margin.left)
+                    .attr('cy', yPos + 60 + props.margin.top);
+                d3.select('#focusLineX')
+                    .transition()
+                    .duration(10)
+                    .attr('x1', xPos + props.margin.left)
+                    .attr('y1', props.margin.top + 60 + y(400))
+                    .attr('x2', xPos + props.margin.left)
+                    .attr('y2', props.margin.top + 60 + y(0));
+                d3.select('#focusLineY')
+                    .transition()
+                    .duration(10)
+                    .attr('x1', props.margin.left + x.range()[0])
+                    .attr('y1', props.margin.top + 60 + y(400) + yPos)
+                    .attr('x2', props.margin.left + x.range()[1])
+                    .attr('y2', props.margin.top + 60 + y(400) + yPos);
+                d3.select(".tooltipTextT")
+                    .attr("x", xPos + 60)
+                    .attr("y", y(400) + 140 + props.margin.top - 60)
+                    .text("time: " + d.time)
+                    .style("opacity", 1)
+                d3.select(".tooltipTextV")
+                    .attr("x", xPos + 60)
+                    .attr("y", y(400) + 140 + props.margin.top - 30)
+                    .text("value: " + d.value)
+                    .style("opacity", 1)
+                d3.select(".tooltipTextS")
+                    .attr("x", xPos + 60)
+                    .attr("y", y(400) + 140 + props.margin.top)
+                    .text("source: " + d.source)
+                    .style("opacity", 1)
+            })
+            .on('mousedown', function() {
+                d3.select('#focusLineX').style('display', 'none');
+                d3.select('#focusLineY').style('display', 'none');
+                d3.select('#focusCircle').style('display', 'none');
+                d3.select('#focusCircleInne').style('display', 'none')
+                d3.select('.tooltipTextT').style('display', 'none')
+                d3.select('.tooltipTextV').style('display', 'none')
+                d3.select('.tooltipTextS').style('display', 'none');
+            })
+            .on('click', function() {
+                d3.select('#focusLineX').style('display', 'block');
+                d3.select('#focusLineY').style('display', 'block');
+                d3.select('#focusCircle').style('display', 'block');
+                d3.select('#focusCircleInne').style('display', 'block')
+                d3.select('.tooltipTextT').style('display', 'block')
+                d3.select('.tooltipTextV').style('display', 'block')
+                d3.select('.tooltipTextS').style('display', 'block');
+            });
     }
 
     componentWillReceiveProps(nextProps) {
