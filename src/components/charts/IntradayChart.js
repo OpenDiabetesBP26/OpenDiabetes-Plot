@@ -270,6 +270,7 @@ class IntradayChart extends Component {
                 let d = mouseDate.getTime() - dPre.time.getTime() > dSuf.time.getTime() - mouseDate.getTime() ? dSuf : dPre;
                 let xPos = x(d.time);
                 let yPos = y(d.value);
+                console.log("mouseX", xPos);
 
                 d3.select('#focusCircle')
                     .transition()
@@ -297,17 +298,17 @@ class IntradayChart extends Component {
                     .attr('x2', props.margin.left + x.range()[1])
                     .attr('y2', props.margin.top + 60 + y(400) + yPos);
                 d3.select(".tooltipTextT")
-                    .attr("x", xPos + 60)
+                    .attr("x", xPos >= x.range()[1]*(3/4) - props.margin.left ? xPos - 400 : xPos + 60)
                     .attr("y", y(400) + 140 + props.margin.top - 60)
                     .text("time: " + d.time)
                     .style("opacity", 1)
                 d3.select(".tooltipTextV")
-                    .attr("x", xPos + 60)
+                    .attr("x", xPos >= x.range()[1]*(3/4) - props.margin.left ? xPos - 400 : xPos + 60)
                     .attr("y", y(400) + 140 + props.margin.top - 30)
                     .text("value: " + d.value)
                     .style("opacity", 1)
                 d3.select(".tooltipTextS")
-                    .attr("x", xPos + 60)
+                    .attr("x", xPos >= x.range()[1]*(3/4) - props.margin.left ? xPos - 400 : xPos + 60)
                     .attr("y", y(400) + 140 + props.margin.top)
                     .text("source: " + d.source)
                     .style("opacity", 1)
