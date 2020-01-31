@@ -84,6 +84,7 @@ class BackGround {
         console.log(this.ticksFormat())
         console.log(this.creathalfhourlyOpacity())
         var ticksFormat = this.ticksFormat()
+        console.log(ticksFormat)
         switch (ticksFormat) {
             case 'yearly':
                 return this.creatYearlyOpacity()

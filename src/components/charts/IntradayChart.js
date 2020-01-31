@@ -18,6 +18,8 @@ class IntradayChart extends Component {
             let xAxis = d3.axisBottom(this.props.x)
 
             let yAxis = d3.axisLeft(this.props.y);
+            this.yBasal = d3.scaleLinear().range([150, 0]).domain([0, 5]);
+            let yBasalAxis = d3.axisRight(this.yBasal)
             let y = this.props.y;
             let x = this.props.x;
             let margin = this.props.margin;
@@ -121,6 +123,7 @@ class IntradayChart extends Component {
 
 
             this.circs = comp.append('g');
+            this.line = comp.append("g");
 
             //tooltips Text
             this.tooltipText =
@@ -172,6 +175,8 @@ class IntradayChart extends Component {
     drawChart(props) {
         let y = props.y;
         let x = props.x;
+        let yb = this.yBasal;
+
         //wenn xAxis neue Scale bekommt, erneue Graph von xAxis und draw Background
         if (this.xAxis_graph) {
             //ebene und focus-Elementen werden dargestellt
@@ -194,7 +199,7 @@ class IntradayChart extends Component {
                     .attr('width', (d, i) => wdArr[i])
                     .style("fill", "lightgray")
                     .style("opacity", (d, i) => opacityArr[i]),
-                    (update) => update
+                (update) => update
                     .attr('x', d => d)
                     .attr('width', (d, i) => wdArr[i])
                     .style("opacity", (d, i) => opacityArr[i])
@@ -217,6 +222,22 @@ class IntradayChart extends Component {
                     .attr('fill', d => this.circleColor(d.value))
                 )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
+        }
+        if (this.line != null) {
+            var line = this.line.selectAll('line').data(props.data.basal).join(
+                (enter) => enter.append('line')
+                    .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
+                    .attr('y1', d => yb(+d.value))
+                    .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
+                    .attr('y2', d => yb(+d.value))
+                    .attr('stroke', 'blue'),
+                (update) => update
+                    .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
+                    .attr('y1', d => yb(+d.value))
+                    .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
+                    .attr('y2', d => yb(+d.value)))
+
+                .attr('transform', 'translate(' + this.props.margin.left + ' ' + ((this.props.margin.top + 60 + this.props.y.range()[0] - 150)) + ')');
         }
 
         //update topbar
@@ -336,13 +357,13 @@ class IntradayChart extends Component {
     componentWillReceiveProps(nextProps) {
         //Wir können Daten hier neu rendern
         this.drawChart(nextProps);
-        //console.log(nextProps.xSize);
+        console.log(nextProps.data);
     }
     shouldComponentUpdate() {
         //Update ausgeschaltet -> wird nicht neu gerendert
         return false;
     }
-    componentDidUpdate() {}
+    componentDidUpdate() { }
 }
 
 export default hot ? hot(module)(IntradayChart) : IntradayChart;

@@ -1,169 +1,957 @@
 import * as d3 from 'd3';
+import crossfilter from 'crossfilter2';
 
 class DataManager {
 	constructor() {
-		this.domain = [0, 0];
-		this.buffer = [0, 0];
+		this.domain = [new Date(0), new Date(0)];
+		this.buffer = [new Date(0), new Date(0)];
 		this.dataDomain = [];
 		this.display = 'yearly'
 		this.glucoseLevels = {
-			reallyLow: 50,
+			hypo: 60,
 			low: 80,
-			ok: 150,
+			normal: 150,
 			high: 250,
-			reallyHigh: 400
+			hyper: 400
+		}
+		this.types = {
+			basal_profile: 'BASAL_PROFILE',
+			basal_temp: 'BASAL_TEMP',
+			glucose: 'GLUCOSE_CGM',
+			bolus: 'BOLUS_NORMAL',
+			carbs: 'MEAL_MANUAL'
 		}
 	}
+
 	parseTime(data) {
-		data.forEach(d => d.time = new Date(d.epoch));
+		data.forEach(d => {
+			d.time = new Date(d.epoch);
+			delete d.isoTime;
+			delete d.epoch;
+		});
 	}
-	async readDataFromURL(url) {
-		let data = await(await fetch(url)).json();
-		this.readData(data);
+
+	parseBasal(basal, basal_temp) {
+		let basal_profile_offset = 60000 * 60;
+		//Assumption -> basal and basal_temp are sorted on time
+
+		//Add offset to basal
+		basal = basal.map(d => {
+			d.time_start = d.time;
+			d.value = parseFloat(d.value);
+			d.time_end = new Date(d.time.getTime() + basal_profile_offset);
+			return d;
+		})
+		//For temp, parse value to float, calculate start and end time
+		basal_temp = basal_temp.map(d => {
+			d.value = parseFloat(d.value);
+			d.time_start = d.time;
+			d.time_end = new Date(d.time.getTime() + (d.valueExtension * 60000));
+			return d;
+		})
+		//Remove overlapping by overwriting
+		let i;
+		for (i = 0; i < basal_temp.length - 1; i++) {
+			if (basal_temp[i].time_end.getTime() > basal_temp[i + 1].time_start.getTime()) {
+				basal_temp[i].time_end = new Date(basal_temp[i + 1].time_start.getTime());
+			}
+		}
+		//Create arry containing results
+		let basal_combined = [];
+		//filter 0.0 values, as they seem to only reset basal
+		//not needed as end time was calculated
+		//Reverse lists for pop()
+		basal_temp = basal_temp.filter(d => d.valueExtension != 0).reverse();
+		basal = basal.reverse();
+		//Get first elements
+		let last_basal = basal.pop();
+		let last_temp = basal_temp.pop();
+		//Iterate until all are used
+		while (last_basal != null || last_temp != null) {
+			//If there are no basal temp anymore, add every profile
+			if (last_temp == null) {
+				while (last_basal != null) {
+					basal_combined.push(last_basal);
+					last_basal = basal.pop();
+				}
+			}
+			//If last basal profile is null, temp cannot be computed anymore
+			if (last_basal == null) {
+				break;
+			}
+			//If temp is not in time range for profile, append profile until then
+			while (last_temp.time_start > last_basal.time_end) {
+				basal_combined.push(last_basal);
+				last_basal = basal.pop();
+			}
+			//Assumption: last_basal.time_end >= last_temp.time_start --> last_temp.time_start >= last_basal.time_start
+			//If start times do not equal, there must be a first part only containing basal profile
+			if (last_basal.time_start.getTime() != last_temp.time_start.getTime()) {
+				let b = {
+					origin: last_basal.origin,
+					source: last_basal.source,
+					type: last_basal.type,
+					value: last_basal.value,
+					time_start: new Date(last_basal.time_start.getTime()),
+					time_end: new Date(last_temp.time_start.getTime())
+				}
+				basal_combined.push(b);
+			}
+			if (last_basal.time_end.getTime() == last_temp.time_end.getTime()) {
+				last_temp.value_inc = last_temp.value;
+				last_temp.value = last_basal.value + last_temp.value;
+				if (basal_combined.length > 0 &&
+					basal_combined[basal_combined.length - 1].type == 'BASAL_TEMP' &&
+					basal_combined[basal_combined.length - 1].value == last_temp.value &&
+					basal_combined[basal_combined.length - 1].value_inc == last_temp.value_inc) {
+
+					basal_combined[basal_combined.length - 1].time_end = new Date(last_temp.time_end.getTime());
+
+				} else {
+
+					basal_combined.push(last_temp);
+				}
+				last_basal = basal.pop();
+				last_temp = basal_temp.pop();
+			}
+			else if (last_basal.time_end.getTime() < last_temp.time_end.getTime()) {
+				let temp_end = {
+					origin: last_temp.origin,
+					source: last_temp.source,
+					type: last_temp.type,
+					value: last_basal.value + last_temp.value,
+					value_inc: last_temp.value,
+					time_start: new Date(last_temp.time_start.getTime()),
+					time_end: new Date(last_basal.time_end.getTime())
+				}
+				last_temp.time_start = new Date(last_basal.time_end.getTime());
+				//Check if last entry is the same
+				if (basal_combined.length > 0 &&
+					basal_combined[basal_combined.length - 1].type == 'BASAL_TEMP' &&
+					basal_combined[basal_combined.length - 1].value == temp_end.value &&
+					basal_combined[basal_combined.length - 1].value_inc == temp_end.value_inc) {
+
+					basal_combined[basal_combined.length - 1].time_end = new Date(temp_end.time_end.getTime());
+
+				} else {
+
+					basal_combined.push(temp_end);
+				}
+				last_basal = basal.pop();
+			} else {
+				last_temp.value_inc = last_temp.value;
+				last_temp.value = last_basal.value + last_temp.value;
+
+				let b_end = {
+					origin: last_basal.origin,
+					source: last_basal.source,
+					type: last_basal.type,
+					value: last_basal.value,
+					time_start: new Date(last_temp.time_end.getTime()),
+					time_end: new Date(last_basal.time_end.getTime())
+				}
+				if (basal_combined.length > 0 &&
+					basal_combined[basal_combined.length - 1].type == 'BASAL_TEMP' &&
+					basal_combined[basal_combined.length - 1].value == last_temp.value &&
+					basal_combined[basal_combined.length - 1].value_inc == last_temp.value_inc) {
+
+					basal_combined[basal_combined.length - 1].time_end = new Date(last_temp.time_end.getTime());
+
+				} else {
+
+					basal_combined.push(last_temp);
+				}
+				last_temp = basal_temp.pop();
+				last_basal = b_end;
+
+			}
+		}
+		if (basal_combined.length != 0) {
+			basal_combined[0].value_prev = 0;
+			basal_combined[0].time = new Date(basal_combined[0].time_start.getTime());
+			for (i = 1; i < basal_combined.length; i++) {
+				//Stunden offset 
+				basal_combined[i].value_prev = basal_combined[i - 1].value;
+				basal_combined[i].time = new Date(basal_combined[i].time_start.getTime());
+			}
+		}
+		return basal_combined;
+	}
+	parsePrediction(predictions) {
+		let refined = d3.nest()
+			.key(d => d.time)
+			.entries(predictions);
+		refined = refined.map(key => {
+			//Get time object from item
+			let time = new Date(key);
+			key.time = time;
+			key.predictions = key.values.map(item => {
+				//Rename a few
+				item.values = item.valueExtension;
+				//Delete unnecessary items to save space
+				//delete item.epoch;
+				delete item.time;
+				delete item.valueExtension;
+				delete item.refinedType;
+				delete item.type;
+				//delete item.isoTime;
+				return item;
+			});
+			delete key.key;
+			delete key.values;
+			return key;
+		});
+		return refined;
 	}
 	readData(data) {
+		let then = new Date();
 		this.parseTime(data);
-		this.data = data;
+		this.maxDomain = d3.extent(data, d => d.time);
+		let basal_profile = data.filter(d => d.type == this.types.basal_profile);
+		let basal_temp = data.filter(d => d.type == this.types.basal_temp);
+		//Remove those from data
+		data = data.filter(d => d.type != this.types.basal_profile && d.type != this.types.basal_temp);
+		let basal_combined = this.parseBasal(basal_profile, basal_temp);
 
-		//Set max domain
-		this.maxDomain = d3.extent(this.data, d => d.time);
+		let types = this.types;
+		//Add in crossfilter
+		let data_crossfilter = crossfilter(data);
+		data_crossfilter.add(basal_combined);
 
-		//Get all glucose data
-		this.glucoseData = this.data.filter(d => d.type == 'GLUCOSE_CGM');
-		this.bolus_normal = this.data.filter(d => d.type == 'BOLUS_NORMAL');
-		this.bolus_square = this.data.filter(d => d.type == 'BOLUS_SQUARE');
-		this.basal_profile = this.data.filter(d =>d.type == 'BASAL_PROFILE');
-		this.basal_temp = this.data.filter(d =>d.type == 'BASAL_TEMP');
-		this.refined_vault = this.data.filter(d =>d.type == 'REFINED_VAULT_ENTRY');
-
-		//DEBUG OUTPRINT
-		console.log(this.glucoseData);
-		console.log(this.bolus_normal);
-		console.log(this.bolus_square);
-		console.log(this.basal_profile);
-		console.log(this.basal_temp);
-		console.log(this.refined_vault);
-
-		//Use ungrouped data for intraday viz
-		this.glucoseData_grouped = {
-			intraday: {
-				glucose: this.glucoseData
+		//Create filter dimension
+		let filter_dim = data_crossfilter.dimension(d => d.time);
+		let group_dim = data_crossfilter.dimension(d => d.time);
+		let groupThreeHour = group_dim.group(d => new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), (d.getMinutes() - d.getMinutes() % 10))).reduce(
+			function reduceAdd(p, v, nf) {
+				if (v.type == types.glucose) {
+					p.glucose.sum += parseInt(v.value);
+					p.glucose.count++;
+					p.glucose.avg = p.glucose.sum / p.glucose.count;
+					return p;
+				}
+				else if (v.type == types.basal_profile || v.type == types.basal_temp) {
+					let weight = (v.time_end - v.time_start) / (60000 * 60.0);
+					p.basal.sum += (weight * v.value);
+					return p;
+				} else if (v.type == types.bolus) {
+					p.bolus.sum += v.value;
+					return p;
+				} else if (v.type == types.carbs) {
+					p.carbs.sum += v.value;
+					return p;
+				}
+				else {
+					return p;
+				}
 			},
-			hourly3: this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes() % 10))),
-			hourly6: this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours(), (d.time.getMinutes() - d.time.getMinutes() % 20))),
-			daily: this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), d.time.getHours())),
-			weekly: this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate(), (d.time.getHours() - d.time.getHours() % 6) / 6)),
-			monthly: this.compGlucoseCGMData(this.glucoseData, d => new Date(d.time.getFullYear(), d.time.getMonth(), d.time.getDate()))
-		}
-		//Init buffered data
-		//Create copies with slice()
-		this.glucoseData_grouped_buffered = {
-			intraday: {
-				glucose: this.glucoseData_grouped.intraday.glucose.slice()
+			function reduceRemove(p, v, nf) {
+				if (v.type == types.glucose) {
+					p.glucose.sum -= parseInt(v.value);
+					p.glucose.count--;
+					p.glucose.avg = p.glucose.sum / p.glucose.count;
+					return p;
+				}
+				else if (v.type == types.basal_profile || v.type == types.basal_temp) {
+					let weight = (v.time_end - v.time_start) / (60000 * 60);
+					p.basal.sum -= (weight * v.value);
+					return p;
+
+				} else if (v.type == types.bolus) {
+					p.bolus.sum -= v.value;
+					return p;
+				} else if (v.type == types.carbs) {
+					p.carbs.sum -= v.value;
+					return p;
+				}
+				else {
+					return p;
+				}
 			},
-			hourly3: this.glucoseData_grouped.hourly3.slice(),
-			hourly6: this.glucoseData_grouped.hourly6.slice(),
-			daily: this.glucoseData_grouped.daily.slice(),
-			weekly: this.glucoseData_grouped.weekly.slice(),
-			monthly: this.glucoseData_grouped.monthly.slice()
+			function reduceInitial() {
+				return {
+					glucose: {
+						sum: 0,
+						count: 0,
+						avg: 0,
+					},
+					basal: {
+						sum: 0,
+					},
+					bolus: {
+						sum: 0,
+					},
+					carbs: {
+						sum: 0,
+					}
+				}
+			}
+		);
+
+
+		let groupSixHour = group_dim.group(d => new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), (d.getMinutes() - d.getMinutes() % 20))).reduce(
+			function reduceAdd(p, v, nf) {
+				if (v.type == types.glucose) {
+					p.glucose.sum += parseInt(v.value);
+					p.glucose.count++;
+					p.glucose.avg = p.glucose.sum / p.glucose.count;
+					return p;
+				}
+				else if (v.type == types.basal_profile || v.type == types.basal_temp) {
+					let weight = (v.time_end - v.time_start) / (60000 * 60.0);
+					p.basal.sum += (weight * v.value);
+					return p;
+				} else if (v.type == types.bolus) {
+					p.bolus.sum += v.value;
+					return p;
+				} else if (v.type == types.carbs) {
+					p.carbs.sum += v.value;
+					return p;
+				}
+				else {
+					return p;
+				}
+			},
+			function reduceRemove(p, v, nf) {
+				if (v.type == types.glucose) {
+					p.glucose.sum -= parseInt(v.value);
+					p.glucose.count--;
+					p.glucose.avg = p.glucose.sum / p.glucose.count;
+					return p;
+				}
+				else if (v.type == types.basal_profile || v.type == types.basal_temp) {
+					let weight = (v.time_end - v.time_start) / (60000 * 60);
+					p.basal.sum -= (weight * v.value);
+					return p;
+
+				} else if (v.type == types.bolus) {
+					p.bolus.sum -= v.value;
+					return p;
+				} else if (v.type == types.carbs) {
+					p.carbs.sum -= v.value;
+					return p;
+				}
+				else {
+					return p;
+				}
+			},
+			function reduceInitial() {
+				return {
+					glucose: {
+						sum: 0,
+						count: 0,
+						avg: 0,
+					},
+					basal: {
+						sum: 0,
+					},
+					bolus: {
+						sum: 0,
+					},
+					carbs: {
+						sum: 0,
+					}
+				}
+			}
+		);
+		let limit = 400;
+		let groupDaily = group_dim.group(d => new Date(d.getFullYear(), d.getMonth(), d.getDate())).reduce(
+			function reduceAdd(p, v, nf) {
+				if (v.type == types.glucose) {
+					let value = parseInt(v.value);
+					if (value > limit) {
+						value = limit;
+					}
+					p.glucose.median_arr[value] ? p.glucose.median_arr[value]++ : p.glucose.median_arr[value] = 1;
+
+					p.glucose.sum += parseInt(v.value);
+					p.glucose.count++;
+					p.glucose.avg = p.glucose.sum / p.glucose.count;
+					return p;
+				}
+				else if (v.type == types.basal_profile || v.type == types.basal_temp) {
+					let weight = (v.time_end - v.time_start) / (60000 * 60.0);
+					p.basal.sum += (weight * v.value);
+					return p;
+				} else if (v.type == types.bolus) {
+					p.bolus.sum += v.value;
+					return p;
+				} else if (v.type == types.carbs) {
+					p.carbs.sum += v.value;
+					return p;
+				}
+				else {
+					return p;
+				}
+			},
+			function reduceRemove(p, v, nf) {
+				if (v.type == types.glucose) {
+					let value = parseInt(v.value);
+					if (value > limit) {
+						value = limit;
+					}
+					p.glucose.median_arr[value]--;
+					p.glucose.sum -= parseInt(v.value);
+					p.glucose.count--;
+					p.glucose.avg = p.glucose.sum / p.glucose.count;
+					return p;
+				}
+				else if (v.type == types.basal_profile || v.type == types.basal_temp) {
+					let weight = (v.time_end - v.time_start) / (60000 * 60);
+					p.basal.sum -= (weight * v.value);
+					return p;
+
+				} else if (v.type == types.bolus) {
+					p.bolus.sum -= v.value;
+					return p;
+				} else if (v.type == types.carbs) {
+					p.carbs.sum -= v.value;
+					return p;
+				}
+				else {
+					return p;
+				}
+			},
+			function reduceInitial() {
+				return {
+					glucose: {
+						sum: 0,
+						count: 0,
+						avg: 0,
+						median_arr: new Array(limit + 1),
+					},
+					basal: {
+						sum: 0,
+					},
+					bolus: {
+						sum: 0,
+					},
+					carbs: {
+						sum: 0,
+					}
+				}
+			}
+		);
+
+		let week = 60000 * 60 * 24 * 7;
+		let groupWeekly = group_dim.group(d => new Date(Math.floor(d.getTime() / week) * week)).reduce(
+			function reduceAdd(p, v, nf) {
+				if (v.type == types.glucose) {
+					let value = parseInt(v.value);
+					if (value > limit) {
+						value = limit;
+					}
+					p.glucose.median_arr[value] ? p.glucose.median_arr[value]++ : p.glucose.median_arr[value] = 1;
+
+					p.glucose.sum += parseInt(v.value);
+					p.glucose.count++;
+					return p;
+				}
+				else if (v.type == types.basal_profile || v.type == types.basal_temp) {
+					let weight = (v.time_end - v.time_start) / (60000 * 60.0);
+					p.basal.sum += (weight * v.value);
+					return p;
+				} else if (v.type == types.bolus) {
+					p.bolus.sum += v.value;
+					return p;
+				} else if (v.type == types.carbs) {
+					p.carbs.sum += v.value;
+					return p;
+				}
+				else {
+					return p;
+				}
+			},
+			function reduceRemove(p, v, nf) {
+				if (v.type == types.glucose) {
+					let value = parseInt(v.value);
+					if (value > limit) {
+						value = limit;
+					}
+					p.glucose.median_arr[value]--;
+
+					p.glucose.sum -= parseInt(v.value);
+					p.glucose.count--;
+
+					return p;
+				}
+				else if (v.type == types.basal_profile || v.type == types.basal_temp) {
+					let weight = (v.time_end - v.time_start) / (60000 * 60);
+					p.basal.sum -= (weight * v.value);
+					return p;
+
+				} else if (v.type == types.bolus) {
+					p.bolus.sum -= v.value;
+					return p;
+				} else if (v.type == types.carbs) {
+					p.carbs.sum -= v.value;
+					return p;
+				}
+				else {
+					return p;
+				}
+			},
+			function reduceInitial() {
+				return {
+					glucose: {
+						sum: 0,
+						count: 0,
+						avg: 0,
+						median_arr: new Array(limit + 1),
+					},
+					basal: {
+						sum: 0,
+					},
+					bolus: {
+						sum: 0,
+					},
+					carbs: {
+						sum: 0,
+					}
+				}
+			}
+		);
+
+		let groupMonthly = group_dim.group(d => new Date(d.getFullYear(), d.getMonth())).reduce(
+			function reduceAdd(p, v, nf) {
+				if (v.type == types.glucose) {
+					let value = parseInt(v.value);
+					if (value > limit) {
+						value = limit;
+					}
+					p.glucose.median_arr[value] ? p.glucose.median_arr[value]++ : p.glucose.median_arr[value] = 1;
+
+					p.glucose.sum += parseInt(v.value);
+					p.glucose.count++;
+					return p;
+				}
+				else if (v.type == types.basal_profile || v.type == types.basal_temp) {
+					let weight = (v.time_end - v.time_start) / (60000 * 60.0);
+					p.basal.sum += (weight * v.value);
+					return p;
+				} else if (v.type == types.bolus) {
+					p.bolus.sum += v.value;
+					return p;
+				} else if (v.type == types.carbs) {
+					p.carbs.sum += v.value;
+					return p;
+				}
+				else {
+					return p;
+				}
+			},
+			function reduceRemove(p, v, nf) {
+				if (v.type == types.glucose) {
+					let value = parseInt(v.value);
+					if (value > limit) {
+						value = limit;
+					}
+					p.glucose.median_arr[value]--;
+
+					p.glucose.sum -= parseInt(v.value);
+					p.glucose.count--;
+					return p;
+				}
+				else if (v.type == types.basal_profile || v.type == types.basal_temp) {
+					let weight = (v.time_end - v.time_start) / (60000 * 60);
+					p.basal.sum -= (weight * v.value);
+					return p;
+
+				} else if (v.type == types.bolus) {
+					p.bolus.sum -= v.value;
+					return p;
+				} else if (v.type == types.carbs) {
+					p.carbs.sum -= v.value;
+					return p;
+				}
+				else {
+					return p;
+				}
+			},
+			function reduceInitial() {
+				return {
+					glucose: {
+						sum: 0,
+						count: 0,
+						avg: 0,
+						median_arr: new Array(limit + 1),
+					},
+					basal: {
+						sum: 0,
+					},
+					bolus: {
+						sum: 0,
+					},
+					carbs: {
+						sum: 0,
+					}
+				}
+			}
+		);
+		let glucoseLevels = this.glucoseLevels;
+		let group_stats_range = group_dim.groupAll().reduce(
+			function reduceAdd(p, v, nf) {
+				if (v.type == types.glucose) {
+					//Compute hour
+					let hour = v.time.getHours();
+					let minute = Math.floor(v.time.getMinutes() / 10);
+					let value = parseInt(v.value);
+					p.stats[hour * 6 + minute][value] ? p.stats[hour * 6 + minute][value]++ : p.stats[hour * 6 + minute][value] = 1;
+					p.count++;
+					p.sum += value;
+					if (value < glucoseLevels.hypo) {
+						p.hypo++;
+					} else if (value < glucoseLevels.low) {
+						p.low++;
+					} else if (value > glucoseLevels.high) {
+						p.high++;
+					} else if (value > glucoseLevels.hyper) {
+						p.hyper++;
+					} else {
+						p.normal++;
+					}
+				}
+				return p;
+			},
+			function reduceRemove(p, v, nf) {
+				if (v.type == types.glucose) {
+					//Compute hour
+					let hour = v.time.getHours();
+					let minute = Math.floor(v.time.getMinutes() / 10);
+					let value = parseInt(v.value);
+					p.stats[hour * 6 + minute][value]--;
+					p.count--;
+					p.sum -= value;
+					if (value < glucoseLevels.hypo) {
+						p.hypo--;
+					} else if (value < glucoseLevels.low) {
+						p.low--;
+					} else if (value > glucoseLevels.high) {
+						p.high--;
+					} else if (value > glucoseLevels.hyper) {
+						p.hyper--;
+					} else {
+						p.normal--;
+					}
+				}
+				return p;
+			},
+			function reduceInitial() {
+				//Init array for minutes
+				let size = 24 * 6;
+				let time = new Array(size);
+				let i;
+				for (i = 0; i < time.length; i++) {
+					time[i] = new Array(limit + 1);
+				}
+				return {
+					count: 0,
+					sum: 0,
+					hypo: 0,
+					low: 0,
+					normal: 0,
+					high: 0,
+					hyper: 0,
+					stats: time,
+				}
+			}
+		);
+
+		this.data = {
+			raw: data_crossfilter,
+			three: groupThreeHour,
+			six: groupSixHour,
+			daily: groupDaily,
+			weekly: groupWeekly,
+			monthly: groupMonthly,
+			stats_range: group_stats_range,
 		}
+		this.filter = filter_dim;
+
+		console.log(group_dim.top(Infinity));
+		console.log(groupThreeHour.top(Infinity));
+		console.log(groupSixHour.top(Infinity));
+		console.log(group_stats_range.value());
+
+		// let now = new Date();
+		// console.log('Reading data took ' + (now - then) + ' ms');
 
 
+		// then = new Date();
+		// filter_dim.filterRange([new Date(2016, 1, 1), new Date(2017, 1, 1)]);
+		// now = new Date();
+		// console.log('Filter sample took ' + (now - then) + ' ms');
 
-		//Update current domain to max domain from data
-		this.updateDomain(d3.extent(this.data, d => d.time))
+		// then = new Date();
+		// filter_dim.filterRange([new Date(2016, 5, 1), new Date(2017, 1, 1)]);
+		// now = new Date();
+		// console.log('Filter sample took ' + (now - then) + ' ms');
 
+
+		// then = new Date();
+		// filter_dim.filterRange([new Date(2012, 5, 1), new Date(2019, 1, 1)]);
+		// now = new Date();
+		// console.log('Filter sample took ' + (now - then) + ' ms');
 	}
-	getMaxDomain(){
+	getDomain() {
+		return this.domain;
+	}
+	getMaxDomain() {
 		return this.maxDomain;
 	}
-	getMaxZoom(){
+	getMaxZoom() {
 		//Max Zoom -> 1 hour
-		let hour = 60*60000;
+		let hour = 60 * 60000;
 		let domain_delta = this.maxDomain[1] - this.maxDomain[0];
 		let zoom = domain_delta / hour;
 		return zoom;
-		
-	}
-	async updateDomain(newDomain) {
-		this.domain = newDomain;
-		const timeDelta = this.domain[1] - this.domain[0];
-		if (
-			//Buffer too small -> zoom out
-			this.buffer[0] + timeDelta * (1/6) > this.domain[0] ||
-			this.buffer[1] - timeDelta * (1/6) < this.domain[1] ||
-			//Buffer too large -> zoom in
-			this.buffer[0] + timeDelta * (5 / 6) < this.domain[0] ||
-			this.buffer[1] - timeDelta * (5 / 6) > this.domain[1]
-		) {
 
-			//Generate new bufer
-			this.buffer = [this.domain[0] - timeDelta / 2, (+this.domain[1]) + timeDelta / 2];
-			await this.bufferData();
-		}
 	}
-	bufferData(){
-		//Update only the buffer for the current display
-		return new Promise(resolve => {
-			let bufferfilter = data => data.filter((d) => this.buffer[0] <= d.time && d.time <= this.buffer[1]);
-			switch(this.display){
-				case 'intraday': this.glucoseData_grouped_buffered.intraday.glucose =  bufferfilter(this.glucoseData_grouped.intraday.glucose);
-				case '3hourly': this.glucoseData_grouped_buffered.hourly3 =  bufferfilter(this.glucoseData_grouped.hourly3);
-				case '6hourly': this.glucoseData_grouped_buffered.hourly6 =  bufferfilter(this.glucoseData_grouped.hourly6);
-				case 'daily': this.glucoseData_grouped_buffered.daily =  bufferfilter(this.glucoseData_grouped.daily);
-				case 'weekly': this.glucoseData_grouped_buffered.weekly =  bufferfilter(this.glucoseData_grouped.weekly);
-				case 'monthly': this.glucoseData_grouped_buffered.monthly =  bufferfilter(this.glucoseData_grouped.monthly);
-				default:
-				resolve()
+	getPercentile(data, count, percentile) {
+		let percentile_index = [];
+		percentile.forEach(d => percentile_index.push(Math.floor(d * count)));
+
+		let results = new Array(percentile_index.length);
+		let i;
+		if (data) {
+			for (i = 0; i < data.length; i++) {
+				if (data[i]) {
+					let j;
+					for (j = 0; j < percentile_index.length; j++) {
+						percentile_index[j] -= data[i];
+						if (percentile_index[j] < 0) {
+							results[j] = i;
+							percentile_index[j] = Infinity;
+						}
+					}
+				}
 			}
-		})
+		}
+		return results;
+
 	}
-	changeDisplay(display){
+	updateDomain(newDomain) {
+		this.domain = newDomain;
+		this.filterData();
+		//DEBUG
+		console.log(this.getPercentileDay());
+	}
+	filterData() {
+		switch (this.display) {
+			case '3hourly':
+				this.domain = this.domain.map(d => new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), (d.getMinutes() - d.getMinutes() % 10)));
+				break;
+			case '6hourly':
+				this.domain = this.domain.map(d => new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), (d.getMinutes() - d.getMinutes() % 20)));
+				break;
+			case 'daily':
+				this.domain = this.domain.map(d => new Date(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() + 60000 * 60 * 24));
+				break;
+			case 'weekly':
+				let week = 60000 * 60 * 24 * 7;
+				this.domain = this.domain.map(d => new Date((Math.floor(d.getTime() / week) + 1) * week));
+				break;
+			case 'monthly':
+				this.domain = this.domain.map(d => new Date(d.getFullYear(), d.getMonth() + 1));
+				break;
+			default:
+		}
+		this.filter.filterRange(this.domain);
+	}
+	changeDisplay(display) {
 		this.display = display;
-		//Rebuffer Display for new Data
-		this.bufferData();
+		this.filterData();
 	}
 	getData() {
 		return this.data;
 	}
-	getIntradayData(){
-		const filterCurrentDomain = (d) => this.domain[0] <= d.time && d.time <= this.domain[1];
-		//Filter Buffered Data
-		let glucose = this.glucoseData_grouped_buffered.intraday.glucose.filter(filterCurrentDomain);
-
-		let stats = {
-			reallyLow: glucose.filter(d => d.value < this.glucoseLevels.reallyLow).length / glucose.length,
-			low: glucose.filter(d => d.value > this.glucoseLevels.reallyLow && d.value < this.glucoseLevels.low).length / glucose.length,
-			ok: glucose.filter(d => d.value > this.glucoseLevels.low && d.value < this.glucoseLevels.ok).length / glucose.length,
-			high: glucose.filter(d => d.value > this.glucoseLevels.ok && d.value < this.glucoseLevels.high).length / glucose.length,
-			reallyHigh: glucose.filter(d => d.value > this.glucoseLevels.high && d.value < this.glucoseLevels.reallyHigh).length / glucose.length
+	getIntradayData() {
+		let data = this.data.raw.allFiltered();
+		let results = {
+			glucose: data.filter(d => d.type == this.types.glucose),
+			bolus: data.filter(d => d.type == this.types.bolus),
+			basal: data.filter(d => d.type == this.types.basal_temp || d.types == this.types.basal_profile),
+			carbs: data.filter(d => d.type == this.types.carbs)
 		}
-
-		//Pack all data into one object
-		let data = {
+		return results;
+	}
+	getThreeHourlyData() {
+		let data_raw = this.data.three.top(Infinity);
+		let glucose = [];
+		let basal = [];
+		let bolus = [];
+		let carbs = [];
+		data_raw.forEach(d => {
+			if (d.value.glucose.count != 0) {
+				let item = {
+					time: d.key,
+					value: d.value.glucose.sum / d.value.glucose.count,
+				}
+				glucose.push(item);
+			}
+			if (d.value.basal.sum != 0) {
+				let item = {
+					time: d.key,
+					value: d.value.basal.sum,
+				}
+				basal.push(item);
+			}
+			if (d.value.bolus.sum != 0) {
+				let item = {
+					time: d.key,
+					value: d.value.bolus.sum,
+				}
+				bolus.push(item);
+			}
+			if (d.value.carbs.sum != 0) {
+				let item = {
+					time: d.key,
+					value: d.value.carbs.sum,
+				}
+				carbs.push(item);
+			}
+		})
+		return {
 			glucose: glucose,
-			stats: stats
+			basal: basal,
+			bolus: bolus,
+			carbs: carbs
+		};
+	}
+	getSixHourlyData() {
+		let data_raw = this.data.six.top(Infinity);
+		let glucose = [];
+		let basal = [];
+		let bolus = [];
+		let carbs = [];
+		data_raw.forEach(d => {
+			if (d.value.glucose.count != 0) {
+				let item = {
+					time: d.key,
+					value: d.value.glucose.sum / d.value.glucose.count,
+				}
+				glucose.push(item);
+			}
+			if (d.value.basal.sum != 0) {
+				let item = {
+					time: d.key,
+					value: d.value.basal.sum,
+				}
+				basal.push(item);
+			}
+			if (d.value.bolus.sum != 0) {
+				let item = {
+					time: d.key,
+					value: d.value.bolus.sum,
+				}
+				bolus.push(item);
+			}
+			if (d.value.carbs.sum != 0) {
+				let item = {
+					time: d.key,
+					value: d.value.carbs.sum,
+				}
+				carbs.push(item);
+			}
+		})
+		return {
+			glucose: glucose,
+			basal: basal,
+			bolus: bolus,
+			carbs: carbs
+		};;
+	}
+	getDailyData() {
+		let data_raw = this.data.daily.top(Infinity);
+		let glucose = [];
+		data_raw.forEach(d => {
+			if (d.value.glucose.count != 0) {
+				let percentile = this.getPercentile(d.value.glucose.median_arr, d.value.glucose.count, [0.25, 0.5, 0.75]);
+				let item = {
+					time: d.key,
+					value: percentile[1],
+					value_avg: d.value.glucose.sum / d.value.glucose.count,
+					value_lower_perc: percentile[0],
+					value_higher_perc: percentile[2],
+					percentile: percentile
+				}
+				glucose.push(item);
+			}
+		})
+		return {
+			glucose: glucose
+		};
+	}
+	getWeeklyData() {
+		let data_raw = this.data.weekly.top(Infinity);
+		let glucose = [];
+		data_raw.forEach(d => {
+			if (d.value.glucose.count != 0) {
+				let percentile = this.getPercentile(d.value.glucose.median_arr, d.value.glucose.count, [0.25, 0.5, 0.75]);
+				let item = {
+					time: d.key,
+					value: percentile[1],
+					value_avg: d.value.glucose.sum / d.value.glucose.count,
+					value_lower_perc: percentile[0],
+					value_higher_perc: percentile[2],
+					percentile: percentile
+				}
+				glucose.push(item);
+			}
+		})
+		return {
+			glucose: glucose
+		};
+	}
+	getMonthlyData() {
+		let data_raw = this.data.monthly.top(Infinity);
+		let glucose = [];
+		data_raw.forEach(d => {
+			if (d.value.glucose.count != 0) {
+				let percentile = this.getPercentile(d.value.glucose.median_arr, d.value.glucose.count, [0.25, 0.5, 0.75]);
+				let item = {
+					time: d.key,
+					value: percentile[1],
+					value_avg: d.value.glucose.sum / d.value.glucose.count,
+					value_lower_perc: percentile[0],
+					value_higher_perc: percentile[2],
+					percentile: percentile
+				}
+				glucose.push(item);
+			}
+		})
+		return {
+			glucose: glucose
+		};
+	}
+	getStatistics() {
+		let stats_raw = this.data.stats_range.value();
+		let stats = {
+			timeFrame: this.domain,
+			glucose: {
+				hypo: stats_raw.hypo / stats_raw.count,
+				low: stats_raw.low / stats_raw.count,
+				normal: stats_raw.normal / stats_raw.count,
+				high: stats_raw.high / stats_raw.count,
+				hyper: stats_raw.hyper / stats_raw.count,
+				average: stats_raw.sum / stats_raw.count
+			},
+			glucoseLevels: this.glucoseLevels
 		}
-		return data;
+		return stats;
 	}
-	compGlucoseCGMData(data, keyfunc) {
-		let glucose = d3.nest()
-			.key(keyfunc)
-			.rollup(function (v) {
-				return {
-					value: d3.median(v, function (d) { return +d.value; }),
-					value_min: +d3.min(v, function (d) { return +d.value; }),
-					value_max: +d3.max(v, function (d) { return +d.value; }),
-					value_lower_perc: d3.quantile(v.map(d => +d.value).sort((a, b) => (+a) - (+b)), 0.25),
-					value_higher_perc: d3.quantile(v.map(d => +d.value).sort((a, b) => (+a) - (+b)), 0.75),
-					time: new Date(d3.mean(v, function (d) { return d.time; }))
-				};
-			})
-			.entries(data);
-		return glucose.map(d => d.value);
+	getPercentileDay() {
+		let day = this.data.stats_range.value().stats;
+		let result = [];
+		let i;
+		for (i = 0; i < day.length; i++) {
+			let item = {
+				time: new Date(1970, 1, 2, Math.floor(i / 6), (i % 6) * 10),
+				value: this.getPercentile(day[i], day[i].reduce((p, c) => p + c), [0.10, 0.25, 0.5, 0.75, 0.90])
+			}
+			result.push(item);
+		}
+		return result;
 	}
-	milliSecondsToMinutes(ms) {
-		return ms / 60000
-	}
+
 }
 export default DataManager
