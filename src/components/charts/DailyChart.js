@@ -20,6 +20,7 @@ class DailyChart extends Component {
         let xAxis = d3.axisBottom(this.props.x);
         let yAxis = d3.axisLeft(this.props.y);
         let y = this.props.y;
+		let x = this.props.x;
         let margin = this.props.margin;
         let width = 1000;
 
@@ -45,7 +46,37 @@ class DailyChart extends Component {
             .style("opacity", 0.3)
             .style("fill", "#F8F9F9") //"#F8F9F9"
 
-        
+        //drei Kreise von Legende
+            this.lengdeCircs =
+                comp.append("circle")
+                .attr("class", "legendeCircleH")
+                .attr('cx', x.range()[1] - 20)
+                .attr('cy', margin.top + 45)
+                .attr('r', 6)
+				.style("fill", "#3498DB")
+            comp.append("circle")
+                .attr("class", "legendeCircleN")
+                .attr('cx', x.range()[1] - 40)
+                .attr('cy', margin.top + 45)
+                .attr('r', 6)
+				.style("fill", "#58D68D")
+            comp.append("circle")
+                .attr("class", "legendeCircleL")
+                .attr('cx', x.range()[1] - 60)
+                .attr('cy', margin.top + 45)
+                .attr('r', 6)
+				.style("fill", "#DC7633")
+		//Text von Legendecircle
+		this.legendeText =
+                comp.append("text")
+                .attr("class", "legendeCircText")
+                .text("low high")
+                .attr("x", x.range()[1] - 110)
+                .attr("y", margin.top + 50)	
+				.style("word-spacing", "80px")
+				.style("font", "sans-serif")
+				.style("fill", "lightgray")
+				
         this.legendeText = comp.append("text")
             .text("BLOOD BLUCOSE     mg/dL")
             .attr("class", "legendeText")
@@ -53,7 +84,29 @@ class DailyChart extends Component {
             .attr("y", margin.top + 47)
             .style("font", "sans-serif")
             .attr("fill", "black")
-
+		
+		//dotted line
+		this.dashLine =
+                comp.append("line")
+                .attr("class", "dashLineH_N")
+                .attr("x1", margin.left + x.range()[0])
+                .attr("y1", margin.top + 60 + y(185))
+                .attr("x2", margin.left + x.range()[1])
+                .attr("y2", margin.top + 60 + y(185))
+				.style("stroke-dasharray", "4, 7")
+				.style("stroke", "#F4F6F7")
+				.style("stroke-width", "2")
+				
+            comp.append("line")
+                .attr("class", "dashLineN_L")
+                .attr("x1", margin.left + x.range()[0])
+                .attr("y1", margin.top + 60 + y(65))
+                .attr("x2", margin.left + x.range()[1])
+                .attr("y2", margin.top + 60 + y(65))
+				.style("stroke-dasharray", "4, 7")
+				.style("stroke", "#F4F6F7")
+				.style("stroke-width", "2")
+				
         //svg graph für x und y achse
         //init x und y achse
         this.xAxis_graph = comp.append("g")
@@ -68,7 +121,15 @@ class DailyChart extends Component {
             .attr("class", "yline")
             .attr("transform", "translate(" + margin.left + "," + (margin.top + 60)+ ")")
             .call(yAxis);
-
+		// y abdeckung
+		this.yAbdeckung = comp.append("line")
+                .attr("class", "yAbdeckung")
+                .attr("x1", margin.left)
+                .attr("y1", margin.top + y(400))
+                .attr("x2", margin.left)
+                .attr("y2", margin.top + 60 + y(0))
+				.style("stroke", "white")
+				.style("stroke-width", "2")
         this.circs = comp.append('g');
         this.drawChart(this.props);
 
@@ -129,6 +190,12 @@ class DailyChart extends Component {
         if (this.topbar) {
             this.topbar.attr("width", this.props.x.range()[1]);
             this.legendeBackground.attr("width", this.props.x.range()[1]);
+			d3.select(".legendeCircleH").attr('cx', x.range()[1] - 20);
+            d3.select(".legendeCircleN").attr('cx', x.range()[1] - 40);
+            d3.select(".legendeCircleL").attr('cx', x.range()[1] - 60);
+            d3.select(".legendeCircText").attr("x", x.range()[1] - 110);
+            d3.select(".dashLineH_N").attr("x2", this.props.margin.left + x.range()[1]);
+            d3.select(".dashLineN_L").attr("x2", this.props.margin.left + x.range()[1])
         }
     }
     componentWillReceiveProps(nextProps){
