@@ -25,12 +25,12 @@ class Chart extends Component {
             <div className="container-fluid">
                 <Loading visible={this.state.loading} />
                 <div className="row">
-                    <div className="col-md-8 col-sm-12">
+                    <div className="col-lg-8 col-md-12">
                         <svg id="d3sample" width="100%" height="500" ref={(svg) => this.svg = svg}>
                             {display}
                         </svg>
                     </div>
-                    <div className="col-md-4 col-sm-12">
+                    <div className="col-lg-4 col-md-12">
                         <Statistics domain={this.state.x != null ? this.state.x.domain() : null} dm={this.state.data_manager != null ? this.state.data_manager : null} />
                     </div>
                 </div>

@@ -14,9 +14,9 @@ class Statistics extends Component {
                 </div>
                 );
         }
-        console.log(this.state.stats);
         return(
-        <div className="bg-light">
+        
+        <div className="container bg-light">
             <h2>Glucose distribution</h2>
             <div className="time-frame">
             <p>from {this.state.stats.timeFrame[0].toDateString()} {this.state.stats.timeFrame[0].getHours()}:{this.state.stats.timeFrame[0].getMinutes()} - {this.state.stats.timeFrame[1].toDateString()} {this.state.stats.timeFrame[1].getHours()}:{this.state.stats.timeFrame[1].getMinutes()}</p>
@@ -30,7 +30,7 @@ class Statistics extends Component {
             <div className="stat-fill hyper" style={{width: Math.round(this.state.stats.glucose.hyper * 100)+'%'}}></div>
             <div className="description">
                 <h2>{Math.round(this.state.stats.glucose.hyper * 100)}%</h2>
-                <p>above {this.state.stats.glucoseLevels.high} mg/dl</p>
+                <p>above {this.state.stats.glucoseLevels.hyper} mg/dl</p>
             </div>
             </div>
 
@@ -38,7 +38,7 @@ class Statistics extends Component {
             <div className="stat-fill high" style={{width: Math.round(this.state.stats.glucose.high * 100)+'%'}}></div>
             <div className="description">
                 <h2>{Math.round(this.state.stats.glucose.high * 100)}%</h2>
-                <p>between {this.state.stats.glucoseLevels.normal} - {this.state.stats.glucoseLevels.high} mg/dl</p>
+                <p>between {this.state.stats.glucoseLevels.high} - {this.state.stats.glucoseLevels.hyper} mg/dl</p>
             </div>
             </div>
 
@@ -46,7 +46,7 @@ class Statistics extends Component {
             <div className="stat-fill normal" style={{width: Math.round(this.state.stats.glucose.normal * 100)+'%'}}></div>
             <div className="description">
                 <h2>{Math.round(this.state.stats.glucose.normal * 100)}%</h2>
-                <p>between {this.state.stats.glucoseLevels.low} - {this.state.stats.glucoseLevels.normal} mg/dl</p>
+                <p>between {this.state.stats.glucoseLevels.low} - {this.state.stats.glucoseLevels.high} mg/dl</p>
             </div>
             </div>
 
