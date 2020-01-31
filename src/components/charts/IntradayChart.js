@@ -194,16 +194,36 @@ class IntradayChart extends Component {
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
                     .attr('fill', d => circleColor(d))
+					.attr('data-toggle', "tooltip")
+						.attr('data-placement', 'top')
+						.attr('title', function(d) {
+						return "time: " + d.time 
+							+ "/br value: " + d.value
+							+ "/br source: " + d.source
+					})
 					.on("mouseover", mouseover_tp)
                     .on("mouseout", mouseout_tp),
                     (update) => update
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
                     .attr('fill', d => circleColor(d))
+					.attr('data-toggle', "tooltip")
+						.attr('data-placement', 'top')
+						.attr('title', function(d) {
+						return "time: " + d.time
+							+ "/br value: " + d.value
+							+ "/br source: " + d.source
+					})
 					.on("mouseover", mouseover_tp)
                     .on("mouseout", mouseout_tp)
                 )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
+					
+				
+				$('circles').tooltip({
+					selector:'[data-toggle="tooltip"]',
+					container:'body'
+				});
         }
 		
 		function mouseover_tp(d) {
