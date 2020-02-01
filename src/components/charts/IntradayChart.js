@@ -225,9 +225,9 @@ class IntradayChart extends Component {
 					.attr('class', 'my_circle')
 					.attr('data-toggle', "tooltip")
 					.attr('title', function(d) {
-						return "time: " + d.time
-						+ "<br>value: " + d.value
-						+ "<br>source: " + d.source
+						return "<p align='left'>time: " + d.time
+						+ "<br/>value: " + d.value
+						+ "<br/>source: " + d.source + "</p>"
 					}),
                     (update) => update
                     .attr('cy', d => y(+d.value))
@@ -236,21 +236,25 @@ class IntradayChart extends Component {
 					.attr('class', 'my_circle')
 					.attr('data-toggle', "tooltip")
 					.attr('title', function(d) {
-						return "time: " + d.time
-						+ "<br>value: " + d.value
-						+ "<br>source: " + d.source
+						return "<p align='left'>time: " + d.time
+						+ "<br/>value: " + d.value
+						+ "<br/>source: " + d.source + "</p>"
 					})
                 )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
 				
-						//boostrap tooltip hover function
-				$(document).ready(function() {
-					$('[data-toggle="tooltip"]').tooltip({
-						placement: 'top',
-						container:'body'
-					});
-				});
         }
+		
+		//boostrap tooltip hover function
+			$(document).ready(function() {
+				$('[data-toggle="tooltip"]').tooltip({
+					placement: 'top',
+					container:'body',
+					html: true,
+				});
+			$('[data-toggle="tooltip"]').tooltip('hide')
+			});
+				
         if (this.line != null) {
             var line = this.line.selectAll('line').data(props.data.basal).join(
                 (enter) => enter.append('line')
