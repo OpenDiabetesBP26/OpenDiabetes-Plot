@@ -19,10 +19,10 @@ class BackGround {
         this.rectWs = []; //widths von rects für output, fertig!
         this.xPos = []; //xposition von ticks für output, fertig!
         this.tickArray = []; //ticks für inere Verwendung, fertig!
-        this.in6StufeOpacity = [0.4,0.6,0.8,0.7,0.6,0.4] //6 stufen Opacity für innere Verwendung
-        this.in12StufeOpacity = [0.4,0.5,0.6,0.7,0.8,0.9,0.8,0.7,0.6,0.5,0.4,0.3] //12 stufen Opacity für innere Verwendung
-        this.in7tufeOpacity = [0.5, 0.6, 0.7, 0.8, 0.7, 0.6, 0.5] //7 stufen Opacity für innere Verwendung
-        this.in15StufeOpacity = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2] //15 stufen Opacity für innere Verwendung
+        this.in6StufeOpacity = [0.9, 0.8, 0.7, 0.6, 0.5, 0.6] //6 stufen Opacity für innere Verwendung
+        this.in12StufeOpacity = [0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35] //12 stufen Opacity für innere Verwendung
+        this.in7tufeOpacity = [0.9, 0.8, 0.7, 0.6, 0.5, 0.6, 0.5] //7 stufen Opacity für innere Verwendung
+        this.in15StufeOpacity = [0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25, 0.2] //15 stufen Opacity für innere Verwendung
     }
     //füge ein ein date-pading ein, die Zeitabstand stimmt mit der von folgenden Ticks überein.
     //读取ticks的日期，并且在index0位置加入一个与后续等距的date
@@ -112,7 +112,7 @@ class BackGround {
         let OpacitySeed = []
         let rectOpacity = []
         //console.log("creatYearlyOpacity")
-        OpacitySeed = this.in6StufeOpacity
+        OpacitySeed = this.in6tufeOpacity
         let yearBase = this.tickArray[0].getFullYear()
         this.tickArray.forEach((d, i) => rectOpacity[i] = OpacitySeed[d.getFullYear() - yearBase])
         return rectOpacity;
@@ -180,20 +180,20 @@ class BackGround {
         return rectOpacity;
     }
     creathalfhourlyOpacity() {
+        //console.log("creathalfhourlyOpacity")
         let OpacitySeed = []
         let rectOpacity = []
-        OpacitySeed = this.in6StufeOpacity
-         console.log("OpacitySeed", OpacitySeed)
-        this.tickArray.forEach((d, i) => rectOpacity[i] = OpacitySeed[(2 * (d.getHours()%3)) + (d.getMinutes()/30)]);
-        console.log("Opacity",rectOpacity)
+        OpacitySeed = this.in12StufeOpacity
+        this.tickArray.forEach((d, i) => rectOpacity[i] = OpacitySeed[(d.getHours() * 60 + d.getMinutes()) % 12]);
         return rectOpacity;
     }
 
     creat5minOpacity() {
+        //console.log("creat5minOpacity")
         let OpacitySeed = []
         let rectOpacity = []
         OpacitySeed = this.in12StufeOpacity
-        this.tickArray.forEach((d, i) => rectOpacity[i] = OpacitySeed[d.getMinutes()/5]);
+        this.tickArray.forEach((d, i) => rectOpacity[i] = OpacitySeed[(d.getHours() * 60 + d.getMinutes()) % 12]);
         return rectOpacity;
     }
     creatminOpacity() {

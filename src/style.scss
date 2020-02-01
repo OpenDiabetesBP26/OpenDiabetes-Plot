@@ -123,24 +123,44 @@ body {
             fill: #2E86C1;
             opacity: 0.6;
         }
-        .yAbdeckung{
-        stroke: white;
-        stroke-width: 2;
+
+        .yAbdeckung {
+            stroke: white;
+            stroke-width: 2;
         }
-        .tooltipbg{
-        fill: lightgray;//#EB984E;
-        stroke:gray; //#EB984E;
-        stroke-width:3;
+
+        .tooltipbg {
+            fill: lightgray; //#EB984E;
+            stroke: gray; //#EB984E;
+            stroke-width: 3;
         }
-        .tooltipTextT{
-        fill: black;
+
+        .tooltipTextT {
+            fill: black;
 
         }
-        .tooltipTextV{
-        fill: black;
+
+        .tooltipTextV {
+            fill: black;
         }
-        .tooltipTextS{
-        fill: black;
+
+        .tooltipTextS {
+            fill: black;
+        }
+
+        .focusLine {
+            fill: none;
+            stroke: steelblue;
+            stroke-width: 0.5px;
+        }
+        .focusCircleInne{
+        fill: lightgray;
+        }
+        
+        .overlay{
+        fill: none;
+        stroke: none;
+        pointer-events: all;
         }
 
 
