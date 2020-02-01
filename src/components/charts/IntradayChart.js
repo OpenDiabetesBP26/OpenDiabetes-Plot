@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { hot } from 'react-hot-loader';
 import * as d3 from 'd3';
 import BackGround from '../../services/BackGround.js';
+import $ from 'jquery';
 
 class IntradayChart extends Component {
     constructor(props) {
@@ -122,7 +123,8 @@ class IntradayChart extends Component {
 
 
 
-            this.circs = comp.append('g');
+            this.circs = comp.append('g')
+				.attr("class", "gcircle");
             this.line = comp.append("g");
 
             //tooltips Text
@@ -182,8 +184,10 @@ class IntradayChart extends Component {
         //wenn xAxis neue Scale bekommt, erneue Graph von xAxis und draw Background
         if (this.xAxis_graph) {
             //ebene und focus-Elementen werden dargestellt
-            d3.select('.overlay').attr("width", x.range()[1] - x.range()[0]);
-            this.mouseCatchMove(props);
+			
+			// there is comflict betweeen overlay and tooltip-bootstrap
+            //d3.select('.overlay').attr("width", x.range()[1] - x.range()[0]);
+            //this.mouseCatchMove(props);
             //neue xAxis Daten von props
             let newxAxis = d3.axisTop(x)
             this.xAxis_graph.call(newxAxis)
@@ -217,13 +221,35 @@ class IntradayChart extends Component {
                     .attr('r', 3)
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
-                    .attr('fill', d => this.circleColor(d.value)),
+                    .attr('fill', d => this.circleColor(d.value))
+					.attr('class', 'my_circle')
+					.attr('data-toggle', "tooltip")
+					.attr('title', function(d) {
+						return "time: " + d.time
+						+ "<br>value: " + d.value
+						+ "<br>source: " + d.source
+					}),
                     (update) => update
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
                     .attr('fill', d => this.circleColor(d.value))
+					.attr('class', 'my_circle')
+					.attr('data-toggle', "tooltip")
+					.attr('title', function(d) {
+						return "time: " + d.time
+						+ "<br>value: " + d.value
+						+ "<br>source: " + d.source
+					})
                 )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
+				
+						//boostrap tooltip hover function
+				$(document).ready(function() {
+					$('[data-toggle="tooltip"]').tooltip({
+						placement: 'top',
+						container:'body'
+					});
+				});
         }
         if (this.line != null) {
             var line = this.line.selectAll('line').data(props.data.basal).join(
@@ -260,7 +286,7 @@ class IntradayChart extends Component {
     }
     //focus zeigt zuerst automatisch, wenn man mouse click halten, dann focus sich verbergt, 
     //nach dem verschieben oder zoomen, mit ein mal mouseclick wird focus wieder dargestellt.
-    mouseCatchMove(props, focusLineX) {
+	mouseCatchMove(props, focusLineX) {
         let data = props.data.glucose;
         let y = props.y;
         let x = props.x;
