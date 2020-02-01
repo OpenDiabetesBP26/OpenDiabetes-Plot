@@ -16,7 +16,7 @@ import PercentileDay from './charts/PercentileDay';
 class Chart extends Component {
     constructor(props) {
         super(props);
-        this.state = { display: 'intraday' }
+        this.state = { display: 'intraday', margin: { top: 20, right: 40, bottom: 110, left: 40 } }
         this.svg = React.createRef()
 
     }
@@ -29,10 +29,10 @@ class Chart extends Component {
                         <svg id="d3sample" width="100%" height="500" ref={(svg) => this.svg = svg}>
                             {display}
                         </svg>
-                        { this.state.display == 'daily' || this.state.display == 'weekly' || this.state.display == 'monthly' ? <PercentileDay x={this.state.x} data={this.state.data_manager != null ? this.state.data_manager.getPercentileDay() : null} margin={this.state.margin} /> : '' }
+                        {this.state.display == 'daily' || this.state.display == 'weekly' || this.state.display == 'monthly' ? <PercentileDay x={this.state.x} data={this.data_manager != null ? this.data_manager.getPercentileDay() : null} margin={this.state.margin} /> : ''}
                     </div>
                     <div className="col-lg-4 col-md-12">
-                        <Statistics domain={this.state.x != null ? this.state.x.domain() : null} dm={this.state.data_manager != null ? this.state.data_manager : null} />
+                        <Statistics domain={this.state.x != null ? this.state.x.domain() : null} dm={this.data_manager != null ? this.data_manager : null} />
                     </div>
                 </div>
             </div>
@@ -41,90 +41,75 @@ class Chart extends Component {
     getDisplayComponent(display) {
         switch (display) {
             case 'intraday':
-                return <IntradayChart data={this.state.data_manager != null ? this.state.data_manager.getIntradayData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin} />
+                return <IntradayChart data={this.data_manager != null ? this.data_manager.getIntradayData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin} />
             case '3hourly':
-                return <ThreeHourlyChart data={this.state.data_manager != null ? this.state.data_manager.getThreeHourlyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin} />
+                return <ThreeHourlyChart data={this.data_manager != null ? this.data_manager.getThreeHourlyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin} />
             case '6hourly':
-                return <SixHourlyChart data={this.state.data_manager != null ? this.state.data_manager.getSixHourlyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin} />
+                return <SixHourlyChart data={this.data_manager != null ? this.data_manager.getSixHourlyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin} />
             case 'daily':
-                return <DailyChart data={this.state.data_manager != null ? this.state.data_manager.getDailyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin} />
+                return <DailyChart data={this.data_manager != null ? this.data_manager.getDailyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin} />
             case 'weekly':
-                return <WeeklyChart data={this.state.data_manager != null ? this.state.data_manager.getWeeklyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin} />
+                return <WeeklyChart data={this.data_manager != null ? this.data_manager.getWeeklyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin} />
             case 'monthly':
-                return <MonthlyChart data={this.state.data_manager != null ? this.state.data_manager.getMonthlyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin} />
+                return <MonthlyChart data={this.data_manager != null ? this.data_manager.getMonthlyData() : null} svg={this.svg} x={this.state.x} y={this.state.y} margin={this.state.margin} />
             default:
                 return null;
         }
     }
 
     componentDidUpdate() {
-        if (!this.props.data) { return; }; 
-        //TODO Implement DataManager
-        // let data = await (await fetch("/data/2019-11-20-1349_export-data.json")).json()
-        // console.log(data);
-        // data = data.data;
-        // this.data = data;
-        let dm = new DataManager();
-        this.setState({ data_manager: dm });
-        
-        this.state.data_manager.readData(this.props.data);
-        this.maxZoom = this.state.data_manager.getMaxZoom();
-        this.setState({ maxZoom: this.maxZoom });
+        if (!this.props.data) { return; };
+        console.log('Updatet new data');
+        console.log(this.props.data)
+        //this.readData();
 
+    }
+    readData(){
+        //For now, create new datamanger
+        this.data_manager = new DataManager();
+        this.data_manager.readData(this.props.data);
+        this.maxZoom = this.data_manager.getMaxZoom();
+        this.setState({ maxZoom: this.maxZoom });
+    }
+    //Wird einmalig aufgerufen, wenn es gemountet ist
+    componentDidMount() {
+        //Create Datamanager and read data
+        console.log(this.props.data);
+        this.data_manager = new DataManager();
+        this.readData();
         //Add d3 stuff
-        let svg = d3.select("svg");
+        let svg = d3.select("svg#d3sample");
         let width = 1000,
-            height = 400,
-            margin = { top: 20, right: 40, bottom: 110, left: 40 }
+            height = 400
 
         //Domains
-        let xBase = d3.scaleTime().range([0, width]),
-            x = d3.scaleTime().range([0, width]),
-            y = d3.scaleLinear().range([height, 0]);
+        this.xBase = d3.scaleTime().range([0, width]);
+        this.x = d3.scaleTime().range([0, width]).domain(this.data_manager.getMaxDomain());
+        this.y = d3.scaleLinear().range([height, 0]).domain([0, 400]);
 
-        //Set max domains
-        x.domain(this.state.data_manager.getMaxDomain());
-        y.domain([0, 400])
-        xBase.domain(x.domain());
-
-        //TODO set base domain through data manager
-
-        //Update State with domains
-        this.setState({ xBase: xBase, x: x, y: y, margin: margin })
-
-
+        this.xBase.domain(this.x.domain());
         this.zoom = d3.zoom()
             //Wie viel man unzoomen und zoomen kann
             //TODO vom DataManager berechnen lassen
             .scaleExtent([1, this.maxZoom])
             .translateExtent([[0, 0], [width, 0]])
             .on("zoom", () => this.zoomed());
-
         svg.call(this.zoom);
-        this.d3svg = svg;
 
-        //Append resize listener
-        
-        //Call resize to set first state
-        this.updateDimensions();
-    }
-    //Wird einmalig aufgerufen, wenn es gemountet ist
-    componentDidMount() {
-        let dm = new DataManager();
-        this.setState({ data_manager: dm });
         window.addEventListener("resize", this.updateDimensions.bind(this));
+        this.updateDimensions();
     }
     updateDimensions() {
         if (this.svg) {
             let newWidth = this.svg.getBoundingClientRect().width - this.state.margin.left - this.state.margin.right;
             //Update Base and x range
-            let xBase = this.state.xBase.range([0, newWidth]);
-            let x = this.state.x.range([0, newWidth]);
+            let xBase = this.xBase.range([0, newWidth]);
+            let x = this.x.range([0, newWidth]);
 
             //Update Zoom
             //Fix, as d3.event.transform is null in webpack
-            let oldRange = this.state.xBase.range()[1] - this.state.xBase.range()[0];
-            let s = this.state.x.domain().map(x => xBase(x));
+            let oldRange = this.xBase.range()[1] - this.xBase.range()[0];
+            let s = this.x.domain().map(x => xBase(x));
             let k = oldRange / (s[1] - s[0]);
 
             let newXOffset = -xBase(x.domain()[0]);
@@ -133,7 +118,7 @@ class Chart extends Component {
             d3.select("svg").call(this.zoom.transform, d3.zoomIdentity.scale(k).translate(newXOffset, 0));
 
             //Update State
-            this.setState({ xBase: xBase, x: x });
+            this.setState({x: this.x, y: this.y});
 
         }
     }
@@ -154,7 +139,7 @@ class Chart extends Component {
     zoomed() {
         //this.fixExtent();
 
-        let x = d3.event.transform.rescaleX(this.state.xBase);
+        let x = d3.event.transform.rescaleX(this.xBase);
         //Update Domain in sync
         //Update Display
 
@@ -162,9 +147,9 @@ class Chart extends Component {
         let delta = (x.domain()[1] - x.domain()[0]) / (60000 * 60);
         let display = this.getDisplay(delta);
         if (this.state.display != display) {
-            this.state.data_manager.changeDisplay(display);
+            this.data_manager.changeDisplay(display);
         }
-        this.state.data_manager.updateDomain(x.domain());
+        this.data_manager.updateDomain(x.domain());
 
 
         //Set State

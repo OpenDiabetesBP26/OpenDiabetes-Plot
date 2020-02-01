@@ -55,7 +55,7 @@ const ChartContainer = (props) => {
             <div className="row">
                 {file}
             </div>
-            <Chart props={props} data={data} />
+            {data ? <Chart props={props} data={data} /> : ''}
         </div>);
 }
 
