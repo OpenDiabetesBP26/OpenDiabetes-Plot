@@ -164,11 +164,13 @@ class IntradayChart extends Component {
             let focusCircle = comp.append('circle')
                 .attr('id', 'focusCircle')
                 .attr('r', 8)
-                .attr('class', 'focusCircle');
+                .attr('class', 'focusCircle')
+                .attr('display', 'none');
             let focusCircleInne = comp.append('circle')
                 .attr('id', 'focusCircleInne')
                 .attr('r', 5)
-                .attr('class', 'focusCircleInne');
+                .attr('class', 'focusCircleInne')
+                .attr('display', 'none');
         }
 
     }
@@ -298,12 +300,14 @@ class IntradayChart extends Component {
                     .duration(10)
                     .attr('cx', xPos + props.margin.left)
                     .attr('cy', yPos + 60 + props.margin.top)
-                    .attr('fill', d.value >= 185 ? '#3498DB' : d.value >= 65 ? '#58D68D' : '#DC7633');
+                    .attr('fill', d.value >= 185 ? '#3498DB' : d.value >= 65 ? '#58D68D' : '#DC7633')
+                    .attr('display', 'block');
                 d3.select('#focusCircleInne')
                     .transition()
                     .duration(10)
                     .attr('cx', xPos + props.margin.left)
-                    .attr('cy', yPos + 60 + props.margin.top);
+                    .attr('cy', yPos + 60 + props.margin.top)
+                    .attr('display', 'block');
                 d3.select('#focusLineX')
                     .transition()
                     .duration(10)
