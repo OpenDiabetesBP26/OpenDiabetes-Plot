@@ -228,6 +228,16 @@ class IntradayChart extends Component {
 						return "<p text-align='left'>Time: " + d.time
 						+ "<br/>Value: " + d.value
 						+ "<br/>Source: " + d.source + "</p>"
+					})
+					.on('mouseover', function(d) {
+						d3.select(this).transition()
+						.duration(300)
+						.attr('r', 3 * 3)
+					})
+					.on('mouseout', function(d) {
+						d3.select(this).transition()
+						.duration(300)
+						.attr('r',3)
 					}),
                     (update) => update
                     .attr('cy', d => y(+d.value))
@@ -239,6 +249,16 @@ class IntradayChart extends Component {
 						return "<p text-align='left'>Time: " + d.time
 						+ "<br/>Value: " + d.value
 						+ "<br/>Source: " + d.source + "</p>"
+					})
+					.on('mouseover', function(d) {
+						d3.select(this).transition()
+						.duration(300)
+						.attr('r', 3 * 3)
+					})
+					.on('mouseout', function(d) {
+						d3.select(this).transition()
+						.duration(300)
+						.attr('r',3)
 					})
                 )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
