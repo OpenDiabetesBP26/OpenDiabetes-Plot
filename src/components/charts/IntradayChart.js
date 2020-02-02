@@ -222,6 +222,7 @@ class IntradayChart extends Component {
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
                     .attr('fill', d => this.circleColor(d.value))
+					// boostrap tooltip text
 					.attr('class', 'my_circle')
 					.attr('data-toggle', "tooltip")
 					.attr('title', function(d) {
@@ -243,6 +244,7 @@ class IntradayChart extends Component {
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
                     .attr('fill', d => this.circleColor(d.value))
+					// boostrap tooltip text
 					.attr('class', 'my_circle')
 					.attr('data-toggle', "tooltip")
 					.attr('title', function(d) {
@@ -271,6 +273,7 @@ class IntradayChart extends Component {
 					placement: 'top',
 					container:'body',
 					html: true,
+					template: '<div class="tooltip" role="tooltip"><div class="arrow define-tooltip-arrow"></div><div class="tooltip-inner define-tooltip-inner"></div></div>'
 				});
 			$('[data-toggle="tooltip"]').tooltip('hide')
 			});

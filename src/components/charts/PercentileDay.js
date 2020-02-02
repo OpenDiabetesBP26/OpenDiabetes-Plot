@@ -47,10 +47,10 @@ class PercentileDay extends Component {
 
         let lines = d3.line().x(d => d.x).y(d=>d.y);
         let area = d3.area().x(d => d.x).y0(d => d.y1).y1(d=>d.y2);
-        
+  
         if(this.data_group){
             this.data_group.selectAll("path").remove();
-            this.data_group.append("path").attr("d", area(upper)).attr("stroke", "lightblue").attr("style", "fill: lightblue").attr("stroke-width", 2).attr("fill", "none");
+			this.data_group.append("path").attr("d", area(upper)).attr("stroke", "lightblue").attr("style", "fill: lightblue").attr("stroke-width", 2).attr("fill", "none");
             this.data_group.append("path").attr("d", lines(median)).attr("stroke", "blue").attr("stroke-width", 2).attr("fill", "none");
         }
 
