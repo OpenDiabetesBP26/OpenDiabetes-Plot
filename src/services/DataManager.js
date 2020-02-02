@@ -209,6 +209,11 @@ class DataManager {
 		return refined;
 	}
 	readData(data) {
+		//DeepCopy Hack
+		let then = new Date();
+		data = JSON.parse(JSON.stringify(data));
+		let now = new Date();
+		console.log('DeepCopy hack took ' + (now - then) + ' ms');
 		//Firstly, parse values to float
 		this.parseData(data);
 		//Values too low

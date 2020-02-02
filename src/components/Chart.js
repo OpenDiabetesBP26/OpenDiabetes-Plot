@@ -58,24 +58,36 @@ class Chart extends Component {
     }
 
     componentDidUpdate() {
+        //componentDidUpdate wird bei jedem prop und state change aufgerufen -> bloss keine state changes hier rein tun
         if (!this.props.data) { return; };
-        console.log('Updatet new data');
-        console.log(this.props.data)
-        //this.readData();
+
+        //Schauen ob die Daten sich geaendert haben bevor neue eingelesen werden
+        if (this.props.data != this.data) {
+            this.data = this.props.data;
+            console.log('Updatet new data');
+            console.log(this.props.data);
+
+            //Hier muesste dann noch der Zoom resettet werden.
+            //Wird bei den test.json Daten auch crashen, da DataManager nicht fuer solche Datenmengen ausgelegt ist.
+            //Muss definitiv noch mehr Error Management rein
+            this.readData();
+        }
 
     }
-    readData(){
+    readData() {
         //For now, create new datamanger
         this.data_manager = new DataManager();
         this.data_manager.readData(this.props.data);
         this.maxZoom = this.data_manager.getMaxZoom();
-        this.setState({ maxZoom: this.maxZoom });
+        //this.setState({ maxZoom: this.maxZoom });
     }
     //Wird einmalig aufgerufen, wenn es gemountet ist
     componentDidMount() {
         //Create Datamanager and read data
         console.log(this.props.data);
         this.data_manager = new DataManager();
+        //Wir speichern die Daten ab um spaeter pruefen zu koennen ob diese sich geaendert haben
+        this.data = this.props.data;
         this.readData();
         //Add d3 stuff
         let svg = d3.select("svg#d3sample");
@@ -118,7 +130,7 @@ class Chart extends Component {
             d3.select("svg").call(this.zoom.transform, d3.zoomIdentity.scale(k).translate(newXOffset, 0));
 
             //Update State
-            this.setState({x: this.x, y: this.y});
+            this.setState({ x: this.x, y: this.y });
 
         }
     }
