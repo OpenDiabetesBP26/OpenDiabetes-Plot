@@ -26,8 +26,8 @@ class MonthlyChart extends Component {
 
 
         let comp = d3.select("g#monthly");
-        this.hLineX = 185;
-        this.lLineX = 150;
+        this.hLineX = 150;
+        this.lLineX = 50;
         //svg graph für background
         this.background = comp.append("g")
         this.topbar = comp.append("rect")

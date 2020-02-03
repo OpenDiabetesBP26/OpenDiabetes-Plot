@@ -42,13 +42,11 @@ class BackGround {
     //第一个位x(0),其他的为scale的绝对位置
     creatXpos(d) {
         this.tickArray.map((e, i) => i == 0 ? this.xPos[i] = 0 : this.xPos[i] = d(e))
-        //console.log("xPos", this.xPos)
         return this.xPos;
     }
     // erzeuge widths für allen rects.
     getWds() {
         this.xPos.forEach((d, i) => i == this.xPos.length - 1 ? this.rectWs[i] = this.xLen - this.xPos[i] : this.rectWs[i] = this.xPos[i + 1] - d)
-        //console.log("rectWs_bevor: " , this.rectWs)
         this.rectWs.forEach((d, i) => d > 1 ? this.rectWs[i] -= 1 : d)
         return this.rectWs;
 
@@ -59,7 +57,6 @@ class BackGround {
             return 'intraday';
         } else {
             let tickStep = this.tickArray[2].getTime() - this.tickArray[1].getTime()
-            console.log("tickStep", tickStep)
             let result = '';
             if (tickStep >= 350 * 24 * 60 * 60 * 1000) {
                 result = 'yearly'
@@ -89,8 +86,6 @@ class BackGround {
 
     creatOpacity() {
         var ticksFormat = this.ticksFormat()
-        console.log("ticksFormat",ticksFormat)
-        console.log("tickss",this.tickArray)
         switch (ticksFormat) {
             case 'yearly':
                 return this.creatYearlyOpacity()
@@ -194,7 +189,6 @@ class BackGround {
     }
     creathalfhourlyOpacity() {
         console.log("creathalfhourlyOpacity")
-        console.log("d", this.tickArray)
         let OpacitySeed = []
         let rectOpacity = []
         OpacitySeed = this.in6StufeOpacity
