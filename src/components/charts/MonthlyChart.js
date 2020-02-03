@@ -26,8 +26,8 @@ class MonthlyChart extends Component {
 
 
         let comp = d3.select("g#monthly");
-        this.hLineX = 185;
-        this.lLineX = 150;
+        this.hLineX = 150;
+        this.lLineX = 50;
         //svg graph für background
         this.background = comp.append("g")
         this.topbar = comp.append("rect")
@@ -339,6 +339,23 @@ class MonthlyChart extends Component {
                     .attr("y", y(400) + 140 + props.margin.top)
                     .text("source: " + d.source)
                     .style("opacity", 1)
+
+                d3.select('#focusLineX').style('display', 'block');
+                //d3.select('#focusLineY').style('display', 'block');
+                //d3.select('#focusCircle').style('display', 'block');
+                //d3.select('#focusCircleInne').style('display', 'block')
+                d3.select('.tooltipTextT').style('display', 'block')
+                d3.select('.tooltipTextV').style('display', 'block')
+                d3.select('.tooltipTextS').style('display', 'block');
+            })
+            .on('wheel', function() {
+                d3.select('#focusLineX').style('display', 'none');
+                //d3.select('#focusLineY').style('display', 'none');
+                //d3.select('#focusCircle').style('display', 'none');
+                //d3.select('#focusCircleInne').style('display', 'none')
+                d3.select('.tooltipTextT').style('display', 'none')
+                d3.select('.tooltipTextV').style('display', 'none')
+                d3.select('.tooltipTextS').style('display', 'none');
             })
             .on('mousedown', function() {
                 d3.select('#focusLineX').style('display', 'none');
