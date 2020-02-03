@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { hot } from 'react-hot-loader';
 import * as d3 from 'd3';
 import BackGround from '../../services/BackGround.js';
-import $ from 'jquery';
 
 class IntradayChart extends Component {
     constructor(props) {
@@ -186,8 +185,8 @@ class IntradayChart extends Component {
             //ebene und focus-Elementen werden dargestellt
 			
 			// there is comflict betweeen overlay and tooltip-bootstrap
-            //d3.select('.overlay').attr("width", x.range()[1] - x.range()[0]);
-            //this.mouseCatchMove(props);
+            d3.select('.overlay').attr("width", x.range()[1] - x.range()[0]);
+            this.mouseCatchMove(props);
             //neue xAxis Daten von props
             let newxAxis = d3.axisTop(x)
             this.xAxis_graph.call(newxAxis)
@@ -267,7 +266,8 @@ class IntradayChart extends Component {
 				
         }
 		
-		//boostrap tooltip hover function
+		//use jquery$ boostrap tooltip hover function
+		/*
 			$(document).ready(function() {
 				$('[data-toggle="tooltip"]').tooltip({
 					placement: 'top',
@@ -277,6 +277,7 @@ class IntradayChart extends Component {
 				});
 			$('[data-toggle="tooltip"]').tooltip('hide')
 			});
+			*/
 				
         if (this.line != null) {
             var line = this.line.selectAll('line').data(props.data.basal).join(
