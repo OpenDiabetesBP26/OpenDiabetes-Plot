@@ -19,7 +19,8 @@ class IntradayChart extends Component {
 
             let yAxis = d3.axisLeft(this.props.y);
             this.yBasal = d3.scaleLinear().range([150, 0]).domain([0, 5]);
-            let yBasalAxis = d3.axisRight(this.yBasal)
+            let yBasalAxis = d3.axisRight(this.yBasal);
+            
             let y = this.props.y;
             let x = this.props.x;
             let margin = this.props.margin;
@@ -104,12 +105,27 @@ class IntradayChart extends Component {
                 .attr("transform", "translate(" + margin.left + "," + (margin.top + 25) + ")")
                 .call(xAxis);
 
-
-
             this.yAxis_graph = comp.append("g")
                 .attr("class", "yline")
                 .attr("transform", "translate(" + margin.left + "," + (margin.top + 60) + ")")
                 .call(yAxis);
+            
+            this.yBasal_gragh = comp.append("g")
+                .attr("class", "yline")
+                .attr("transform", "translate(" + margin.left + "," + (margin.top + 60 +y.range()[0] - 150) + ")")
+                .call(yBasalAxis);
+            
+            this.bLegendeText =
+            comp.append("text")
+                .text("BASAL RATES")
+                .attr("class", "legendeText1")
+                .attr("x", margin.left + 30)
+                .attr("y", margin.top + 60 +y.range()[0]+15)
+            comp.append("text")
+                .text("u/hr")
+                .attr("class", "legendeText2")
+                .attr("x", margin.left + 140)
+                .attr("y", margin.top + 60 +y.range()[0]+15)
 
             this.yAbdeckung = comp.append("line")
                 .attr("class", "yAbdeckung")
@@ -117,9 +133,6 @@ class IntradayChart extends Component {
                 .attr("y1", margin.top + y(400))
                 .attr("x2", margin.left)
                 .attr("y2", margin.top + 60 + y(0))
-
-
-
 
 
             this.circs = comp.append('g');
@@ -142,6 +155,12 @@ class IntradayChart extends Component {
                 .attr("x", margin.left)
                 .attr("y", margin.top)
                 .style("opacity", 0)
+            //basal Text
+            //comp.append('text')
+                //.attr("class", "tooltipTextB")
+                //.attr("x", margin.left)
+                //.attr("y", margin.top)
+                //.style("opacity", 0)
 
             this.drawChart(this.props);
 
@@ -225,14 +244,31 @@ class IntradayChart extends Component {
                 )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
         }
+        //Basal
         if (this.line != null) {
-            var line = this.line.selectAll('line').data(props.data.basal).join(
+            var baLine = this.line.selectAll('line').data(props.data.basal).join(
                 (enter) => enter.append('line')
                     .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
                     .attr('y1', d => yb(+d.value))
                     .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
                     .attr('y2', d => yb(+d.value))
-                    .attr('stroke', 'blue'),
+                    .attr("class", "basal"),
+                (update) => update
+                    .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
+                    .attr('y1', d => y(+d.value))
+                    .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
+                    .attr('y2', d => y(+d.value)))
+
+                .attr('transform', 'translate(' + this.props.margin.left + ' ' + ((this.props.margin.top + 60 + this.props.y.range()[0] - 150)) + ')');
+            
+        //Bolus(the other value)
+            var boLine = this.line.selectAll('line').data(props.data.bolus).join(
+                (enter) => enter.append('line')
+                    .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
+                    .attr('y1', d => yb(+d.value))
+                    .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
+                    .attr('y2', d => yb(+d.value))
+                    .attr("class", "bolus"),
                 (update) => update
                     .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
                     .attr('y1', d => yb(+d.value))
@@ -273,6 +309,7 @@ class IntradayChart extends Component {
                 d3.select('.tooltipTextT').style('display', null)
                 d3.select('.tooltipTextV').style('display', null)
                 d3.select('.tooltipTextS').style('display', null);
+                //d3.select('.tooltipTextB').style('display', null);
             })
             .on('mouseout', function() {
                 d3.select('#focusLineX').style('display', 'none');
@@ -282,6 +319,7 @@ class IntradayChart extends Component {
                 d3.select('.tooltipTextT').style('display', 'none')
                 d3.select('.tooltipTextV').style('display', 'none')
                 d3.select('.tooltipTextS').style('display', 'none');
+                //d3.select('.tooltipTextB').style('display', 'none');
             })
             .on('mousemove', function() {
                 let mouse = d3.mouse(this);
@@ -337,6 +375,11 @@ class IntradayChart extends Component {
                     .attr("y", y(400) + 140 + props.margin.top)
                     .text("source: " + d.source)
                     .style("opacity", 1)
+                //d3.select(".tooltipTextB")
+                    //.attr("x", xPos >= x.range()[1]*(3/4) - props.margin.left ? xPos - 400 : xPos + 60)
+                    //.attr("y", y(400) + 140 + props.margin.top)
+                    //.text("source: " + d.source)
+                    //.style("opacity", 1)
             })
             .on('mousedown', function() {
                 d3.select('#focusLineX').style('display', 'none');
@@ -346,6 +389,7 @@ class IntradayChart extends Component {
                 d3.select('.tooltipTextT').style('display', 'none')
                 d3.select('.tooltipTextV').style('display', 'none')
                 d3.select('.tooltipTextS').style('display', 'none');
+                //d3.select('.tooltipTextB').style('display', 'none');
             })
             .on('click', function() {
                 d3.select('#focusLineX').style('display', 'block');
@@ -355,6 +399,7 @@ class IntradayChart extends Component {
                 d3.select('.tooltipTextT').style('display', 'block')
                 d3.select('.tooltipTextV').style('display', 'block')
                 d3.select('.tooltipTextS').style('display', 'block');
+                //d3.select('.tooltipTextB').style('display', 'block');
             });
     }
 
