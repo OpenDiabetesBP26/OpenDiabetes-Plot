@@ -1,5 +1,40 @@
 @import "~bootstrap/scss/bootstrap";
 
+// d3-tip border and font attribute
+.d3-tip {
+  line-height: 1;
+  //font-weight: bold;
+  padding: 7px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #FFF;
+  border-radius: 7px;
+  font-size:85%;
+  width: 120px;
+  
+  //margin:0% 0% 0% 10%;
+}
+
+// d3-tip arrow attibute
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+// d3-tip direction attribute (top)
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left:0%;
+  
+}
+
 div.stat-container{
     width:100%;
     height:100px;
@@ -58,20 +93,13 @@ div.stat-container.hypo{
     }
 }
 
-.define-tooltip-inner{
-	background:#ccc;
-	text-align: left;
-	color:#000;
-	opacity:0.9;
-}
-
 body {
     h1 {
         color: green;
     }
 
     main {
-
+	
         //x-Achse
         .xline {
             color: white;

@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { hot } from 'react-hot-loader';
 import * as d3 from 'd3';
 import BackGround from '../../services/BackGround.js';
+// use d3-tip
+import d3Tip from 'd3-tip';
 
 class IntradayChart extends Component {
     constructor(props) {
@@ -179,14 +181,22 @@ class IntradayChart extends Component {
         let y = props.y;
         let x = props.x;
         let yb = this.yBasal;
+		// d3-tip initialisation 
+		let tip = d3Tip().attr('class', 'd3-tip')
+						.offset([-10, 0])
+						.html(function(d) { return "<p text-align='left'>Time: " + d.time
+																	+ "<br/>Value: " + d.value
+																	+ "<br/>Source: " + d.source + "</p>"; 
+						});
+		// call tip funktion
+		d3.select("body").append('svg').call(tip);
 
         //wenn xAxis neue Scale bekommt, erneue Graph von xAxis und draw Background
         if (this.xAxis_graph) {
-            //ebene und focus-Elementen werden dargestellt
-			
-			// there is comflict betweeen overlay and tooltip-bootstrap
-            d3.select('.overlay').attr("width", x.range()[1] - x.range()[0]);
-            this.mouseCatchMove(props);
+            // there is a conflict between Qing's Implementation of tooltip and Yichen's 
+			//ebene und focus-Elementen werden dargestellt
+            //d3.select('.overlay').attr("width", x.range()[1] - x.range()[0]);
+            //this.mouseCatchMove(props);
             //neue xAxis Daten von props
             let newxAxis = d3.axisTop(x)
             this.xAxis_graph.call(newxAxis)
@@ -221,63 +231,42 @@ class IntradayChart extends Component {
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
                     .attr('fill', d => this.circleColor(d.value))
-					// boostrap tooltip text
-					.attr('class', 'my_circle')
-					.attr('data-toggle', "tooltip")
-					.attr('title', function(d) {
-						return "<p text-align='left'>Time: " + d.time
-						+ "<br/>Value: " + d.value
-						+ "<br/>Source: " + d.source + "</p>"
-					})
+					// d3-tip tooltip hover funktion
 					.on('mouseover', function(d) {
+						let args = Array.prototype.slice.call(arguments);
 						d3.select(this).transition()
 						.duration(300)
-						.attr('r', 3 * 3)
+						.attr('r', 3 * 3);
+						tip.show.apply(this, [...args]);
 					})
 					.on('mouseout', function(d) {
 						d3.select(this).transition()
 						.duration(300)
-						.attr('r',3)
+						.attr('r',3);
+						tip.hide();
 					}),
                     (update) => update
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
                     .attr('fill', d => this.circleColor(d.value))
-					// boostrap tooltip text
-					.attr('class', 'my_circle')
-					.attr('data-toggle', "tooltip")
-					.attr('title', function(d) {
-						return "<p text-align='left'>Time: " + d.time
-						+ "<br/>Value: " + d.value
-						+ "<br/>Source: " + d.source + "</p>"
-					})
+					// d3-tip tooltip hover funktion
 					.on('mouseover', function(d) {
+						let args = Array.prototype.slice.call(arguments);
 						d3.select(this).transition()
 						.duration(300)
-						.attr('r', 3 * 3)
+						.attr('r', 3 * 3);
+						tip.show.apply(this, [...args]);
 					})
 					.on('mouseout', function(d) {
 						d3.select(this).transition()
 						.duration(300)
-						.attr('r',3)
+						.attr('r',3);
+						tip.hide();
 					})
                 )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
-				
         }
 		
-		//use jquery$ boostrap tooltip hover function
-		/*
-			$(document).ready(function() {
-				$('[data-toggle="tooltip"]').tooltip({
-					placement: 'top',
-					container:'body',
-					html: true,
-					template: '<div class="tooltip" role="tooltip"><div class="arrow define-tooltip-arrow"></div><div class="tooltip-inner define-tooltip-inner"></div></div>'
-				});
-			$('[data-toggle="tooltip"]').tooltip('hide')
-			});
-			*/
 				
         if (this.line != null) {
             var line = this.line.selectAll('line').data(props.data.basal).join(
@@ -413,6 +402,10 @@ class IntradayChart extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
+		//remove all old tooltip, when zoom-in or zoom-out
+		//it is necessary to perform twice remove opearation, because old tooltip sometimes remains in charts after only one time remove operation, i don't know the reason
+		d3.select(".d3-tip").remove();
+		d3.select(".d3-tip").remove();
         //Wir können Daten hier neu rendern
         this.drawChart(nextProps);
         console.log(nextProps.data);
