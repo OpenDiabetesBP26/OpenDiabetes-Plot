@@ -29,7 +29,8 @@ class IntradayChart extends Component {
 
 
             let comp = d3.select("g#intraday");
-
+			this.hLineX = 150;
+            this.lLineX = 50;
             //svg graph für background
             this.background = comp.append("g")
             //add background für bar am top
@@ -85,15 +86,15 @@ class IntradayChart extends Component {
                 comp.append("line")
                 .attr("class", "dashLineH_N")
                 .attr("x1", margin.left + x.range()[0])
-                .attr("y1", margin.top + 60 + y(185))
+                .attr("y1", margin.top + 60 + y(this.hLineX))
                 .attr("x2", margin.left + x.range()[1])
-                .attr("y2", margin.top + 60 + y(185))
+                .attr("y2", margin.top + 60 + y(this.hLineX))
             comp.append("line")
                 .attr("class", "dashLineN_L")
                 .attr("x1", margin.left + x.range()[0])
-                .attr("y1", margin.top + 60 + y(65))
+                .attr("y1", margin.top + 60 + y(this.lLineX))
                 .attr("x2", margin.left + x.range()[1])
-                .attr("y2", margin.top + 60 + y(65));
+                .attr("y2", margin.top + 60 + y(this.lLineX));
 
             //Bereich von Analystische Darstellung
             this.analysis = comp.append("g")
@@ -124,8 +125,8 @@ class IntradayChart extends Component {
 
 
 
-            this.circs = comp.append('g')
-				.attr("class", "gcircle");
+            this.circs = comp.append('g');
+			
             this.line = comp.append("g");
 
             //tooltips Text
@@ -214,7 +215,7 @@ class IntradayChart extends Component {
                     .attr('width', (d, i) => wdArr[i])
                     .style("fill", "lightgray")
                     .style("opacity", (d, i) => opacityArr[i]),
-                (update) => update
+					(update) => update
                     .attr('x', d => d)
                     .attr('width', (d, i) => wdArr[i])
                     .style("opacity", (d, i) => opacityArr[i])
@@ -270,13 +271,13 @@ class IntradayChart extends Component {
 				
         if (this.line != null) {
             var line = this.line.selectAll('line').data(props.data.basal).join(
-                (enter) => enter.append('line')
+					(enter) => enter.append('line')
                     .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
                     .attr('y1', d => yb(+d.value))
                     .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
                     .attr('y2', d => yb(+d.value))
                     .attr('stroke', 'blue'),
-                (update) => update
+					(update) => update
                     .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
                     .attr('y1', d => yb(+d.value))
                     .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
@@ -299,7 +300,7 @@ class IntradayChart extends Component {
     }
     //circle_color 
     circleColor(d) {
-        return d >= 185 ? '#3498DB' : d >= 65 ? '#58D68D' : '#DC7633';
+        return d >= this.hLineX ? '#3498DB' : d >= this.lLineX ? '#58D68D' : '#DC7633';
     }
     //focus zeigt zuerst automatisch, wenn man mouse click halten, dann focus sich verbergt, 
     //nach dem verschieben oder zoomen, mit ein mal mouseclick wird focus wieder dargestellt.
@@ -380,7 +381,23 @@ class IntradayChart extends Component {
                     .attr("y", y(400) + 140 + props.margin.top)
                     .text("source: " + d.source)
                     .style("opacity", 1)
+				d3.select('#focusLineX').style('display', 'block');
+                d3.select('#focusLineY').style('display', 'block');
+                d3.select('#focusCircle').style('display', 'block');
+                d3.select('#focusCircleInne').style('display', 'block');
+                d3.select('.tooltipTextT').style('display', 'block');
+                d3.select('.tooltipTextV').style('display', 'block');
+                d3.select('.tooltipTextS').style('display', 'block');												    
             })
+			.on('wheel', function() {
+                d3.select('#focusLineX').style('display', 'none');
+                d3.select('#focusLineY').style('display', 'none');
+                d3.select('#focusCircle').style('display', 'none');
+                d3.select('#focusCircleInne').style('display', 'none')
+                d3.select('.tooltipTextT').style('display', 'none')
+                d3.select('.tooltipTextV').style('display', 'none')
+                d3.select('.tooltipTextS').style('display', 'none');
+            })							 
             .on('mousedown', function() {
                 d3.select('#focusLineX').style('display', 'none');
                 d3.select('#focusLineY').style('display', 'none');
@@ -390,13 +407,14 @@ class IntradayChart extends Component {
                 d3.select('.tooltipTextV').style('display', 'none')
                 d3.select('.tooltipTextS').style('display', 'none');
             })
+			//nur wenn automatische Darstellung ungültig ist!! 													
             .on('click', function() {
                 d3.select('#focusLineX').style('display', 'block');
                 d3.select('#focusLineY').style('display', 'block');
                 d3.select('#focusCircle').style('display', 'block');
-                d3.select('#focusCircleInne').style('display', 'block')
-                d3.select('.tooltipTextT').style('display', 'block')
-                d3.select('.tooltipTextV').style('display', 'block')
+                d3.select('#focusCircleInne').style('display', 'block');
+                d3.select('.tooltipTextT').style('display', 'block');
+                d3.select('.tooltipTextV').style('display', 'block');
                 d3.select('.tooltipTextS').style('display', 'block');
             });
     }
