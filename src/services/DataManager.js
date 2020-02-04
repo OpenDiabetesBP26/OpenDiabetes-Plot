@@ -22,166 +22,6 @@ class DataManager {
 		}
 	}
 
-	parseData(data) {
-		data.forEach(d => {
-			d.time = new Date(d.epoch);
-			delete d.isoTime;
-			delete d.epoch;
-			if(d.type == this.types.glucose){
-				d.value = parseInt(d.value);
-			}
-			else if(d.type == this.types.basal_profile || d.type == this.types.basal_temp || d.type == this.types.bolus || d.type == this.types.carbs){
-				d.value = parseFloat(d.value);
-			}
-		});
-	}
-
-	parseBasal(basal, basal_temp) {
-		let basal_profile_offset = 60000 * 60;
-		//Assumption -> basal and basal_temp are sorted on time
-
-		//Add offset to basal
-		basal = basal.map(d => {
-			d.time_start = d.time;
-			d.value = parseFloat(d.value);
-			d.time_end = new Date(d.time.getTime() + basal_profile_offset);
-			return d;
-		})
-		//For temp, parse value to float, calculate start and end time
-		basal_temp = basal_temp.map(d => {
-			d.value = parseFloat(d.value);
-			d.time_start = d.time;
-			d.time_end = new Date(d.time.getTime() + (d.valueExtension * 60000));
-			return d;
-		})
-		//Remove overlapping by overwriting
-		let i;
-		for (i = 0; i < basal_temp.length - 1; i++) {
-			if (basal_temp[i].time_end.getTime() > basal_temp[i + 1].time_start.getTime()) {
-				basal_temp[i].time_end = new Date(basal_temp[i + 1].time_start.getTime());
-			}
-		}
-		//Create arry containing results
-		let basal_combined = [];
-		//filter 0.0 values, as they seem to only reset basal
-		//not needed as end time was calculated
-		//Reverse lists for pop()
-		basal_temp = basal_temp.filter(d => d.valueExtension != 0).reverse();
-		basal = basal.reverse();
-		//Get first elements
-		let last_basal = basal.pop();
-		let last_temp = basal_temp.pop();
-		//Iterate until all are used
-		while (last_basal != null || last_temp != null) {
-			//If there are no basal temp anymore, add every profile
-			if (last_temp == null) {
-				while (last_basal != null) {
-					basal_combined.push(last_basal);
-					last_basal = basal.pop();
-				}
-			}
-			//If last basal profile is null, temp cannot be computed anymore
-			if (last_basal == null) {
-				break;
-			}
-			//If temp is not in time range for profile, append profile until then
-			while (last_temp.time_start > last_basal.time_end) {
-				basal_combined.push(last_basal);
-				last_basal = basal.pop();
-			}
-			//Assumption: last_basal.time_end >= last_temp.time_start --> last_temp.time_start >= last_basal.time_start
-			//If start times do not equal, there must be a first part only containing basal profile
-			if (last_basal.time_start.getTime() != last_temp.time_start.getTime()) {
-				let b = {
-					origin: last_basal.origin,
-					source: last_basal.source,
-					type: last_basal.type,
-					value: last_basal.value,
-					time_start: new Date(last_basal.time_start.getTime()),
-					time_end: new Date(last_temp.time_start.getTime())
-				}
-				basal_combined.push(b);
-			}
-			if (last_basal.time_end.getTime() == last_temp.time_end.getTime()) {
-				last_temp.value_inc = last_temp.value;
-				last_temp.value = last_basal.value + last_temp.value;
-				if (basal_combined.length > 0 &&
-					basal_combined[basal_combined.length - 1].type == 'BASAL_TEMP' &&
-					basal_combined[basal_combined.length - 1].value == last_temp.value &&
-					basal_combined[basal_combined.length - 1].value_inc == last_temp.value_inc) {
-
-					basal_combined[basal_combined.length - 1].time_end = new Date(last_temp.time_end.getTime());
-
-				} else {
-
-					basal_combined.push(last_temp);
-				}
-				last_basal = basal.pop();
-				last_temp = basal_temp.pop();
-			}
-			else if (last_basal.time_end.getTime() < last_temp.time_end.getTime()) {
-				let temp_end = {
-					origin: last_temp.origin,
-					source: last_temp.source,
-					type: last_temp.type,
-					value: last_basal.value + last_temp.value,
-					value_inc: last_temp.value,
-					time_start: new Date(last_temp.time_start.getTime()),
-					time_end: new Date(last_basal.time_end.getTime())
-				}
-				last_temp.time_start = new Date(last_basal.time_end.getTime());
-				//Check if last entry is the same
-				if (basal_combined.length > 0 &&
-					basal_combined[basal_combined.length - 1].type == 'BASAL_TEMP' &&
-					basal_combined[basal_combined.length - 1].value == temp_end.value &&
-					basal_combined[basal_combined.length - 1].value_inc == temp_end.value_inc) {
-
-					basal_combined[basal_combined.length - 1].time_end = new Date(temp_end.time_end.getTime());
-
-				} else {
-
-					basal_combined.push(temp_end);
-				}
-				last_basal = basal.pop();
-			} else {
-				last_temp.value_inc = last_temp.value;
-				last_temp.value = last_basal.value + last_temp.value;
-
-				let b_end = {
-					origin: last_basal.origin,
-					source: last_basal.source,
-					type: last_basal.type,
-					value: last_basal.value,
-					time_start: new Date(last_temp.time_end.getTime()),
-					time_end: new Date(last_basal.time_end.getTime())
-				}
-				if (basal_combined.length > 0 &&
-					basal_combined[basal_combined.length - 1].type == 'BASAL_TEMP' &&
-					basal_combined[basal_combined.length - 1].value == last_temp.value &&
-					basal_combined[basal_combined.length - 1].value_inc == last_temp.value_inc) {
-
-					basal_combined[basal_combined.length - 1].time_end = new Date(last_temp.time_end.getTime());
-
-				} else {
-
-					basal_combined.push(last_temp);
-				}
-				last_temp = basal_temp.pop();
-				last_basal = b_end;
-
-			}
-		}
-		if (basal_combined.length != 0) {
-			basal_combined[0].value_prev = 0;
-			basal_combined[0].time = new Date(basal_combined[0].time_start.getTime());
-			for (i = 1; i < basal_combined.length; i++) {
-				//Stunden offset 
-				basal_combined[i].value_prev = basal_combined[i - 1].value;
-				basal_combined[i].time = new Date(basal_combined[i].time_start.getTime());
-			}
-		}
-		return basal_combined;
-	}
 	parsePrediction(predictions) {
 		let refined = d3.nest()
 			.key(d => d.time)
@@ -209,29 +49,123 @@ class DataManager {
 		return refined;
 	}
 	readData(data) {
-		//Firstly, parse values to float
-		this.parseData(data);
-		//Values too low
-		let low = data.filter(d => d.type == this.types.glucose && d.value < 40);
-		low.filter(d => d.value > 30).forEach(d => d.value = 40.0);
-		//Delete those under 40 now
-		data = data.filter(d => d.type == this.types.glucose && d.value >= 40);
+		//TODO Annahme Daten sind nach Datum sortiert
+		//More efficient algo
+		const hours = 60000 * 60;
+		const minute = 60000;
+		const underLimit = 40;
+		const upperLimit = 400;
+		const basalTimeLimit = 0;
+		let last_basal_profile = undefined;
+		let last_basal_temp = undefined;
+		let basal_temp = [];
+		let item = undefined;
+		let items = [];
+		let maxDomain = [Infinity, 0];
+		//Iterate data
+		for (let i = 0; i < data.length; i++) {
+			if (!data[i] || !data[i].epoch || !data[i].value || !data[i].type) continue;
+			if(data[i].epoch < maxDomain[0]) maxDomain[0] = data[i].epoch;
+			if(data[i].epoch > maxDomain[1]) maxDomain[1] = data[i].epoch;
+			let value;
+			let lastValue;
+			switch (data[i].type) {
+				case (this.types.glucose):
+					value = parseInt(data[i].value);
+					if (value < underLimit) value = underLimit;
+					if (value > upperLimit) value = upperLimit;
+					item = {
+						time: new Date(data[i].epoch),
+						value: value,
+						type: this.types.glucose
+					}
+					items.push(item);
+					break;
+				case (this.types.basal_profile):
+					lastValue = 0.00;
+					value = parseFloat(data[i].value);
+					if (last_basal_profile && data[i].epoch - last_basal_profile.time.getTime() <= basalTimeLimit) {
+						lastValue = last_basal_profile.value;
+					}
+					item = {
+						time: new Date(data[i].epoch),
+						value: value,
+						type: this.types.basal_profile,
+						lastValue: lastValue,
+						timeEnd: new Date(data[i].epoch + (1) * hours)
+					}
 
-		//Cap highs to limit
-		data.filter(d => d.type == this.types.glucose && d.value > 400).forEach(d => d.value = 400);
+					//Check temp insulin
+					if (!last_basal_temp || last_basal_temp.timeEnd.getTime() <= item.time.getTime()) {
+						let newTemp = {
+							time: item.time,
+							value: item.value,
+							type: this.types.basal_temp,
+							lastValue:  last_basal_temp &&  last_basal_temp.timeEnd.getTime() == item.time.getTime() ?  last_basal_temp.value : item.lastValue,
+							timeEnd: item.timeEnd
+						}
+						last_basal_temp = newTemp;
+						items.push(newTemp);
+					}
 
-		this.maxDomain = d3.extent(data, d => d.time);
-		let basal_profile = data.filter(d => d.type == this.types.basal_profile);
-		let basal_temp = data.filter(d => d.type == this.types.basal_temp);
-		//Remove those from data
-		data = data.filter(d => d.type != this.types.basal_profile && d.type != this.types.basal_temp);
-		let basal_combined = this.parseBasal(basal_profile, basal_temp);
+					last_basal_profile = item;
+					items.push(item);
+					break;
+
+				case (this.types.basal_temp):
+					item = {
+						time: new Date(data[i].epoch),
+						value: parseFloat(data[i].value),
+						valueExtension: data[i].valueExtension,
+						type: this.types.basal_temp,
+						lastValue: 0.00,
+						timeEnd: new Date(data[i].epoch + (data[i].valueExtension * minute))
+					}
+					if (last_basal_temp) {
+						if (last_basal_temp.timeEnd.getTime() >= item.time.getTime()) {
+							last_basal_temp.timeEnd = new Date(item.time.getTime());
+							item.lastValue = last_basal_temp.value;
+						} else {
+							let newBasal = {
+								time: new Date(last_basal_temp.timeEnd.getTime()),
+								value: last_basal_profile && last_basal_profile.timeEnd.getTime() > item.time.getTime() ? last_basal_profile.value : 0.00,
+								type: this.types.basal_temp,
+								lastValue: last_basal_temp.value,
+								timeEnd: new Date(item.time.getTime())
+							}
+							items.push(newBasal);
+						}
+
+					}
+					last_basal_temp = item;
+					items.push(item);
+					break;
+				case (this.types.bolus):
+					item = {
+						time: new Date(data[i].epoch),
+						value: parseFloat(data[i].value),
+						type: this.types.bolus
+					}
+					items.push(item);
+					break;
+				case (this.types.carbs):
+					item = {
+						time: new Date(data[i].epoch),
+						value: parseFloat(data[i].value),
+						type: this.types.carbs
+					}
+					items.push(item);
+					break;
+				default:
+					break;
+			}
+
+		}
+		this.maxDomain = [new Date(maxDomain[0]), new Date(maxDomain[1])];
 
 		let types = this.types;
-		//Add in crossfilter
-		let data_crossfilter = crossfilter(data);
-		data_crossfilter.add(basal_combined);
 
+		let data_crossfilter = crossfilter(items);
 		//Create filter dimension
 		let filter_dim = data_crossfilter.dimension(d => d.time);
 		let group_dim = data_crossfilter.dimension(d => d.time);
@@ -244,7 +178,7 @@ class DataManager {
 					return p;
 				}
 				else if (v.type == types.basal_profile || v.type == types.basal_temp) {
-					let weight = (v.time_end - v.time_start) / (60000 * 60.0);
+					let weight = (v.timeEnd - v.time) / (60000 * 60.0);
 					p.basal.sum += (weight * v.value);
 					return p;
 				} else if (v.type == types.bolus) {
@@ -266,7 +200,7 @@ class DataManager {
 					return p;
 				}
 				else if (v.type == types.basal_profile || v.type == types.basal_temp) {
-					let weight = (v.time_end - v.time_start) / (60000 * 60);
+					let weight = (v.timeEnd - v.time) / (60000 * 60);
 					p.basal.sum -= (weight * v.value);
 					return p;
 
@@ -311,7 +245,7 @@ class DataManager {
 					return p;
 				}
 				else if (v.type == types.basal_profile || v.type == types.basal_temp) {
-					let weight = (v.time_end - v.time_start) / (60000 * 60.0);
+					let weight = (v.timeEnd - v.time) / (60000 * 60.0);
 					p.basal.sum += (weight * v.value);
 					return p;
 				} else if (v.type == types.bolus) {
@@ -333,7 +267,7 @@ class DataManager {
 					return p;
 				}
 				else if (v.type == types.basal_profile || v.type == types.basal_temp) {
-					let weight = (v.time_end - v.time_start) / (60000 * 60);
+					let weight = (v.timeEnd - v.time) / (60000 * 60);
 					p.basal.sum -= (weight * v.value);
 					return p;
 
@@ -369,7 +303,7 @@ class DataManager {
 		);
 		let limit = 400;
 		//Reduce function for percentile
-		function reduceAddPercentile(p, v, nf){
+		function reduceAddPercentile(p, v, nf) {
 			if (v.type == types.glucose) {
 				let value = parseInt(v.value);
 				if (value > limit) {
@@ -383,7 +317,7 @@ class DataManager {
 				return p;
 			}
 			else if (v.type == types.basal_profile || v.type == types.basal_temp) {
-				let weight = (v.time_end - v.time_start) / (60000 * 60.0);
+				let weight = (v.timeEnd - v.time) / (60000 * 60.0);
 				p.basal.sum += (weight * v.value);
 				return p;
 			} else if (v.type == types.bolus) {
@@ -410,7 +344,7 @@ class DataManager {
 				return p;
 			}
 			else if (v.type == types.basal_profile || v.type == types.basal_temp) {
-				let weight = (v.time_end - v.time_start) / (60000 * 60);
+				let weight = (v.timeEnd - v.time) / (60000 * 60);
 				p.basal.sum -= (weight * v.value);
 				return p;
 
@@ -425,7 +359,7 @@ class DataManager {
 				return p;
 			}
 		}
-		function reduceInitialPercentile(){
+		function reduceInitialPercentile() {
 			return {
 				glucose: {
 					sum: 0,
@@ -621,9 +555,10 @@ class DataManager {
 		let results = {
 			glucose: data.filter(d => d.type == this.types.glucose),
 			bolus: data.filter(d => d.type == this.types.bolus),
-			basal: data.filter(d => d.type == this.types.basal_temp || d.types == this.types.basal_profile),
+			basal: data.filter(d => d.type == this.types.basal_temp || d.type == this.types.basal_profile),
 			carbs: data.filter(d => d.type == this.types.carbs)
 		}
+		console.log(results);
 		return results;
 	}
 	getThreeHourlyData() {
