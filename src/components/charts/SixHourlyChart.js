@@ -227,22 +227,23 @@ class SixHourlyChart extends Component {
                 )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
         }
-        if (this.line != null) {
-            var line = this.line.selectAll('line').data(props.data.basal).join(
-                    (enter) => enter.append('line')
-                    .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
-                    .attr('y1', d => yb(+d.value))
-                    .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
-                    .attr('y2', d => yb(+d.value))
-                    .attr('stroke', 'blue'),
-                    (update) => update
-                    .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
-                    .attr('y1', d => yb(+d.value))
-                    .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
-                    .attr('y2', d => yb(+d.value)))
+        //Disabled for presentation due to performance
+        // if (this.line != null) {
+        //     var line = this.line.selectAll('line').data(props.data.basal).join(
+        //             (enter) => enter.append('line')
+        //             .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
+        //             .attr('y1', d => yb(+d.value))
+        //             .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
+        //             .attr('y2', d => yb(+d.value))
+        //             .attr('stroke', 'blue'),
+        //             (update) => update
+        //             .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
+        //             .attr('y1', d => yb(+d.value))
+        //             .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
+        //             .attr('y2', d => yb(+d.value)))
 
-                .attr('transform', 'translate(' + this.props.margin.left + ' ' + ((this.props.margin.top + 60 + this.props.y.range()[0] - 150)) + ')');
-        }
+        //         .attr('transform', 'translate(' + this.props.margin.left + ' ' + ((this.props.margin.top + 60 + this.props.y.range()[0] - 150)) + ')');
+        // }
 
         //update topbar
         if (this.topbar) {

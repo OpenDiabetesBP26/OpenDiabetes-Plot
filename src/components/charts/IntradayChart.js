@@ -47,10 +47,10 @@ class IntradayChart extends Component {
             //drei Kreise von Legende
             this.lengdeCircs =
                 comp.append("circle")
-                .attr("class", "legendeCircleH")
-                .attr('cx', x.range()[1] - 20)
-                .attr('cy', margin.top + 45)
-                .attr('r', 6)
+                    .attr("class", "legendeCircleH")
+                    .attr('cx', x.range()[1] - 20)
+                    .attr('cy', margin.top + 45)
+                    .attr('r', 6)
             comp.append("circle")
                 .attr("class", "legendeCircleN")
                 .attr('cx', x.range()[1] - 40)
@@ -64,10 +64,10 @@ class IntradayChart extends Component {
             //Text von Legende
             this.legendeText =
                 comp.append("text")
-                .attr("class", "legendeCircText")
-                .text("low high")
-                .attr("x", x.range()[1] - 110)
-                .attr("y", margin.top + 50)
+                    .attr("class", "legendeCircText")
+                    .text("low high")
+                    .attr("x", x.range()[1] - 110)
+                    .attr("y", margin.top + 50)
             comp.append("text")
                 .text("BLOOD BLUCOSE")
                 .attr("class", "legendeText1")
@@ -81,11 +81,11 @@ class IntradayChart extends Component {
 
             this.dashLine =
                 comp.append("line")
-                .attr("class", "dashLineH_N")
-                .attr("x1", margin.left + x.range()[0])
-                .attr("y1", margin.top + 60 + y(this.hLineX))
-                .attr("x2", margin.left + x.range()[1])
-                .attr("y2", margin.top + 60 + y(this.hLineX))
+                    .attr("class", "dashLineH_N")
+                    .attr("x1", margin.left + x.range()[0])
+                    .attr("y1", margin.top + 60 + y(this.hLineX))
+                    .attr("x2", margin.left + x.range()[1])
+                    .attr("y2", margin.top + 60 + y(this.hLineX))
             comp.append("line")
                 .attr("class", "dashLineN_L")
                 .attr("x1", margin.left + x.range()[0])
@@ -124,10 +124,10 @@ class IntradayChart extends Component {
             //tooltips Text
             this.tooltipText =
                 comp.append('text')
-                .attr("class", "tooltipTextT")
-                .attr("x", margin.left)
-                .attr("y", margin.top)
-                .style("opacity", 0)
+                    .attr("class", "tooltipTextT")
+                    .attr("x", margin.left)
+                    .attr("y", margin.top)
+                    .style("opacity", 0)
             comp.append('text')
                 .attr("class", "tooltipTextV")
                 .attr("x", margin.left)
@@ -190,18 +190,18 @@ class IntradayChart extends Component {
             let wdArr = bg.getWds();
 
             let ticksGroup = this.background.selectAll('rect').data(xPos).join(
-                    (enter) => enter.append('rect')
+                (enter) => enter.append('rect')
                     .attr('x', d => d)
                     .attr('y', y(400))
                     .attr('height', 400)
                     .attr('width', (d, i) => wdArr[i])
                     .style("fill", "lightgray")
                     .style("opacity", (d, i) => opacityArr[i]),
-                    (update) => update
+                (update) => update
                     .attr('x', d => d)
                     .attr('width', (d, i) => wdArr[i])
                     .style("opacity", (d, i) => opacityArr[i])
-                )
+            )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
         }
 
@@ -209,33 +209,56 @@ class IntradayChart extends Component {
 
         if (this.circs != null) {
             let circles = this.circs.selectAll('circle').data(props.data.glucose).join(
-                    (enter) => enter.append('circle')
+                (enter) => enter.append('circle')
                     .attr('r', 3)
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
                     .attr('fill', d => this.circleColor(d.value)),
-                    (update) => update
+                (update) => update
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
                     .attr('fill', d => this.circleColor(d.value))
-                )
+            )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
         }
         if (this.line != null) {
-            var line = this.line.selectAll('line').data(props.data.basal).join(
-                    (enter) => enter.append('line')
-                    .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
-                    .attr('y1', d => yb(+d.value))
-                    .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
-                    .attr('y2', d => yb(+d.value))
-                    .attr('stroke', 'blue'),
-                    (update) => update
-                    .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
-                    .attr('y1', d => yb(+d.value))
-                    .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
-                    .attr('y2', d => yb(+d.value)))
+            this.line.selectAll("path").remove();
+            if (props.data.basal.length != 0) {
+                //Basal to line points
+                const linegen = (data) => {
+                    let points = []
+                    points.push({ x: 0, y: yb(data[0].lastValue) });
+                    let lastEnd = undefined;
+                    for (let i = 0; i < data.length; i++) {
+                        if (lastEnd && lastEnd.getTime() < data[i].time.getTime()) {
+                            points.push({ x: x(lastEnd), y: yb(0) })
+                            points.push({ x: x(data[i].time), y: yb(0) })
+                        }
+                        points.push({ x: x(data[i].time), y: yb(data[i].lastValue) })
+                        points.push({ x: x(data[i].time), y: yb(data[i].value) })
+                        points.push({ x: x.range()[1] > x(data[i].timeEnd) ? x(data[i].timeEnd) : x.range()[1], y: yb(data[i].value) })
+                        lastEnd = data[i].timeEnd;
+                    }
+                    if (x(lastEnd) < x.range()[1]) {
+                        points.push({ x: x(lastEnd), y: yb(0) })
+                        points.push({ x: x.range()[1], y: yb(0) })
+                    }
+                    return points;
+                }
+                let basal_temp_points = linegen(props.data.basal);
+                
+                let lines = d3.line().x(d => d.x).y(d => d.y);
+                let area = d3.area().x(d => d.x).y0(yb(0)).y1(d => d.y);
+                this.line.append("path").attr("d", area(basal_temp_points)).attr("stroke", "lightblue").attr("style", "fill: lightblue; opacity:0.5").attr("stroke-width", 2).attr("fill", "none")
+                if(props.data.basal_profile.length != 0){
+                    let basal_profile_points = linegen(props.data.basal_profile);
+                    this.line.append("path").attr("d", lines(basal_profile_points)).attr("stroke", "blue").attr("stroke-width", 2).attr("stroke-dasharray","3,3,3").attr("fill", "none")
+                } 
+                this.line.append("path").attr("d", lines(basal_temp_points)).attr("stroke", "blue").attr("stroke-width", 2).attr("fill", "none")
+                this.line.attr('transform', 'translate(' + this.props.margin.left + ' ' + ((this.props.margin.top + 60 + this.props.y.range()[0] - 150)) + ')');
+                
+                }
 
-                .attr('transform', 'translate(' + this.props.margin.left + ' ' + ((this.props.margin.top + 60 + this.props.y.range()[0] - 150)) + ')');
         }
 
         //update topbar
@@ -261,7 +284,7 @@ class IntradayChart extends Component {
         let y = props.y;
         let x = props.x;
         d3.select(".overlay")
-            .on('mouseover', function() {
+            .on('mouseover', function () {
                 d3.select('#focusLineX').style('display', null);
                 d3.select('#focusLineY').style('display', null);
                 d3.select('#focusCircle').style('display', null);
@@ -270,7 +293,7 @@ class IntradayChart extends Component {
                 d3.select('.tooltipTextV').style('display', null)
                 d3.select('.tooltipTextS').style('display', null);
             })
-            .on('mouseout', function() {
+            .on('mouseout', function () {
                 d3.select('#focusLineX').style('display', 'none');
                 d3.select('#focusLineY').style('display', 'none');
                 d3.select('#focusCircle').style('display', 'none');
@@ -279,14 +302,14 @@ class IntradayChart extends Component {
                 d3.select('.tooltipTextV').style('display', 'none')
                 d3.select('.tooltipTextS').style('display', 'none');
             })
-            .on('mousemove', function() {
+            .on('mousemove', function () {
                 let mouse = d3.mouse(this);
                 let mouseDate = x.invert(mouse[0] - props.margin.left <= x(data[data.length - 1].time) ? mouse[0] - props.margin.left : x(data[data.length - 1].time));
-                let bisectDate = d3.bisector(function(d) { return d.time; }).left;
+                let bisectDate = d3.bisector(function (d) { return d.time; }).left;
                 let index = bisectDate(data, mouseDate);
-                let dPre = data[index - 1]
+                let dPre = data[index - 1];
                 let dSuf = data[index];
-                let d = mouseDate.getTime() - dPre.time.getTime() > dSuf.time.getTime() - mouseDate.getTime() ? dSuf : dPre;
+                let d = mouseDate.getTime() - (dPre ? dPre.time.getTime() : 0) > dSuf.time.getTime() - mouseDate.getTime() ? dSuf : dPre;
                 let xPos = x(d.time);
                 let yPos = y(d.value);
                 console.log("mouseX", xPos);
@@ -342,7 +365,7 @@ class IntradayChart extends Component {
                 d3.select('.tooltipTextV').style('display', 'block');
                 d3.select('.tooltipTextS').style('display', 'block');
             })
-            .on('wheel', function() {
+            .on('wheel', function () {
                 d3.select('#focusLineX').style('display', 'none');
                 d3.select('#focusLineY').style('display', 'none');
                 d3.select('#focusCircle').style('display', 'none');
@@ -351,7 +374,7 @@ class IntradayChart extends Component {
                 d3.select('.tooltipTextV').style('display', 'none')
                 d3.select('.tooltipTextS').style('display', 'none');
             })
-            .on('mousedown', function() {
+            .on('mousedown', function () {
                 d3.select('#focusLineX').style('display', 'none');
                 d3.select('#focusLineY').style('display', 'none');
                 d3.select('#focusCircle').style('display', 'none');
@@ -362,7 +385,7 @@ class IntradayChart extends Component {
             })
 
             //nur wenn automatische Darstellung ungültig ist!! 
-            .on('click', function() {
+            .on('click', function () {
                 d3.select('#focusLineX').style('display', 'block');
                 d3.select('#focusLineY').style('display', 'block');
                 d3.select('#focusCircle').style('display', 'block');
@@ -382,7 +405,7 @@ class IntradayChart extends Component {
         //Update ausgeschaltet -> wird nicht neu gerendert
         return false;
     }
-    componentDidUpdate() {}
+    componentDidUpdate() { }
 }
 
 export default hot ? hot(module)(IntradayChart) : IntradayChart;

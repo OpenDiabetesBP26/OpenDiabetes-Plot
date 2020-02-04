@@ -65,8 +65,8 @@ class DataManager {
 		//Iterate data
 		for (let i = 0; i < data.length; i++) {
 			if (!data[i] || !data[i].epoch || !data[i].value || !data[i].type) continue;
-			if(data[i].epoch < maxDomain[0]) maxDomain[0] = data[i].epoch;
-			if(data[i].epoch > maxDomain[1]) maxDomain[1] = data[i].epoch;
+			if (data[i].epoch < maxDomain[0]) maxDomain[0] = data[i].epoch;
+			if (data[i].epoch > maxDomain[1]) maxDomain[1] = data[i].epoch;
 			let value;
 			let lastValue;
 			switch (data[i].type) {
@@ -84,7 +84,7 @@ class DataManager {
 				case (this.types.basal_profile):
 					lastValue = 0.00;
 					value = parseFloat(data[i].value);
-					if (last_basal_profile && data[i].epoch - last_basal_profile.time.getTime() <= basalTimeLimit) {
+					if (last_basal_profile && data[i].epoch - last_basal_profile.timeEnd.getTime() <= basalTimeLimit) {
 						lastValue = last_basal_profile.value;
 					}
 					item = {
@@ -97,11 +97,22 @@ class DataManager {
 
 					//Check temp insulin
 					if (!last_basal_temp || last_basal_temp.timeEnd.getTime() <= item.time.getTime()) {
+						if (last_basal_temp) {
+							let newTempPrev = {
+								time: last_basal_temp.timeEnd,
+								value: item.lastValue,
+								type: this.types.basal_temp,
+								lastValue: last_basal_temp.value,
+								timeEnd: item.time
+							}
+							items.push(newTempPrev);
+
+						}
 						let newTemp = {
 							time: item.time,
 							value: item.value,
 							type: this.types.basal_temp,
-							lastValue:  last_basal_temp &&  last_basal_temp.timeEnd.getTime() == item.time.getTime() ?  last_basal_temp.value : item.lastValue,
+							lastValue: last_basal_temp && last_basal_temp.timeEnd.getTime() == item.time.getTime() ? last_basal_temp.value : item.lastValue,
 							timeEnd: item.timeEnd
 						}
 						last_basal_temp = newTemp;
@@ -113,6 +124,11 @@ class DataManager {
 					break;
 
 				case (this.types.basal_temp):
+					//Check for reset (valueExtension == 0)
+					if (data[i].valueExtension == 0) {
+						last_basal_temp.timeEnd = new Date(data[i].epoch);
+						break;
+					}
 					item = {
 						time: new Date(data[i].epoch),
 						value: parseFloat(data[i].value),
@@ -125,6 +141,7 @@ class DataManager {
 						if (last_basal_temp.timeEnd.getTime() >= item.time.getTime()) {
 							last_basal_temp.timeEnd = new Date(item.time.getTime());
 							item.lastValue = last_basal_temp.value;
+
 						} else {
 							let newBasal = {
 								time: new Date(last_basal_temp.timeEnd.getTime()),
@@ -134,6 +151,7 @@ class DataManager {
 								timeEnd: new Date(item.time.getTime())
 							}
 							items.push(newBasal);
+							item.lastValue = newBasal.value;
 						}
 
 					}
@@ -555,7 +573,8 @@ class DataManager {
 		let results = {
 			glucose: data.filter(d => d.type == this.types.glucose),
 			bolus: data.filter(d => d.type == this.types.bolus),
-			basal: data.filter(d => d.type == this.types.basal_temp || d.type == this.types.basal_profile),
+			basal: data.filter(d => d.type == this.types.basal_temp),
+			basal_profile: data.filter(d => d.type == this.types.basal_profile),
 			carbs: data.filter(d => d.type == this.types.carbs)
 		}
 		console.log(results);
@@ -645,7 +664,7 @@ class DataManager {
 			basal: basal,
 			bolus: bolus,
 			carbs: carbs
-		};;
+		};
 	}
 	getDailyData() {
 		let data_raw = this.data.daily.all();
@@ -706,6 +725,7 @@ class DataManager {
 				glucose.push(item);
 			}
 		})
+		console.log(glucose);
 		return {
 			glucose: glucose
 		};
