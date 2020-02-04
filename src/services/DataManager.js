@@ -180,6 +180,7 @@ class DataManager {
 				basal_combined[i].time = new Date(basal_combined[i].time_start.getTime());
 			}
 		}
+		console.log(basal_combined);
 		return basal_combined;
 	}
 	parsePrediction(predictions) {
@@ -220,7 +221,7 @@ class DataManager {
 		let low = data.filter(d => d.type == this.types.glucose && d.value < 40);
 		low.filter(d => d.value > 30).forEach(d => d.value = 40.0);
 		//Delete those under 40 now
-		data = data.filter(d => d.type == this.types.glucose && d.value >= 40);
+		data = data.filter(d => (d.type == this.types.glucose && d.value >= 40) || d.type != this.types.glucose);
 
 		//Cap highs to limit
 		data.filter(d => d.type == this.types.glucose && d.value > 400).forEach(d => d.value = 400);
@@ -231,7 +232,7 @@ class DataManager {
 		//Remove those from data
 		data = data.filter(d => d.type != this.types.basal_profile && d.type != this.types.basal_temp);
 		let basal_combined = this.parseBasal(basal_profile, basal_temp);
-
+		console.log(basal_combined);
 		let types = this.types;
 		//Add in crossfilter
 		let data_crossfilter = crossfilter(data);
@@ -626,9 +627,10 @@ class DataManager {
 		let results = {
 			glucose: data.filter(d => d.type == this.types.glucose),
 			bolus: data.filter(d => d.type == this.types.bolus),
-			basal: data.filter(d => d.type == this.types.basal_temp || d.types == this.types.basal_profile),
+			basal: data.filter(d => d.type == this.types.basal_temp || d.type == this.types.basal_profile),
 			carbs: data.filter(d => d.type == this.types.carbs)
 		}
+		console.log(results);
 		return results;
 	}
 	getThreeHourlyData() {
