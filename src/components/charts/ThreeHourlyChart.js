@@ -301,7 +301,7 @@ class ThreeHourlyChart extends Component {
                     .duration(10)
                     .attr('cx', xPos + props.margin.left)
                     .attr('cy', yPos + 60 + props.margin.top)
-                    .attr('fill', d.value >= 185 ? '#3498DB' : d.value >= 65 ? '#58D68D' : '#DC7633')
+                    .attr('fill', d.value >= 150 ? '#3498DB' : d.value >= 50 ? '#58D68D' : '#DC7633')
                     .attr('display', 'block');
                 d3.select('#focusCircleInne')
                     .transition()
