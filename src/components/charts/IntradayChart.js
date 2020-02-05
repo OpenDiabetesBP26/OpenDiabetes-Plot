@@ -261,6 +261,14 @@ class IntradayChart extends Component {
         let y = props.y;
         let x = props.x;
 
+        d3.select('g#intraday').append('rect')
+            .attr('class', 'predictionBG')
+            .attr('y', y(400) + 60 + props.margin.top)
+            .attr('height', 400)
+            .attr('fill', 'black')
+            .style('opacity', 0.3)
+            .style('display', 'none');
+
 
 
 
@@ -297,15 +305,7 @@ class IntradayChart extends Component {
                 let yPos = y(d.value);
                 console.log("mouseX", xPos);
 
-                d3.select('g#intraday').append('rect')
-                    .attr('class', 'predictionBG')
-                    .attr('x', xPos)
-                    .attr('y', y(400) + 60 + props.margin.top)
-                    .attr('width', x.range()[1])
-                    .attr('height', 400)
-                    .attr('fill', 'black')
-                    .style('opacity', 0.3)
-                    .style('display', 'none');
+
 
                 d3.select('#focusCircle')
                     .transition()
@@ -350,7 +350,12 @@ class IntradayChart extends Component {
                     .text("source: " + d.source)
                     .style("opacity", 1)
 
-                
+                d3.select('.predictionBG')
+                    .attr('x', xPos + props.margin.left)
+                    .attr('width', x.range()[1] - xPos)
+                    .style('display', 'none');
+
+
 
 
 
@@ -361,7 +366,7 @@ class IntradayChart extends Component {
                 d3.select('.tooltipTextT').style('display', 'block');
                 d3.select('.tooltipTextV').style('display', 'block');
                 d3.select('.tooltipTextS').style('display', 'block');
-                d3.select('#predictionBG').style('display', 'none');
+                //d3.select('#predictionBG').style('display', 'none');
             })
             .on('wheel', function() {
                 d3.select('#focusLineX').style('display', 'none');
