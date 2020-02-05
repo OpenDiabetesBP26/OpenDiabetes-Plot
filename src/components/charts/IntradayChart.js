@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import { hot } from 'react-hot-loader';
 import * as d3 from 'd3';
 import BackGround from '../../services/BackGround.js';
-// use d3-tip
-import d3Tip from 'd3-tip';
 
 class IntradayChart extends Component {
     constructor(props) {
@@ -18,7 +16,6 @@ class IntradayChart extends Component {
     componentDidMount() {
         if (this.props.data != null) {
             let xAxis = d3.axisBottom(this.props.x)
-
             let yAxis = d3.axisLeft(this.props.y);
             this.yBasal = d3.scaleLinear().range([150, 0]).domain([0, 5]);
             let yBasalAxis = d3.axisRight(this.yBasal)
@@ -29,7 +26,7 @@ class IntradayChart extends Component {
 
 
             let comp = d3.select("g#intraday");
-			this.hLineX = 150;
+            this.hLineX = 150;
             this.lLineX = 50;
             //svg graph für background
             this.background = comp.append("g")
@@ -121,12 +118,7 @@ class IntradayChart extends Component {
                 .attr("x2", margin.left)
                 .attr("y2", margin.top + 60 + y(0))
 
-
-
-
-
             this.circs = comp.append('g');
-			
             this.line = comp.append("g");
 
             //tooltips Text
@@ -182,22 +174,12 @@ class IntradayChart extends Component {
         let y = props.y;
         let x = props.x;
         let yb = this.yBasal;
-		// d3-tip initialisation 
-		let tip = d3Tip().attr('class', 'd3-tip')
-						.offset([-10, 0])
-						.html(function(d) { return "<p text-align='left'>Time: " + d.time
-																	+ "<br/>Value: " + d.value
-																	+ "<br/>Source: " + d.source + "</p>"; 
-						});
-		// call tip funktion
-		d3.select("body").append('svg').call(tip);
 
         //wenn xAxis neue Scale bekommt, erneue Graph von xAxis und draw Background
         if (this.xAxis_graph) {
-            // there is a conflict between Qing's Implementation of tooltip and Yichen's 
-			//ebene und focus-Elementen werden dargestellt
-            //d3.select('.overlay').attr("width", x.range()[1] - x.range()[0]);
-            //this.mouseCatchMove(props);
+            //ebene und focus-Elementen werden dargestellt
+            d3.select('.overlay').attr("width", x.range()[1] - x.range()[0]);
+            this.mouseCatchMove(props);
             //neue xAxis Daten von props
             let newxAxis = d3.axisTop(x)
             this.xAxis_graph.call(newxAxis)
@@ -215,7 +197,7 @@ class IntradayChart extends Component {
                     .attr('width', (d, i) => wdArr[i])
                     .style("fill", "lightgray")
                     .style("opacity", (d, i) => opacityArr[i]),
-					(update) => update
+                    (update) => update
                     .attr('x', d => d)
                     .attr('width', (d, i) => wdArr[i])
                     .style("opacity", (d, i) => opacityArr[i])
@@ -231,53 +213,23 @@ class IntradayChart extends Component {
                     .attr('r', 3)
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
-                    .attr('fill', d => this.circleColor(d.value))
-					// d3-tip tooltip hover funktion
-					.on('mouseover', function(d) {
-						let args = Array.prototype.slice.call(arguments);
-						d3.select(this).transition()
-						.duration(300)
-						.attr('r', 3 * 3);
-						tip.show.apply(this, [...args]);
-					})
-					.on('mouseout', function(d) {
-						d3.select(this).transition()
-						.duration(300)
-						.attr('r',3);
-						tip.hide();
-					}),
+                    .attr('fill', d => this.circleColor(d.value)),
                     (update) => update
                     .attr('cy', d => y(+d.value))
                     .attr('cx', d => x(d.time))
                     .attr('fill', d => this.circleColor(d.value))
-					// d3-tip tooltip hover funktion
-					.on('mouseover', function(d) {
-						let args = Array.prototype.slice.call(arguments);
-						d3.select(this).transition()
-						.duration(300)
-						.attr('r', 3 * 3);
-						tip.show.apply(this, [...args]);
-					})
-					.on('mouseout', function(d) {
-						d3.select(this).transition()
-						.duration(300)
-						.attr('r',3);
-						tip.hide();
-					})
                 )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
         }
-		
-				
         if (this.line != null) {
             var line = this.line.selectAll('line').data(props.data.basal).join(
-					(enter) => enter.append('line')
+                    (enter) => enter.append('line')
                     .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
                     .attr('y1', d => yb(+d.value))
                     .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
                     .attr('y2', d => yb(+d.value))
                     .attr('stroke', 'blue'),
-					(update) => update
+                    (update) => update
                     .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
                     .attr('y1', d => yb(+d.value))
                     .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
@@ -304,7 +256,7 @@ class IntradayChart extends Component {
     }
     //focus zeigt zuerst automatisch, wenn man mouse click halten, dann focus sich verbergt, 
     //nach dem verschieben oder zoomen, mit ein mal mouseclick wird focus wieder dargestellt.
-	mouseCatchMove(props, focusLineX) {
+    mouseCatchMove(props, focusLineX) {
         let data = props.data.glucose;
         let y = props.y;
         let x = props.x;
@@ -367,29 +319,30 @@ class IntradayChart extends Component {
                     .attr('x2', props.margin.left + x.range()[1])
                     .attr('y2', props.margin.top + 60 + y(400) + yPos);
                 d3.select(".tooltipTextT")
-                    .attr("x", xPos >= x.range()[1]*(3/4) - props.margin.left ? xPos - 400 : xPos + 60)
+                    .attr("x", xPos >= x.range()[1] * (3 / 4) - props.margin.left ? xPos - 400 : xPos + 60)
                     .attr("y", y(400) + 140 + props.margin.top - 60)
                     .text("time: " + d.time)
                     .style("opacity", 1)
                 d3.select(".tooltipTextV")
-                    .attr("x", xPos >= x.range()[1]*(3/4) - props.margin.left ? xPos - 400 : xPos + 60)
+                    .attr("x", xPos >= x.range()[1] * (3 / 4) - props.margin.left ? xPos - 400 : xPos + 60)
                     .attr("y", y(400) + 140 + props.margin.top - 30)
                     .text("value: " + d.value)
                     .style("opacity", 1)
                 d3.select(".tooltipTextS")
-                    .attr("x", xPos >= x.range()[1]*(3/4) - props.margin.left ? xPos - 400 : xPos + 60)
+                    .attr("x", xPos >= x.range()[1] * (3 / 4) - props.margin.left ? xPos - 400 : xPos + 60)
                     .attr("y", y(400) + 140 + props.margin.top)
                     .text("source: " + d.source)
                     .style("opacity", 1)
-				d3.select('#focusLineX').style('display', 'block');
+
+                d3.select('#focusLineX').style('display', 'block');
                 d3.select('#focusLineY').style('display', 'block');
                 d3.select('#focusCircle').style('display', 'block');
                 d3.select('#focusCircleInne').style('display', 'block');
                 d3.select('.tooltipTextT').style('display', 'block');
                 d3.select('.tooltipTextV').style('display', 'block');
-                d3.select('.tooltipTextS').style('display', 'block');												    
+                d3.select('.tooltipTextS').style('display', 'block');
             })
-			.on('wheel', function() {
+            .on('wheel', function() {
                 d3.select('#focusLineX').style('display', 'none');
                 d3.select('#focusLineY').style('display', 'none');
                 d3.select('#focusCircle').style('display', 'none');
@@ -397,7 +350,7 @@ class IntradayChart extends Component {
                 d3.select('.tooltipTextT').style('display', 'none')
                 d3.select('.tooltipTextV').style('display', 'none')
                 d3.select('.tooltipTextS').style('display', 'none');
-            })							 
+            })
             .on('mousedown', function() {
                 d3.select('#focusLineX').style('display', 'none');
                 d3.select('#focusLineY').style('display', 'none');
@@ -407,7 +360,8 @@ class IntradayChart extends Component {
                 d3.select('.tooltipTextV').style('display', 'none')
                 d3.select('.tooltipTextS').style('display', 'none');
             })
-			//nur wenn automatische Darstellung ungültig ist!! 													
+
+            //nur wenn automatische Darstellung ungültig ist!! 
             .on('click', function() {
                 d3.select('#focusLineX').style('display', 'block');
                 d3.select('#focusLineY').style('display', 'block');
@@ -420,10 +374,6 @@ class IntradayChart extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-		//remove all old tooltip, when zoom-in or zoom-out
-		//it is necessary to perform twice remove opearation, because old tooltip sometimes remains in charts after only one time remove operation, i don't know the reason
-		d3.select(".d3-tip").remove();
-		d3.select(".d3-tip").remove();
         //Wir können Daten hier neu rendern
         this.drawChart(nextProps);
         console.log(nextProps.data);
@@ -432,7 +382,7 @@ class IntradayChart extends Component {
         //Update ausgeschaltet -> wird nicht neu gerendert
         return false;
     }
-    componentDidUpdate() { }
+    componentDidUpdate() {}
 }
 
 export default hot ? hot(module)(IntradayChart) : IntradayChart;
