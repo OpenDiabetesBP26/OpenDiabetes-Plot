@@ -179,7 +179,7 @@ class IntradayChart extends Component {
         if (this.xAxis_graph) {
             //ebene und focus-Elementen werden dargestellt
             d3.select('.overlay').attr("width", x.range()[1] - x.range()[0]);
-            this.mouseCatchMove(props);
+            this.mouseCatchMove(props, this.hLineX, this.lLineX);
             //neue xAxis Daten von props
             let newxAxis = d3.axisTop(x)
             this.xAxis_graph.call(newxAxis)
@@ -256,7 +256,7 @@ class IntradayChart extends Component {
     }
     //focus zeigt zuerst automatisch, wenn man mouse click halten, dann focus sich verbergt, 
     //nach dem verschieben oder zoomen, mit ein mal mouseclick wird focus wieder dargestellt.
-    mouseCatchMove(props, focusLineX) {
+    mouseCatchMove(props,hLineX,lLineX) {
         let data = props.data.glucose;
         let y = props.y;
         let x = props.x;
@@ -296,7 +296,7 @@ class IntradayChart extends Component {
                     .duration(10)
                     .attr('cx', xPos + props.margin.left)
                     .attr('cy', yPos + 60 + props.margin.top)
-                    .attr('fill', d.value >= 185 ? '#3498DB' : d.value >= 65 ? '#58D68D' : '#DC7633')
+                    .attr('fill', d.value >= hLineX ? '#3498DB' : d.value >= lLineX ? '#58D68D' : '#DC7633')
                     .attr('display', 'block');
                 d3.select('#focusCircleInne')
                     .transition()

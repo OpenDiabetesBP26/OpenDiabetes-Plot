@@ -113,9 +113,15 @@ class DailyChart extends Component {
             .attr("x1", margin.left)
             .attr("y1", margin.top + y(400))
             .attr("x2", margin.left)
-            .attr("y2", margin.top + 60 + y(0))
+            .attr("y2", margin.top + 60 + y(0));
 
-        this.circs = comp.append('g');
+        this.percRectH =
+            comp.append('g');
+        this.percRectM =
+            comp.append('g');
+        this.percRectL =
+            comp.append('g');
+
         this.line = comp.append("g");
          //tooltips Text
         this.tooltipText =
@@ -201,39 +207,48 @@ class DailyChart extends Component {
 
         }
 
-        if (this.circs != null) {
-            var circles = this.circs.selectAll('circle').data(props.data.glucose).join(
-                    (enter) => enter.append('circle')
-                    .attr('r', 3)
-                    .attr('cy', d => y(+d.value))
-                    .attr('cx', d => x(d.time))
-                    .attr('fill', d => this.circleColor(d.value)),
+        if (this.percRectH != null) {
+
+            var percH = this.percRectH.selectAll('rect').data(props.data.glucose).join(
+                    (enter) => enter.append('rect')
+                    .attr('width', 8)
+                    .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[2])
+                    .attr('y', d => y(+d.percentile[2]))
+                    .attr('x', d => x(d.time))
+                    .attr('fill', '#3498DB'),
                     (update) => update
-                    .attr('cy', d => y(+d.value))
-                    .attr('cx', d => x(d.time))
-                    .attr('fill', d => this.circleColor(d.value))
+                    .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[2])
+                    .attr('y', d => y(+d.percentile[2]))
+                    .attr('x', d => x(d.time))
+                )
+                .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
+            var percM = this.percRectM.selectAll('rect').data(props.data.glucose).join(
+                    (enter) => enter.append('rect')
+                    .attr('width', 8)
+                    .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[1])
+                    .attr('y', d => y(this.hLineX) < y(+d.percentile[2]) ? y(+d.percentile[2]) : y(this.hLineX))
+                    .attr('x', d => x(d.time))
+                    .attr('fill', '#58D68D'),
+                    (update) => update
+                    .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[1])
+                    .attr('y', d => y(this.hLineX) < y(+d.percentile[2]) ? y(+d.percentile[2]) : y(this.hLineX))
+                    .attr('x', d => x(d.time))
+                )
+                .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
+            var percL = this.percRectL.selectAll('rect').data(props.data.glucose).join(
+                    (enter) => enter.append('rect')
+                    .attr('width', 8)
+                    .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[0])
+                    .attr('y', d => y(this.lLineX))
+                    .attr('x', d => x(d.time))
+                    .attr('fill', '#DC7633'),
+                    (update) => update
+                    .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[0])
+                    .attr('y', d => y(this.lLineX))
+                    .attr('x', d => x(d.time))
                 )
                 .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
         }
-        /*
-        if (this.line != null) {
-            var line = this.line.selectAll('line').data(props.data.basal).join(
-                    (enter) => enter.append('line')
-                    .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
-                    .attr('y1', d => yb(+d.value))
-                    .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
-                    .attr('y2', d => yb(+d.value))
-                    .attr('stroke', 'blue'),
-                    (update) => update
-                    .attr('x1', d => x(+d.time_start) < 0 ? 0 : x(+d.time_start))
-                    .attr('y1', d => yb(+d.value))
-                    .attr('x2', d => x(d.time_end) > x.range()[1] ? x.range()[1] : x(d.time_end))
-                    .attr('y2', d => yb(+d.value)))
-
-                .attr('transform', 'translate(' + this.props.margin.left + ' ' + ((this.props.margin.top + 60 + this.props.y.range()[0] - 150)) + ')');
-        }
-        */
-
         //update topbar
         if (this.topbar) {
             this.topbar.attr("width", this.props.x.range()[1]);
@@ -246,10 +261,19 @@ class DailyChart extends Component {
             d3.select(".dashLineN_L").attr("x2", this.props.margin.left + x.range()[1]);
         }
     }
-    //circle_color 
-    circleColor(d) {
-        return d >= this.hLineX ? '#3498DB' : d >= this.lLineX ? '#58D68D' : '#DC7633';
+    getPercHeight(perc, h, l) {
+        let result = [];
+        let t = perc.filter(d => d > h);
+        let r1 = t.length == 0 ? 0 : Math.max(...perc.filter(d => d > h)) - h;
+        result[2] = r1;
+        let r2 = result[2] == 0 ? perc[0] > l ? perc[2] - perc[0] : perc[2] - l : h - Math.min(perc[1], perc[0]);
+        result[1] = r2;
+        let r3 = perc.filter(d => d > l).length == 3 ? 0 : l - perc[0];
+        result[0] = r3;
+
+        return result;
     }
+
     //focus zeigt zuerst automatisch, wenn man mouse click halten, dann focus sich verbergt, 
     //nach dem verschieben oder zoomen, mit ein mal mouseclick wird focus wieder dargestellt.
     mouseCatchMove(props, focusLineX) {
@@ -259,18 +283,18 @@ class DailyChart extends Component {
         d3.select(".overlay")
             .on('mouseover', function() {
                 d3.select('#focusLineX').style('display', null);
-                d3.select('#focusLineY').style('display', null);
-                d3.select('#focusCircle').style('display', null);
-                d3.select('#focusCircleInne').style('display', null)
+                //d3.select('#focusLineY').style('display', null);
+                //d3.select('#focusCircle').style('display', null);
+                //d3.select('#focusCircleInne').style('display', null)
                 d3.select('.tooltipTextT').style('display', null)
                 d3.select('.tooltipTextV').style('display', null)
                 d3.select('.tooltipTextS').style('display', null);
             })
             .on('mouseout', function() {
                 d3.select('#focusLineX').style('display', 'none');
-                d3.select('#focusLineY').style('display', 'none');
-                d3.select('#focusCircle').style('display', 'none');
-                d3.select('#focusCircleInne').style('display', 'none')
+                //d3.select('#focusLineY').style('display', 'none');
+                //d3.select('#focusCircle').style('display', 'none');
+                //d3.select('#focusCircleInne').style('display', 'none')
                 d3.select('.tooltipTextT').style('display', 'none')
                 d3.select('.tooltipTextV').style('display', 'none')
                 d3.select('.tooltipTextS').style('display', 'none');
@@ -286,7 +310,7 @@ class DailyChart extends Component {
                 let xPos = x(d.time);
                 let yPos = y(d.value);
                 console.log("mouseX", xPos);
-
+                /*
                 d3.select('#focusCircle')
                     .transition()
                     .duration(10)
@@ -300,13 +324,15 @@ class DailyChart extends Component {
                     .attr('cx', xPos + props.margin.left)
                     .attr('cy', yPos + 60 + props.margin.top)
                     .attr('display', 'block');
+                    */
                 d3.select('#focusLineX')
                     .transition()
                     .duration(10)
-                    .attr('x1', xPos + props.margin.left)
+                    .attr('x1', xPos + props.margin.left + 4)
                     .attr('y1', props.margin.top + 60 + y(400))
-                    .attr('x2', xPos + props.margin.left)
+                    .attr('x2', xPos + props.margin.left + 4)
                     .attr('y2', props.margin.top + 60 + y(0));
+                    /*
                 d3.select('#focusLineY')
                     .transition()
                     .duration(10)
@@ -314,6 +340,7 @@ class DailyChart extends Component {
                     .attr('y1', props.margin.top + 60 + y(400) + yPos)
                     .attr('x2', props.margin.left + x.range()[1])
                     .attr('y2', props.margin.top + 60 + y(400) + yPos);
+                    */
                 d3.select(".tooltipTextT")
                     .attr("x", xPos >= x.range()[1] * (3 / 4) - props.margin.left ? xPos - 400 : xPos + 60)
                     .attr("y", y(400) + 140 + props.margin.top - 60)
@@ -331,39 +358,38 @@ class DailyChart extends Component {
                     .style("opacity", 1)
 
                 d3.select('#focusLineX').style('display', 'block');
-                d3.select('#focusLineY').style('display', 'block');
-                d3.select('#focusCircle').style('display', 'block');
-                d3.select('#focusCircleInne').style('display', 'block');
-                d3.select('.tooltipTextT').style('display', 'block');
-                d3.select('.tooltipTextV').style('display', 'block');
+                //d3.select('#focusLineY').style('display', 'block');
+                //d3.select('#focusCircle').style('display', 'block');
+                //d3.select('#focusCircleInne').style('display', 'block')
+                d3.select('.tooltipTextT').style('display', 'block')
+                d3.select('.tooltipTextV').style('display', 'block')
                 d3.select('.tooltipTextS').style('display', 'block');
             })
             .on('wheel', function() {
                 d3.select('#focusLineX').style('display', 'none');
-                d3.select('#focusLineY').style('display', 'none');
-                d3.select('#focusCircle').style('display', 'none');
-                d3.select('#focusCircleInne').style('display', 'none')
+                //d3.select('#focusLineY').style('display', 'none');
+                //d3.select('#focusCircle').style('display', 'none');
+                //d3.select('#focusCircleInne').style('display', 'none')
                 d3.select('.tooltipTextT').style('display', 'none')
                 d3.select('.tooltipTextV').style('display', 'none')
                 d3.select('.tooltipTextS').style('display', 'none');
             })
             .on('mousedown', function() {
                 d3.select('#focusLineX').style('display', 'none');
-                d3.select('#focusLineY').style('display', 'none');
-                d3.select('#focusCircle').style('display', 'none');
-                d3.select('#focusCircleInne').style('display', 'none')
+                //d3.select('#focusLineY').style('display', 'none');
+                //d3.select('#focusCircle').style('display', 'none');
+                //d3.select('#focusCircleInne').style('display', 'none')
                 d3.select('.tooltipTextT').style('display', 'none')
                 d3.select('.tooltipTextV').style('display', 'none')
                 d3.select('.tooltipTextS').style('display', 'none');
             })
-            //nur wenn automatische Darstellung ungültig ist!! 
             .on('click', function() {
                 d3.select('#focusLineX').style('display', 'block');
-                d3.select('#focusLineY').style('display', 'block');
-                d3.select('#focusCircle').style('display', 'block');
-                d3.select('#focusCircleInne').style('display', 'block');
-                d3.select('.tooltipTextT').style('display', 'block');
-                d3.select('.tooltipTextV').style('display', 'block');
+                //d3.select('#focusLineY').style('display', 'block');
+                //d3.select('#focusCircle').style('display', 'block');
+                //d3.select('#focusCircleInne').style('display', 'block')
+                d3.select('.tooltipTextT').style('display', 'block')
+                d3.select('.tooltipTextV').style('display', 'block')
                 d3.select('.tooltipTextS').style('display', 'block');
             });
     }
