@@ -8,10 +8,11 @@ class TimeAxis extends Component {
     }
     render() {
         return (
-            <g>
-                <g id='upperTimeAxis' ref={g => this.upperTime = g} />
-                <g id='lowerTimeAxis' ref={g => this.lowerTime = g} />
-                <g id='background' ref={g => this.background = g} />
+            <g id='timeAxis'>
+                <g className='background' ref={g => this.background = g} />
+                <g className='upperTimeAxis' ref={g => this.upperTime = g} />
+                <g className='lowerTimeAxis' ref={g => this.lowerTime = g} />
+
             </g>
         );
     }
@@ -20,113 +21,144 @@ class TimeAxis extends Component {
     }
     componentWillReceiveProps(nextProps) {
         if (!this.upperTime || !this.lowerTime || !nextProps.x || !this.background) return;
-        let upper = d3.select('g#upperTimeAxis');
-        let lower = d3.select('g#lowerTimeAxis');
-        let background = d3.select('g#background');
+        const stickFirstTick = (caller) => {
+            let firstYear = caller.select('g.tick');
+            if (firstYear.node()) {
+                let string = firstYear.attr('transform');
+                if (!string) return;
+                let translate = string.substring(string.indexOf("(") + 1, string.indexOf(")")).split(",");
+                console.log(translate[0])
+                if (translate[0] < 0) {
+                    firstYear.attr('transform', 'translate(0,0)');
+                }
+            }
+        }
+        let upper = d3.select(this.upperTime);
+        let lower = d3.select(this.lowerTime);
+        let background = d3.select(this.background);
         upper.selectAll().remove();
         lower.selectAll().remove();
         let upperAxis = d3.axisTop(nextProps.x);
         let lowerAxis = d3.axisTop(nextProps.x);
         const domain = nextProps.x.domain();
         const hours = Math.floor((domain[1] - domain[0]) / (60000 * 60));
+
+        let upperOffset, lowerOffset, upperTicks, lowerTicks, upperTickFormat, lowerTickFormat;
         if (hours > 24 * 30 * 12) {
+            console.log('State 1')
             //Create dummy with extra tick last month
-            let dummyScale = d3.axisTop(d3.scaleTime().domain([d3.timeMonth.offset(nextProps.x.domain()[0], -3), nextProps.x.domain()[1]]).range(nextProps.x.range())).ticks(d3.timeMonth.every(3));
-            console.log(dummyScale.scale().ticks());
-            lowerAxis.tickValues((dummyScale.scale().ticks()));
-            lowerAxis.tickFormat(d3.timeFormat("%B"));
-            upperAxis.ticks(d3.timeYear);
-            upperAxis.tickSize(20);
-            lowerAxis.tickSize(15);
-            upper.call(upperAxis);
-            upper.selectAll('path').remove();
-            upper.attr('transform', 'translate(0,60)');
-
-            lower.call(lowerAxis);
-            lower.selectAll('text')
-                .attr("y", -3)
-                .attr("x", 8)
-                .style("text-anchor", "start");
-
-            upper.selectAll('text')
-                .attr("y", -9)
-                .attr("x", 8)
-                .style("text-anchor", "start");
-            lower.attr('transform', 'translate(0,75)');
+            upperOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -9);
+            lowerOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -3);
+            upperTicks = d3.timeYear;
+            lowerTicks = d3.timeMonth.every(3);
+            upperTickFormat = d3.timeFormat("%Y");
+            lowerTickFormat = nextProps.x.range()[1] > 1000 ? d3.timeFormat("%B") : d3.timeFormat("%b");
         }
         else if (hours > 24 * 7 * 4 * 3) {
-            //Create dummy with extra tick last month
-            let dummyScale = d3.axisTop(d3.scaleTime().domain([d3.timeMonth.offset(nextProps.x.domain()[0], -3), nextProps.x.domain()[1]]).range(nextProps.x.range()));
-            lowerAxis.tickValues((dummyScale.scale().ticks(d3.timeMonth)));
-            lowerAxis.tickFormat(d3.timeFormat("%B"));
+            upperOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -11);
+            lowerOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -3);
+            upperTicks = d3.timeYear;
+            lowerTicks = d3.timeMonth;
+            upperTickFormat = d3.timeFormat("%Y");
+            lowerTickFormat = nextProps.x.range()[1] > 1000 ? d3.timeFormat("%B") : d3.timeFormat("%b");
 
-            let dummyScaleUpper = d3.axisTop(d3.scaleTime().domain([d3.timeMonth.offset(nextProps.x.domain()[0], -11), nextProps.x.domain()[1]]).range(nextProps.x.range()));
-            upperAxis.tickValues((dummyScaleUpper.scale().ticks(d3.timeYear)));
-            upperAxis.tickSize(20);
-            lowerAxis.tickSize(15);
-            upper.call(upperAxis);
-            upper.selectAll('path').remove();
-            upper.attr('transform', 'translate(0,60)');
 
-            lower.call(lowerAxis);
-            lower.selectAll('text')
-                .attr("y", -3)
-                .attr("x", 8)
-                .style("text-anchor", "start");
-
-            upper.selectAll('text')
-                .attr("y", -9)
-                .attr("x", 8)
-                .style("text-anchor", "start");
-
-            let firstYear = upper.select('g.tick');
-            if (firstYear.node()) {
-                if (firstYear.node().getBoundingClientRect().x < 0) {
-                    console.log(firstYear.node().getBoundingClientRect().x)
-                    firstYear.attr('transform', 'translate(0,0)');
-                    console.log(firstYear.node().getBoundingClientRect().x)
-                }
-            }
-            lower.attr('transform', 'translate(0,75)');
-
-            let bgTicks = dummyScale.scale().ticks(d3.timeMonth);
-            let background = d3.select('g#background')
-            background.selectAll('rect').data(bgTicks).join(
-                (enter) => {
-                    enter.append('rect')
-                        .attr('x', d => nextProps.x(d))
-                        .attr('y', 0)
-                        .attr('width', '10px')
-                        .attr('height', '100px')
-                        .attr('fill', 'lightgray')
-                        .attr('style', d => {
-                            console.log((d.getMonth() > 6 ? 1 - (6 - d.getMonth()) / 6.0 : d.getMonth() / 6.0))
-                            return 'opacity: ' + (d.getMonth() > 6 ? 1 - (6 - d.getMonth()) / 6.0 : d.getMonth() / 6.0)
-                        })
-                },
-                (update) => {
-                    update
-                        .attr('x', d => nextProps.x(d))
-                        .attr('y', 0)
-                        .attr('style', d => {
-                            let a = d.getMonth() / 6.0;
-                            a = a > 1 ? 2 - a : a;
-                            console.log(a);
-                            return 'opacity: ' + a;
-                        })
-                }
-
-            )
         }
         else if (hours > 24 * 7 * 3) {
+            upperOffset = nextProps.x.range()[1] > 1000 ? d3.timeMonth.offset(nextProps.x.domain()[0], -11) : d3.timeWeek.offset(nextProps.x.domain()[0], -2);
+            lowerOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -1);
+            upperTicks = nextProps.x.range()[1] > 1000 ? d3.timeYear : d3.timeWeek.every(4);
+            lowerTicks = d3.timeWeek;
+            upperTickFormat = nextProps.x.range()[1] > 1000 ? d3.timeFormat("%Y") : d3.timeFormat("%Y %B");
+            lowerTickFormat = nextProps.x.range()[1] > 1000 ? d3.timeFormat("%b %d") : d3.timeFormat("%d");
+
         }
         else if (hours > 24 * 7) {
+            upperOffset = d3.timeDay.offset(nextProps.x.domain()[0], -25);
+            lowerOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -1);
+            upperTicks = d3.timeMonth;
+            lowerTicks = d3.timeDay;
+            upperTickFormat = d3.timeFormat("%Y %B");
+            lowerTickFormat = d3.timeFormat("%d");
+
         }
         else if (hours > 24 * 3) {
+            upperOffset = d3.timeDay.offset(nextProps.x.domain()[0], -4);
+            lowerOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -1);
+            upperTicks = d3.timeWeek;
+            lowerTicks = d3.timeDay;
+            upperTickFormat = d3.timeFormat("%Y %B Week %W");
+            lowerTickFormat = d3.timeFormat("%d");
+
+        } else if (hours > 24) {
+            upperOffset = d3.timeHour.offset(nextProps.x.domain()[0], -6)
+            lowerOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -1);
+            upperTicks = d3.timeDay;
+            lowerTicks = d3.timeHour.every(6);
+            upperTickFormat = d3.timeFormat("%Y %B %d %A");
+            lowerTickFormat = d3.timeFormat("%I %p");
+
+        } else if (hours > 12) {
+            upperOffset = d3.timeHour.offset(nextProps.x.domain()[0], -16)
+            lowerOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -1);
+            upperTicks = d3.timeDay;
+            lowerTicks = d3.timeHour.every(3);
+            upperTickFormat = d3.timeFormat("%Y %B %d %A");
+            lowerTickFormat = d3.timeFormat("%I %p");
+
+        } else if (hours > 6) {
+            upperOffset = d3.timeHour.offset(nextProps.x.domain()[0], -20)
+            lowerOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -1);
+            upperTicks = d3.timeDay;
+            lowerTicks = d3.timeHour;
+            upperTickFormat = d3.timeFormat("%Y %B %d %A");
+            lowerTickFormat = d3.timeFormat("%I %p");
+
+        } else if (hours > 2) {
+            upperOffset = d3.timeHour.offset(nextProps.x.domain()[0], -20)
+            lowerOffset = d3.timeHour.offset(nextProps.x.domain()[0], -1)
+            upperTicks = d3.timeDay;
+            lowerTicks = d3.timeMinute.every(30);
+            upperTickFormat = d3.timeFormat("%Y %B %d %A");
+            lowerTickFormat = d3.timeFormat("%I:%M %p");
+
+        } else {
+            upperOffset = d3.timeHour.offset(nextProps.x.domain()[0], -20)
+            lowerOffset = d3.timeHour.offset(nextProps.x.domain()[0], -1)
+            upperTicks = d3.timeDay;
+            lowerTicks = d3.timeMinute.every(15);
+            upperTickFormat = d3.timeFormat("%Y %B %d %A");
+            lowerTickFormat = d3.timeFormat("%I:%M %p");
+
         }
 
+        let dummyScaleUpper = d3.axisTop(d3.scaleTime().domain([upperOffset, nextProps.x.domain()[1]]).range(nextProps.x.range()));
+        let dummyScaleLower = d3.axisTop(d3.scaleTime().domain([lowerOffset, nextProps.x.domain()[1]]).range(nextProps.x.range()));
+        lowerAxis.tickValues((dummyScaleLower.scale().ticks(lowerTicks)));
+        upperAxis.tickValues((dummyScaleUpper.scale().ticks(upperTicks)));
+        lowerAxis.tickFormat(lowerTickFormat);
+        upperAxis.tickFormat(upperTickFormat);
+        let bgTicks = dummyScaleLower.scale().ticks(lowerTicks);
 
+        upperAxis.tickSize(20);
+        lowerAxis.tickSize(15);
+        upper.call(upperAxis);
+        upper.selectAll('path').remove();
+        upper.attr('transform', 'translate(0,60)');
 
+        lower.call(lowerAxis);
+        lower.selectAll('text')
+            .attr("y", -3)
+            .attr("x", 8)
+            .style("text-anchor", "start");
+
+        upper.selectAll('text')
+            .attr("y", -9)
+            .attr("x", 8)
+            .style("text-anchor", "start");
+        upper.call(stickFirstTick)
+        lower.attr('transform', 'translate(0,75)');
+        lower.select('path').remove();
     }
     shouldComponentUpdate() {
         //Update ausgeschaltet -> wird nicht neu gerendert

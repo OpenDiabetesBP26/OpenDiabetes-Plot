@@ -1,5 +1,63 @@
 @import "~bootstrap/scss/bootstrap";
 
+g#timeAxis {
+    .upperTimeAxis{
+        .tick{
+            text{
+                font-weight:700;
+                color: #919191;
+            }
+        }
+    }
+    .lowerTimeAxis{
+        .tick{
+            text{
+                font-weight:700;
+                color: #a3a3a3;
+            }
+        }
+    }
+
+}
+.background{
+    z-index: -1;
+}
+@media screen and (min-width: 601px) {
+    g#timeAxis {
+        .upperTimeAxis{
+            .tick{
+                text{
+                    font-size: 2em;
+                }
+            }
+        }
+        .lowerTimeAxis{
+            .tick{
+                text{
+                    font-size: 1.6em;
+                }
+            }
+        }
+    }
+}
+@media screen and (max-width: 600px) {
+    g#timeAxis {
+        .upperTimeAxis{
+            .tick{
+                text{
+                    font-size: 1.6em;
+                }
+            }
+        }
+        .lowerTimeAxis{
+            .tick{
+                text{
+                    font-size: 1.2em;
+                }
+            }
+        }
+    }
+}
 div.stat-container{
     width:100%;
     height:100px;

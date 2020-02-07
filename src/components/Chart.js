@@ -3,6 +3,8 @@ import { hot } from 'react-hot-loader';
 import Loading from '../common/Loading';
 import * as d3 from 'd3';
 import DataManager from '../services/DataManager';
+import TimeAxis from './charts/TimeAxis';
+
 
 
 class Chart extends Component {
@@ -26,7 +28,7 @@ class Chart extends Component {
                     <div className="col-lg-8 col-md-12">
                         {!this.data && <div> No data loaded </div>}
                         <svg id="d3sample" width="100%" height="500" ref={(svg) => this.svg = svg}>
-                        
+                        <TimeAxis x={this.state.x} />
                         </svg>
                     </div>
                     <div className="col-lg-4 col-md-12">
