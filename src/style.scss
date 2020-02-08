@@ -20,7 +20,9 @@ g#timeAxis {
 
 }
 .background{
-    z-index: -1;
+    rect{
+        fill: #a3a3a3;
+    }
 }
 @media screen and (min-width: 601px) {
     g#timeAxis {
