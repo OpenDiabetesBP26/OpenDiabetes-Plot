@@ -4,6 +4,7 @@ import Loading from '../common/Loading';
 import * as d3 from 'd3';
 import DataManager from '../services/DataManager';
 import TimeAxis from './charts/TimeAxis';
+import BarGlucose from './charts/BarGlucose';
 
 
 
@@ -27,8 +28,11 @@ class Chart extends Component {
                 <div className="row">
                     <div className="col-lg-8 col-md-12">
                         {!this.data && <div> No data loaded </div>}
-                        <svg id="d3sample" width="100%" height="500" ref={(svg) => this.svg = svg}>
+                        <svg id="d3sample" width="100%" height="800" ref={(svg) => this.svg = svg}>
+                        <g id="mainGroup">
                         <TimeAxis x={this.state.x} />
+                        {this.renderData && this.renderData.dataDisplay.glucoseDisplay == 'percentile' && <BarGlucose data={this.renderData.dataDisplay.glucose} x={this.state.x}/>}
+                        </g>
                         </svg>
                     </div>
                     <div className="col-lg-4 col-md-12">
@@ -87,6 +91,7 @@ class Chart extends Component {
         svg.call(this.zoom);
         //updateDimensions to fix zoom
         this.updateDimensions();
+        d3.select('g#mainGroup').attr('transform', 'translate(50, 0)');
 
     }
     updateDimensions() {
@@ -119,6 +124,7 @@ class Chart extends Component {
     zoomed() {
         this.x = d3.event.transform.rescaleX(this.xBase);
         this.renderData = this.dataManager.getRenderData(this.x.domain());
+        console.log(this.renderData);
         //Set State
         this.setState({
             x: this.x,
