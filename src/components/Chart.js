@@ -6,7 +6,6 @@ import DataManager from '../services/DataManager';
 import TimeAxis from './charts/TimeAxis';
 
 
-
 class Chart extends Component {
     constructor(props) {
         super(props);
