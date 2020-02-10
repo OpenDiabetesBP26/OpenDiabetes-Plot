@@ -340,7 +340,7 @@ class DataManager {
 				p.glucose.sum += v.value;
 				p.glucose.count++;
 				p.glucose.avg = p.glucose.sum / p.glucose.count;
-				if(consoleLimit > 0 && !p.glucose.avg){
+				if (consoleLimit > 0 && !p.glucose.avg) {
 					console.log(v)
 					consoleLimit--;
 					console.log(p.glucose.sum);
@@ -534,7 +534,7 @@ class DataManager {
 	}
 	getRenderData(domain) {
 		//Filter Domain -> later
-		
+
 
 		const week = 60000 * 60 * 24 * 7;
 		const hours = Math.floor((domain[1] - domain[0]) / (60000 * 60));
@@ -556,35 +556,42 @@ class DataManager {
 		}
 
 		//Load Data
-	
+
 		console.log(domain);
 		let data = undefined;
+		console.log(display);
 		switch (display) {
 			case (0):
+				console.log('Filter data' + display);
 				this.filter.filterRange(domain);
 				data = this.data.raw.allFiltered();
 				break;
 			case (1):
+				console.log('Filter data' + display);
 				domain = domain.map(d => new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), (d.getMinutes() - d.getMinutes() % 10)));
 				this.filter.filterRange(domain);
 				data = this.data.three.all();
 				break;
 			case (2):
+				console.log('Filter data' + display);
 				domain = domain.map(d => new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), (d.getMinutes() - d.getMinutes() % 20)));
 				this.filter.filterRange(domain);
 				data = this.data.six.all();
 				break;
 			case (3):
+				console.log('Filter data' + display);
 				domain = domain.map(d => new Date(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() + 60000 * 60 * 24));
 				this.filter.filterRange(domain);
 				data = this.data.daily.all();
 				break;
 			case (4):
+				console.log('Filter data' + display);
 				domain = domain.map(d => new Date((Math.floor(d.getTime() / week) + 1) * week));
 				this.filter.filterRange(domain);
 				data = this.data.weekly.all();
 				break;
 			case (5):
+				console.log('Filter data' + display);
 				domain = domain.map(d => new Date(d.getFullYear(), d.getMonth() + 1));
 				this.filter.filterRange(domain);
 				data = this.data.monthly.all();
@@ -611,7 +618,7 @@ class DataManager {
 				basalDisplay: 'line'
 			}
 			console.log(results);
-			output.dataDisplay=results;
+			output.dataDisplay = results;
 
 		} else if (display <= 2) {
 			let glucose = [];
@@ -656,22 +663,18 @@ class DataManager {
 				glucoseDisplay: 'point',
 				basalDisplay: 'bar'
 			};
-		} else if(display > 2){
+		} else if (display > 2) {
 			console.log(data);
 			let glucose = [];
 			let basal = [];
 			let bolus = [];
 			let carbs = [];
-			
+
 			data.forEach(d => {
 				if (d.value.glucose.count != 0) {
-					let percentile = this.getPercentile(d.value.glucose.median_arr, d.value.glucose.count, [0.25, 0.5, 0.75]);
+					let percentile = this.getPercentile(d.value.glucose.median_arr, d.value.glucose.count, [0.10, 0.25, 0.5, 0.75, 0.90]);
 					let item = {
 						time: d.key,
-						value: percentile[1],
-						value_avg: d.value.glucose.sum / d.value.glucose.count,
-						value_lower_perc: percentile[0],
-						value_higher_perc: percentile[2],
 						percentile: percentile
 					}
 					glucose.push(item);
