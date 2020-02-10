@@ -5,8 +5,6 @@ import * as d3 from 'd3';
 import DataManager from '../services/DataManager';
 import TimeAxis from './charts/TimeAxis';
 
-
-
 class Chart extends Component {
     constructor(props) {
         super(props);
@@ -55,7 +53,7 @@ class Chart extends Component {
     async loadTestData(){
         try {
             //TODO Implement DataManager
-            let data = await (await fetch("/data/2019-11-20-1349_export-data.json")).json()
+            let data = await (await fetch("2019-11-20-1349_export-data.json")).json()
             console.log(data);
             data = data.data;
             this.loadData(data);
