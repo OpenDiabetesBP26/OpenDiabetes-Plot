@@ -24,7 +24,7 @@ steps:
   inputs:
     SourceFolder: './dist'
     Contents: '**'
-    TargetFolder: '$(build.artifactstagingdirectory'
+    TargetFolder: '$(build.artifactstagingdirectory)'
     CleanTargetFolder: true
     OverWrite: true
     flattenFolders: true
