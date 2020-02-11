@@ -7,7 +7,8 @@ module.exports = {
   performance: {hints:false},
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].bundle.js'
+    filename: '[name].bundle.js',
+    chunkFilename: '[name].bundle.js'
   },
   module: {
     rules: [
@@ -34,6 +35,17 @@ module.exports = {
     historyApiFallback: {
       disableDotRule:true
     },
+  },
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        commons: {
+          test: /[\\/]data[\\/]/,
+          name: 'data',
+          chunks: 'all'
+        }
+      }
+    }
   },
   plugins: []
 }

@@ -1,0 +1,35 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install
+    npm run build
+  displayName: 'npm install and build'
+  
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: './dist'
+    Contents: '**'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+    CleanTargetFolder: true
+    OverWrite: true
+    flattenFolders: true
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathtoPublish: $(build.artifactstagingdirectory) # dist or build files
+    ArtifactName: 'package'
+    publishLocation: 'Container'

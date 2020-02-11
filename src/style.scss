@@ -117,7 +117,35 @@ div.stat-container.hypo{
         background-color: #eb4847;
     }
 }
-
+.glucose-percentile{
+    rect.high{
+        fill: #ffbf6c;
+        stroke:#1d1d1d;
+        stroke-opacity: 0.5;
+    }
+    rect.normal{
+        fill: #89db49;
+        stroke:#1d1d1d;
+        stroke-opacity: 0.5;
+    }
+    rect.low{
+        fill: #ff756c;
+        stroke:#1d1d1d;
+        stroke-opacity: 0.5;
+    }
+    rect.nhigh{
+        fill: #ffbf6c;
+        opacity: 0.4;
+    }
+    rect.nnormal{
+        fill: #89db49;
+        opacity: 0.4;
+    }
+    rect.nlow{
+        fill: #ff756c;
+        opacity: 0.4;
+    }
+}
 
 body {
     h1 {
