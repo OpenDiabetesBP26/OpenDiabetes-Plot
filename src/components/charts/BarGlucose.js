@@ -20,8 +20,9 @@ class BarGlucose extends Component {
         this.groupData = d3.select(this.mainGroup).append('g').attr('class', 'data').attr('transform', 'translate(0, 50)');
         this.groupAxis = d3.select(this.mainGroup).append('g').attr('class', 'axis').attr('transform', 'translate(0, 50)');
         this.groupAxis.call(d3.axisLeft(this.y));
-        this.tooltip = d3.select("body").append("div").attr("class","test").style("opacity", 0)
-
+        this.tooltip = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0)
+        this.svg = this.mainGroup.ownerSVGElement;
+        console.log(this.svg)
 
     }
     componentWillReceiveProps(nextProps) {
@@ -55,151 +56,168 @@ class BarGlucose extends Component {
             .attr('width', nextProps.x(nextProps.x.domain()[1]) - nextProps.x(nextProps.x.domain()[0]))
             .attr('height', this.y(0) - this.y(high));
 
+        this.groupData.append('clipPath')
+            .attr("id", "clipAll")
+            .append('rect')
+            .attr('x', 0)
+            .attr('y', this.y.range()[0])
+            .attr('width', nextProps.x(nextProps.x.domain()[1]) - nextProps.x(nextProps.x.domain()[0]))
+            .attr('height', this.y.range()[1]);
+
         let width = 16;
-        let pos = this.groupData.node().getBoundingClientRect();
-        if(nextProps.x.range()[1] < 800) width = 10;
+        let svg = this.svg;
+        let tip = this.tooltip;
+        if (nextProps.x.range()[1] < 800) width = 10;
+        const tip_show = function () {
+            let args = Array.prototype.slice.call(arguments);
+            let data = args[0];
+            let target = args[2][args[1]];
+            //TEST
+            const offset = 10;
+            let point = svg.createSVGPoint();
+            let bbox = target.getBBox();
+            point.x = bbox.x + bbox.width + offset;
+            point.y = bbox.y;
+            let tpoint = point.matrixTransform(target.getScreenCTM())
+            let timePrint = d3.timeFormat("%Y %B %d %I %p");
+            tip.attr('style', 'opacity: 1; position: absolute; left: ' + tpoint.x + 'px ; top: ' + tpoint.y + 'px ;')
+                .html('' + timePrint(data.time) + ' - ' + timePrint(data.timeEnd) + '</br>' +
+                    '<table>' +
+                    '<tr> <td> 90th percentile: </td><td>' + data.percentile[4] + ' mg/dl </td></tr>' +
+                    '<tr> <td> 75th percentile: </td><td>' + data.percentile[3] + ' mg/dl </td></tr>' +
+                    '<tr> <td> median: </td><td>' + data.percentile[2] + ' mg/dl </td></tr>' +
+                    '<tr> <td> 25th percentile: </td><td>' + data.percentile[1] + ' mg/dl </td></tr>' +
+                    '<tr> <td> 10th percentile: </td><td>' + data.percentile[0] + ' mg/dl </td></tr>' +
+                    '</table>'
+
+                )
+                .style('pointer-events', 'all');
+        }
+        const tip_hide = function () {
+            tip.style('opacity', 0).style('pointer-events', 'none');
+        }
         this.groupData.selectAll('g').data(nextProps.data).join(
             (enter) => {
                 let group = enter.append('g').attr('class', 'glucose-percentile')
                 //OUTER PERCENTILE
                 group.append('rect')
-                    .attr('x', d => nextProps.x(d.time) - width/2)
+                    .attr('x', d => nextProps.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[4]))
                     .attr('height', d => this.y(d.percentile[0]) - this.y(d.percentile[4]))
-                    .attr('rx', width/2)
-                    .attr('ry', width/2)
+                    .attr('rx', width / 2)
+                    .attr('ry', width / 2)
                     .attr('class', 'nhigh')
                     .attr("clip-path", "url(#clipHigh)")
 
                 group.append('rect')
-                    .attr('x', d => nextProps.x(d.time) - width/2)
+                    .attr('x', d => nextProps.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[4]))
                     .attr('height', d => this.y(d.percentile[0]) - this.y(d.percentile[4]))
-                    .attr('rx', width/2)
-                    .attr('ry', width/2)
+                    .attr('rx', width / 2)
+                    .attr('ry', width / 2)
                     .attr('class', 'nnormal')
                     .attr("clip-path", "url(#clipNormal)")
 
                 group.append('rect')
-                    .attr('x', d => nextProps.x(d.time) - width/2)
+                    .attr('x', d => nextProps.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[4]))
                     .attr('height', d => this.y(d.percentile[0]) - this.y(d.percentile[4]))
-                    .attr('rx', width/2)
-                    .attr('ry', width/2)
+                    .attr('rx', width / 2)
+                    .attr('ry', width / 2)
                     .attr('class', 'nlow')
                     .attr("clip-path", "url(#clipLow)")
 
                 //INNTER PERCENTIL
                 group.append('rect')
-                    .attr('x', d => nextProps.x(d.time) - width/2)
+                    .attr('x', d => nextProps.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[3]))
                     .attr('height', d => this.y(d.percentile[1]) - this.y(d.percentile[3]))
-                    .attr('rx', width/2)
-                    .attr('ry', width/2)
+                    .attr('rx', width / 2)
+                    .attr('ry', width / 2)
                     .attr('class', 'high')
                     .attr("clip-path", "url(#clipHigh)");
 
                 group.append('rect')
-                    .attr('x', d => nextProps.x(d.time) - width/2)
+                    .attr('x', d => nextProps.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[3]))
                     .attr('height', d => this.y(d.percentile[1]) - this.y(d.percentile[3]))
-                    .attr('rx', width/2)
-                    .attr('ry', width/2)
+                    .attr('rx', width / 2)
+                    .attr('ry', width / 2)
                     .attr('class', 'normal')
                     .attr("clip-path", "url(#clipNormal)");
 
                 group.append('rect')
-                    .attr('x', d => nextProps.x(d.time) - width/2)
+                    .attr('x', d => nextProps.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[3]))
                     .attr('height', d => this.y(d.percentile[1]) - this.y(d.percentile[3]))
-                    .attr('rx', width/2)
-                    .attr('ry', width/2)
+                    .attr('rx', width / 2)
+                    .attr('ry', width / 2)
                     .attr('class', 'low')
                     .attr("clip-path", "url(#clipLow)");
                 //Median Circle
                 group.append('rect')
-                    .attr('x', d => nextProps.x(d.time) - width/2)
+                    .attr('x', d => nextProps.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[2]) - 3)
                     .attr('height', 6)
                     .attr('class', 'median')
-                group.on("mouseover", d => {
-                    this.tooltip.transition()		
-                    .duration(200)		
-                    .style("opacity", .9);
-                    this.tooltip.html(d.time + "<br/>")	
-                    .style("left", (pos.x + nextProps.x(d.time)) + "px")		
-                    .style("top", (pos.y + this.y(d.percentile[2])) + "px")
-                    .style("position", 'absolute')
-                    .style("z-index", -9999)
+                    .attr("clip-path", "url(#clipAll)");
+                group.on('mouseover', tip_show);
+                group.on('mouseout', tip_hide)
 
-                                        //.style("left", (d3.event.pageX) + "px")		
-                    //.style("top", (d3.event.pageY - 28) + "px")
-
-                    console.log(pos);
-                })
-                group.on("mouseout", d => {
-                    this.tooltip.transition()		
-                    .duration(200)		
-                    .style("opacity", .0)
-                    .style("z-index", 0)
-
-                                        //.style("left", (d3.event.pageX) + "px")		
-                    //.style("top", (d3.event.pageY - 28) + "px")
-
-                    console.log(pos);
-                })
             },
             (update) => {
                 //OUTER PERCENTILE
-                update.select('rect.nhigh').attr('x', d => nextProps.x(d.time) - width/2)
+                update.select('rect.nhigh').attr('x', d => nextProps.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[4]))
                     .attr('height', d => this.y(d.percentile[0]) - this.y(d.percentile[4]))
-                    .attr('rx', width/2)
-                    .attr('ry', width/2)
-                update.select('rect.nnormal').attr('x', d => nextProps.x(d.time) - width/2)
+                    .attr('rx', width / 2)
+                    .attr('ry', width / 2)
+                update.select('rect.nnormal').attr('x', d => nextProps.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[4]))
                     .attr('height', d => this.y(d.percentile[0]) - this.y(d.percentile[4]))
-                    .attr('rx', width/2)
-                    .attr('ry', width/2)
-                update.select('rect.nlow').attr('x', d => nextProps.x(d.time) - width/2)
+                    .attr('rx', width / 2)
+                    .attr('ry', width / 2)
+                update.select('rect.nlow').attr('x', d => nextProps.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[4]))
                     .attr('height', d => this.y(d.percentile[0]) - this.y(d.percentile[4]))
-                    .attr('rx', width/2)
-                    .attr('ry', width/2)
+                    .attr('rx', width / 2)
+                    .attr('ry', width / 2)
                 //INNER PERCENTILE
-                update.select('rect.high').attr('x', d => nextProps.x(d.time) - width/2)
+                update.select('rect.high').attr('x', d => nextProps.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[3]))
                     .attr('height', d => this.y(d.percentile[1]) - this.y(d.percentile[3]))
-                    .attr('rx', width/2)
-                    .attr('ry', width/2);
-                update.select('rect.normal').attr('x', d => nextProps.x(d.time) - width/2)
+                    .attr('rx', width / 2)
+                    .attr('ry', width / 2);
+                update.select('rect.normal').attr('x', d => nextProps.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[3]))
                     .attr('height', d => this.y(d.percentile[1]) - this.y(d.percentile[3]))
-                    .attr('rx', width/2)
-                    .attr('ry', width/2);
-                update.select('rect.low').attr('x', d => nextProps.x(d.time) - width/2)
+                    .attr('rx', width / 2)
+                    .attr('ry', width / 2);
+                update.select('rect.low').attr('x', d => nextProps.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[3]))
                     .attr('height', d => this.y(d.percentile[1]) - this.y(d.percentile[3]))
-                    .attr('rx', width/2)
-                    .attr('ry', width/2);
+                    .attr('rx', width / 2)
+                    .attr('ry', width / 2);
                 update.select('rect.median')
-                    .attr('x', d => nextProps.x(d.time) - width/2)
+                    .attr('x', d => nextProps.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[2]) - 3)
                     .attr('height', 6)
+                update.on('mouseover', tip_show);
+                update.on('mouseout', tip_hide)
             }
         )
     }

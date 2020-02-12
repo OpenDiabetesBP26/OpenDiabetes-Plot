@@ -117,6 +117,15 @@ div.stat-container.hypo{
         background-color: #eb4847;
     }
 }
+.glucose-percentile:hover{
+    stroke: #a3a3a3;
+    stroke-width: 5px;
+    stroke-opacity: 1;
+
+    rect.median{
+        stroke: none;
+    }
+}
 .glucose-percentile{
     rect.high{
         fill: #ffbf6c;
@@ -146,7 +155,11 @@ div.stat-container.hypo{
         opacity: 0.4;
     }
 }
-
+.tooltip{
+    padding:10px;
+    background: #f1f1f1;
+    border: 3px solid #f1f1f1;
+}
 body {
     h1 {
         color: green;

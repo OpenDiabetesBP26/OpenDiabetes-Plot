@@ -194,7 +194,7 @@ class DataManager {
 		//Create filter dimension
 		let filter_dim = data_crossfilter.dimension(d => d.time);
 		let group_dim = data_crossfilter.dimension(d => d.time);
-		let groupThreeHour = group_dim.group(d => new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), (d.getMinutes() - d.getMinutes() % 10))).reduce(
+		let groupThreeHour = group_dim.group(d => d3.timeMinute.every(10).floor(d)).reduce(
 			function reduceAdd(p, v, nf) {
 				if (v.type == types.glucose) {
 					p.glucose.sum += parseInt(v.value);
@@ -261,7 +261,7 @@ class DataManager {
 		);
 
 
-		let groupSixHour = group_dim.group(d => new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), (d.getMinutes() - d.getMinutes() % 20))).reduce(
+		let groupSixHour = group_dim.group(d => d3.timeMinute.every(20).floor(d)).reduce(
 			function reduceAdd(p, v, nf) {
 				if (v.type == types.glucose) {
 					p.glucose.sum += parseInt(v.value);
@@ -327,7 +327,6 @@ class DataManager {
 			}
 		);
 		let limit = 400;
-		let consoleLimit = 20;
 		//Reduce function for percentile
 		function reduceAddPercentile(p, v, nf) {
 			if (v.type == types.glucose) {
@@ -335,17 +334,10 @@ class DataManager {
 				if (value > limit) {
 					value = limit;
 				}
-				p.glucose.median_arr[value] ? p.glucose.median_arr[value]++ : p.glucose.median_arr[value] = 1;
-
+				p.glucose.median_arr[value] ? p.glucose.median_arr[value]++ : p.glucose.median_arr[value] = 1; 
 				p.glucose.sum += v.value;
 				p.glucose.count++;
 				p.glucose.avg = p.glucose.sum / p.glucose.count;
-				if (consoleLimit > 0 && !p.glucose.avg) {
-					console.log(v)
-					consoleLimit--;
-					console.log(p.glucose.sum);
-					console.log(p.glucose.count);
-				}
 				return p;
 			}
 			else if (v.type == types.basal_profile || v.type == types.basal_temp) {
@@ -411,20 +403,20 @@ class DataManager {
 				}
 			}
 		}
-		let groupDaily = group_dim.group(d => new Date(d.getFullYear(), d.getMonth(), d.getDate())).reduce(
+		let groupDaily = group_dim.group(d => d3.timeDay.floor(d)).reduce(
 			reduceAddPercentile,
 			reduceRemovePercentile,
 			reduceInitialPercentile
 		);
 
 		let week = 60000 * 60 * 24 * 7;
-		let groupWeekly = group_dim.group(d => new Date(Math.floor(d.getTime() / week) * week)).reduce(
+		let groupWeekly = group_dim.group(d => d3.timeWeek.floor(d)).reduce(
 			reduceAddPercentile,
 			reduceRemovePercentile,
 			reduceInitialPercentile
 		);
 
-		let groupMonthly = group_dim.group(d => new Date(d.getFullYear(), d.getMonth())).reduce(
+		let groupMonthly = group_dim.group(d => d3.timeMonth.floor(d)).reduce(
 			reduceAddPercentile,
 			reduceRemovePercentile,
 			reduceInitialPercentile
@@ -556,45 +548,42 @@ class DataManager {
 		}
 
 		//Load Data
-
-		console.log(domain);
 		let data = undefined;
-		console.log(display);
+		let timeOffset = undefined;
 		switch (display) {
 			case (0):
-				console.log('Filter data' + display);
 				this.filter.filterRange(domain);
 				data = this.data.raw.allFiltered();
 				break;
 			case (1):
-				console.log('Filter data' + display);
 				domain = domain.map(d => new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), (d.getMinutes() - d.getMinutes() % 10)));
 				this.filter.filterRange(domain);
 				data = this.data.three.all();
+				timeOffset = d3.timeMinute.every(10);
 				break;
 			case (2):
-				console.log('Filter data' + display);
 				domain = domain.map(d => new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), (d.getMinutes() - d.getMinutes() % 20)));
 				this.filter.filterRange(domain);
 				data = this.data.six.all();
+				timeOffset = d3.timeMinute.every(20);
 				break;
 			case (3):
-				console.log('Filter data' + display);
 				domain = domain.map(d => new Date(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() + 60000 * 60 * 24));
 				this.filter.filterRange(domain);
 				data = this.data.daily.all();
+				timeOffset = d3.timeDay;
 				break;
 			case (4):
-				console.log('Filter data' + display);
 				domain = domain.map(d => new Date((Math.floor(d.getTime() / week) + 1) * week));
 				this.filter.filterRange(domain);
 				data = this.data.weekly.all();
+				timeOffset = d3.timeWeek;
 				break;
 			case (5):
-				console.log('Filter data' + display);
 				domain = domain.map(d => new Date(d.getFullYear(), d.getMonth() + 1));
 				this.filter.filterRange(domain);
 				data = this.data.monthly.all();
+				timeOffset = d3.timeMonth;
 				break;
 			default:
 				break;
@@ -603,7 +592,7 @@ class DataManager {
 		let output = {
 			dataDisplay: undefined,
 			timeInRange: undefined,
-			percentileDay: undefined
+			percentileDay: undefined,
 		}
 		//dataDisplay
 		if (display == 0) {
@@ -675,6 +664,7 @@ class DataManager {
 					let percentile = this.getPercentile(d.value.glucose.median_arr, d.value.glucose.count, [0.10, 0.25, 0.5, 0.75, 0.90]);
 					let item = {
 						time: d.key,
+						timeEnd: timeOffset.offset(d.key, 1),
 						percentile: percentile
 					}
 					glucose.push(item);
