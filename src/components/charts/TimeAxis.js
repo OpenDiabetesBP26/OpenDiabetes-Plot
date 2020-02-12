@@ -103,7 +103,7 @@ class TimeAxis extends Component {
         }
         else if (hours > 24 * 7) {
             upperOffset = d3.timeDay.offset(nextProps.x.domain()[0], -25);
-            lowerOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -1);
+            lowerOffset = d3.timeDay.offset(nextProps.x.domain()[0], -1);
             upperTicks = d3.timeMonth;
             lowerTicks = d3.timeDay;
             upperTickFormat = d3.timeFormat("%Y %B");
@@ -117,7 +117,7 @@ class TimeAxis extends Component {
         }
         else if (hours > 24 * 3) {
             upperOffset = d3.timeDay.offset(nextProps.x.domain()[0], -4);
-            lowerOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -1);
+            lowerOffset = d3.timeDay.offset(nextProps.x.domain()[0], -1);
             upperTicks = d3.timeWeek;
             lowerTicks = d3.timeDay;
             upperTickFormat = d3.timeFormat("%Y %B Week %W");
@@ -130,8 +130,8 @@ class TimeAxis extends Component {
             };
 
         } else if (hours > 24) {
-            upperOffset = d3.timeHour.offset(nextProps.x.domain()[0], -6)
-            lowerOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -1);
+            upperOffset = d3.timeHour.offset(nextProps.x.domain()[0], -18)
+            lowerOffset = d3.timeHour.offset(nextProps.x.domain()[0], -6);
             upperTicks = d3.timeDay;
             lowerTicks = d3.timeHour.every(6);
             upperTickFormat = d3.timeFormat("%Y %B %d %A");
@@ -145,7 +145,7 @@ class TimeAxis extends Component {
 
         } else if (hours > 12) {
             upperOffset = d3.timeHour.offset(nextProps.x.domain()[0], -16)
-            lowerOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -1);
+            lowerOffset = d3.timeHour.offset(nextProps.x.domain()[0], -3);
             upperTicks = d3.timeDay;
             lowerTicks = d3.timeHour.every(3);
             upperTickFormat = d3.timeFormat("%Y %B %d %A");
@@ -158,7 +158,7 @@ class TimeAxis extends Component {
 
         } else if (hours > 4) {
             upperOffset = d3.timeHour.offset(nextProps.x.domain()[0], -20)
-            lowerOffset = d3.timeMonth.offset(nextProps.x.domain()[0], -1);
+            lowerOffset = d3.timeHour.offset(nextProps.x.domain()[0], -1);
             upperTicks = d3.timeDay;
             lowerTicks = d3.timeHour;
             upperTickFormat = d3.timeFormat("%Y %B %d %A");
@@ -171,7 +171,7 @@ class TimeAxis extends Component {
 
         } else if (hours > 2) {
             upperOffset = d3.timeHour.offset(nextProps.x.domain()[0], -20)
-            lowerOffset = d3.timeHour.offset(nextProps.x.domain()[0], -1)
+            lowerOffset = d3.timeMinute.offset(nextProps.x.domain()[0], -30)
             upperTicks = d3.timeDay;
             lowerTicks = d3.timeMinute.every(30);
             upperTickFormat = d3.timeFormat("%Y %B %d %A");
@@ -184,7 +184,7 @@ class TimeAxis extends Component {
 
         } else {
             upperOffset = d3.timeHour.offset(nextProps.x.domain()[0], -20)
-            lowerOffset = d3.timeHour.offset(nextProps.x.domain()[0], -1)
+            lowerOffset = d3.timeMinute.offset(nextProps.x.domain()[0], -15)
             upperTicks = d3.timeDay;
             lowerTicks = d3.timeMinute.every(15);
             upperTickFormat = d3.timeFormat("%Y %B %d %A");

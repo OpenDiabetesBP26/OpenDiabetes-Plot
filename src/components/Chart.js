@@ -3,6 +3,7 @@ import { hot } from 'react-hot-loader';
 import * as d3 from 'd3';
 import DataManager from '../services/DataManager';
 import TimeAxis from './charts/TimeAxis';
+import BarGlucose from './charts/BarGlucose';
 
 const margin = { top: 20, right: 40, bottom: 110, left: 40 };
 class Chart extends Component {
@@ -21,8 +22,11 @@ class Chart extends Component {
                 <div className="row">
                     <div className="col-lg-8 col-md-12">
                         {!this.props.data && <div> No data loaded </div>}
-                        <svg id="d3sample" width="100%" height="500" ref={(svg) => this.svg = svg}>
+                        <svg id="d3sample" width="100%" height="800" ref={(svg) => this.svg = svg}>
+                        <g id="mainGroup">
                         <TimeAxis x={this.state.x} />
+                        {this.renderData && this.renderData.dataDisplay.glucoseDisplay == 'percentile' && <BarGlucose data={this.renderData.dataDisplay.glucose} x={this.state.x}/>}
+                        </g>
                         </svg>
                     </div>
                 </div>
@@ -40,6 +44,7 @@ class Chart extends Component {
     componentDidMount() {
         //Append resize listener
         window.addEventListener("resize", this.updateDimensions.bind(this));
+        d3.select('g#mainGroup').attr('transform', 'translate(50, 0)');
         // //Call resize to set first state
     }
     componentWillUnmount(){
@@ -101,6 +106,7 @@ class Chart extends Component {
     zoomed() {
         this.x = d3.event.transform.rescaleX(this.xBase);
         this.renderData = this.dataManager.getRenderData(this.x.domain());
+        console.log(this.renderData);
         //Set State
         this.setState({
             x: this.x,

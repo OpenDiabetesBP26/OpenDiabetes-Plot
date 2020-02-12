@@ -117,8 +117,49 @@ div.stat-container.hypo{
         background-color: #eb4847;
     }
 }
+.glucose-percentile:hover{
+    stroke: #a3a3a3;
+    stroke-width: 5px;
+    stroke-opacity: 1;
 
-
+    rect.median{
+        stroke: none;
+    }
+}
+.glucose-percentile{
+    rect.high{
+        fill: #ffbf6c;
+        stroke:#1d1d1d;
+        stroke-opacity: 0.5;
+    }
+    rect.normal{
+        fill: #89db49;
+        stroke:#1d1d1d;
+        stroke-opacity: 0.5;
+    }
+    rect.low{
+        fill: #ff756c;
+        stroke:#1d1d1d;
+        stroke-opacity: 0.5;
+    }
+    rect.nhigh{
+        fill: #ffbf6c;
+        opacity: 0.4;
+    }
+    rect.nnormal{
+        fill: #89db49;
+        opacity: 0.4;
+    }
+    rect.nlow{
+        fill: #ff756c;
+        opacity: 0.4;
+    }
+}
+.tooltip{
+    padding:10px;
+    background: #f1f1f1;
+    border: 3px solid #f1f1f1;
+}
 body {
     h1 {
         color: green;
