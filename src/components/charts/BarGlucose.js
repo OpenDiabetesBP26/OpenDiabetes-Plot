@@ -170,6 +170,7 @@ class BarGlucose extends Component {
                     .attr("clip-path", "url(#clipAll)");
                 group.on('mouseover', tip_show);
                 group.on('mouseout', tip_hide)
+                return enter;
 
             },
             (update) => {
@@ -216,8 +217,6 @@ class BarGlucose extends Component {
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[2]) - 3)
                     .attr('height', 6)
-                update.on('mouseover', tip_show);
-                update.on('mouseout', tip_hide)
             }
         )
     }

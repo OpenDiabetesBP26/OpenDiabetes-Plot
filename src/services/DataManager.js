@@ -568,19 +568,19 @@ class DataManager {
 				timeOffset = d3.timeMinute.every(20);
 				break;
 			case (3):
-				domain = domain.map(d => new Date(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() + 60000 * 60 * 24));
+				domain = domain.map(d => d3.timeDay.ceil(d));
 				this.filter.filterRange(domain);
 				data = this.data.daily.all();
 				timeOffset = d3.timeDay;
 				break;
 			case (4):
-				domain = domain.map(d => new Date((Math.floor(d.getTime() / week) + 1) * week));
+				domain = domain.map(d => d3.timeWeek.ceil(d));
 				this.filter.filterRange(domain);
 				data = this.data.weekly.all();
 				timeOffset = d3.timeWeek;
 				break;
 			case (5):
-				domain = domain.map(d => new Date(d.getFullYear(), d.getMonth() + 1));
+				domain = domain.map(d => d3.timeMonth.ceil(d));
 				this.filter.filterRange(domain);
 				data = this.data.monthly.all();
 				timeOffset = d3.timeMonth;
