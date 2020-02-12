@@ -1,5 +1,15 @@
 @import "~bootstrap/scss/bootstrap";
 
+.fileDrop {
+    text-align:center;
+    vertical-align: center;
+    border: 2px dotted black;
+    outline:none;
+    p {
+        margin:5px 5px;
+    }
+}
+
 g#timeAxis {
     .upperTimeAxis{
         .tick{

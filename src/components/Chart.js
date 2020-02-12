@@ -16,6 +16,9 @@ class Chart extends Component {
         this.state = { x: this.x }
        
     }
+
+
+
     render() {
         return (
             <div className="container-fluid">
