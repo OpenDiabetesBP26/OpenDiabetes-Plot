@@ -23,9 +23,16 @@ class BarGlucose extends Component {
         this.tooltip = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0)
         this.svg = this.mainGroup.ownerSVGElement;
         console.log(this.svg)
+        this.drawChart(this.props);
 
     }
+    componentWillUnmount(){
+        this.tooltip.remove();
+    }
     componentWillReceiveProps(nextProps) {
+        this.drawChart(nextProps);
+    }
+    drawChart(props){
         if (!this.groupData) return;
         let high = 180;
         let low = 80;
@@ -37,7 +44,7 @@ class BarGlucose extends Component {
             .append('rect')
             .attr('x', 0)
             .attr('y', this.y.range()[0])
-            .attr('width', nextProps.x(nextProps.x.domain()[1]) - nextProps.x(nextProps.x.domain()[0]))
+            .attr('width', props.x(props.x.domain()[1]) - props.x(props.x.domain()[0]))
             .attr('height', this.y(high) - this.y.range()[0]);
 
         this.groupData.append('clipPath')
@@ -45,7 +52,7 @@ class BarGlucose extends Component {
             .append('rect')
             .attr('x', 0)
             .attr('y', this.y(high))
-            .attr('width', nextProps.x(nextProps.x.domain()[1]) - nextProps.x(nextProps.x.domain()[0]))
+            .attr('width', props.x(props.x.domain()[1]) - props.x(props.x.domain()[0]))
             .attr('height', this.y(low) - this.y(high));
 
         this.groupData.append('clipPath')
@@ -53,7 +60,7 @@ class BarGlucose extends Component {
             .append('rect')
             .attr('x', 0)
             .attr('y', this.y(low))
-            .attr('width', nextProps.x(nextProps.x.domain()[1]) - nextProps.x(nextProps.x.domain()[0]))
+            .attr('width', props.x(props.x.domain()[1]) - props.x(props.x.domain()[0]))
             .attr('height', this.y(0) - this.y(high));
 
         this.groupData.append('clipPath')
@@ -61,13 +68,13 @@ class BarGlucose extends Component {
             .append('rect')
             .attr('x', 0)
             .attr('y', this.y.range()[0])
-            .attr('width', nextProps.x(nextProps.x.domain()[1]) - nextProps.x(nextProps.x.domain()[0]))
+            .attr('width', props.x(props.x.domain()[1]) - props.x(props.x.domain()[0]))
             .attr('height', this.y.range()[1]);
 
         let width = 16;
         let svg = this.svg;
         let tip = this.tooltip;
-        if (nextProps.x.range()[1] < 800) width = 10;
+        if (props.x.range()[1] < 800) width = 10;
         const tip_show = function () {
             let args = Array.prototype.slice.call(arguments);
             let data = args[0];
@@ -96,12 +103,12 @@ class BarGlucose extends Component {
         const tip_hide = function () {
             tip.style('opacity', 0).style('pointer-events', 'none');
         }
-        this.groupData.selectAll('g').data(nextProps.data).join(
+        this.groupData.selectAll('g').data(props.data).join(
             (enter) => {
                 let group = enter.append('g').attr('class', 'glucose-percentile')
                 //OUTER PERCENTILE
                 group.append('rect')
-                    .attr('x', d => nextProps.x(d.time) - width / 2)
+                    .attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[4]))
                     .attr('height', d => this.y(d.percentile[0]) - this.y(d.percentile[4]))
@@ -111,7 +118,7 @@ class BarGlucose extends Component {
                     .attr("clip-path", "url(#clipHigh)")
 
                 group.append('rect')
-                    .attr('x', d => nextProps.x(d.time) - width / 2)
+                    .attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[4]))
                     .attr('height', d => this.y(d.percentile[0]) - this.y(d.percentile[4]))
@@ -121,7 +128,7 @@ class BarGlucose extends Component {
                     .attr("clip-path", "url(#clipNormal)")
 
                 group.append('rect')
-                    .attr('x', d => nextProps.x(d.time) - width / 2)
+                    .attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[4]))
                     .attr('height', d => this.y(d.percentile[0]) - this.y(d.percentile[4]))
@@ -132,7 +139,7 @@ class BarGlucose extends Component {
 
                 //INNTER PERCENTIL
                 group.append('rect')
-                    .attr('x', d => nextProps.x(d.time) - width / 2)
+                    .attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[3]))
                     .attr('height', d => this.y(d.percentile[1]) - this.y(d.percentile[3]))
@@ -142,7 +149,7 @@ class BarGlucose extends Component {
                     .attr("clip-path", "url(#clipHigh)");
 
                 group.append('rect')
-                    .attr('x', d => nextProps.x(d.time) - width / 2)
+                    .attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[3]))
                     .attr('height', d => this.y(d.percentile[1]) - this.y(d.percentile[3]))
@@ -152,7 +159,7 @@ class BarGlucose extends Component {
                     .attr("clip-path", "url(#clipNormal)");
 
                 group.append('rect')
-                    .attr('x', d => nextProps.x(d.time) - width / 2)
+                    .attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[3]))
                     .attr('height', d => this.y(d.percentile[1]) - this.y(d.percentile[3]))
@@ -162,7 +169,7 @@ class BarGlucose extends Component {
                     .attr("clip-path", "url(#clipLow)");
                 //Median Circle
                 group.append('rect')
-                    .attr('x', d => nextProps.x(d.time) - width / 2)
+                    .attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[2]) - 3)
                     .attr('height', 6)
@@ -175,45 +182,45 @@ class BarGlucose extends Component {
             },
             (update) => {
                 //OUTER PERCENTILE
-                update.select('rect.nhigh').attr('x', d => nextProps.x(d.time) - width / 2)
+                update.select('rect.nhigh').attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[4]))
                     .attr('height', d => this.y(d.percentile[0]) - this.y(d.percentile[4]))
                     .attr('rx', width / 2)
                     .attr('ry', width / 2)
-                update.select('rect.nnormal').attr('x', d => nextProps.x(d.time) - width / 2)
+                update.select('rect.nnormal').attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[4]))
                     .attr('height', d => this.y(d.percentile[0]) - this.y(d.percentile[4]))
                     .attr('rx', width / 2)
                     .attr('ry', width / 2)
-                update.select('rect.nlow').attr('x', d => nextProps.x(d.time) - width / 2)
+                update.select('rect.nlow').attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[4]))
                     .attr('height', d => this.y(d.percentile[0]) - this.y(d.percentile[4]))
                     .attr('rx', width / 2)
                     .attr('ry', width / 2)
                 //INNER PERCENTILE
-                update.select('rect.high').attr('x', d => nextProps.x(d.time) - width / 2)
+                update.select('rect.high').attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[3]))
                     .attr('height', d => this.y(d.percentile[1]) - this.y(d.percentile[3]))
                     .attr('rx', width / 2)
                     .attr('ry', width / 2);
-                update.select('rect.normal').attr('x', d => nextProps.x(d.time) - width / 2)
+                update.select('rect.normal').attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[3]))
                     .attr('height', d => this.y(d.percentile[1]) - this.y(d.percentile[3]))
                     .attr('rx', width / 2)
                     .attr('ry', width / 2);
-                update.select('rect.low').attr('x', d => nextProps.x(d.time) - width / 2)
+                update.select('rect.low').attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[3]))
                     .attr('height', d => this.y(d.percentile[1]) - this.y(d.percentile[3]))
                     .attr('rx', width / 2)
                     .attr('ry', width / 2);
                 update.select('rect.median')
-                    .attr('x', d => nextProps.x(d.time) - width / 2)
+                    .attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width)
                     .attr('y', d => this.y(d.percentile[2]) - 3)
                     .attr('height', 6)

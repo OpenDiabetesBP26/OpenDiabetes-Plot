@@ -19,6 +19,9 @@ class TimeAxis extends Component {
 
     componentDidMount() {
     }
+    componentWillUnmount(){
+        this.tooltip.remove();
+    }
     componentWillReceiveProps(nextProps) {
         if (!this.upperTime || !this.lowerTime || !nextProps.x || !this.background) return;
         const stickFirstTick = (caller) => {

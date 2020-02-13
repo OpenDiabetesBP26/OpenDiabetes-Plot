@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 import DataManager from '../services/DataManager';
 import TimeAxis from './charts/TimeAxis';
 import BarGlucose from './charts/BarGlucose';
+import PointGlucose from './charts/PointGlucose';
 
 const margin = { top: 20, right: 40, bottom: 110, left: 40 };
 class Chart extends Component {
@@ -29,6 +30,7 @@ class Chart extends Component {
                         <g id="mainGroup">
                         <TimeAxis x={this.state.x} />
                         {this.renderData && this.renderData.dataDisplay.glucoseDisplay == 'percentile' && <BarGlucose data={this.renderData.dataDisplay.glucose} x={this.state.x}/>}
+                        {this.renderData && this.renderData.dataDisplay.glucoseDisplay == 'point' && <PointGlucose data={this.renderData.dataDisplay.glucose} x={this.state.x}/>}
                         </g>
                         </svg>
                     </div>

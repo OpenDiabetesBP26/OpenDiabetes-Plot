@@ -165,6 +165,23 @@ div.stat-container.hypo{
         opacity: 0.4;
     }
 }
+.point-glucose{
+    .high{
+        fill: #ffbf6c;
+        stroke:#1d1d1d;
+        stroke-opacity: 0.5;
+    }
+    .normal{
+        fill: #89db49;
+        stroke:#1d1d1d;
+        stroke-opacity: 0.5;
+    }
+    .low{
+        fill: #ff756c;
+        stroke:#1d1d1d;
+        stroke-opacity: 0.5;
+    }
+}
 .tooltip{
     padding:10px;
     background: #f1f1f1;

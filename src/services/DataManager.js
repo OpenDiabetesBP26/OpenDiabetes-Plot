@@ -663,7 +663,8 @@ class DataManager {
 				if (d.value.glucose.count != 0) {
 					let percentile = this.getPercentile(d.value.glucose.median_arr, d.value.glucose.count, [0.10, 0.25, 0.5, 0.75, 0.90]);
 					let item = {
-						time: d.key,
+						timeStart: d.key,
+						time: new Date(d.key.getTime() + ((timeOffset.offset(d.key, 1) - d.key.getTime()) / 2)),
 						timeEnd: timeOffset.offset(d.key, 1),
 						percentile: percentile
 					}
