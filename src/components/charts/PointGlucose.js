@@ -27,7 +27,7 @@ class PointGlucose extends Component {
     componentWillUnmount(){
         this.tooltip.remove();
     }
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         this.drawChart(nextProps)
     }
     drawChart(props){
@@ -44,7 +44,7 @@ class PointGlucose extends Component {
 
             let high = 180;
         let low = 80;
-        let width = 16;
+        //let width = 16;
         let svg = this.svg;
         let tip = this.tooltip;
         const tip_show = function () {

@@ -19,7 +19,7 @@ class Loading extends Component {
             width: '100%',
             height: '100%',
             background: 'radial-gradient(rgba(20, 20, 20,0.6), rgba(0, 0, 0, 0.6))',
-            background: '-webkit-radial-gradient(rgba(20, 20, 20,0.6), rgba(0, 0, 0,0.6))'
+            //background: '-webkit-radial-gradient(rgba(20, 20, 20,0.6), rgba(0, 0, 0,0.6))'
         }}> <div className="spinner-border" style={{
             zIndex: 9999,
             width: '3rem', 

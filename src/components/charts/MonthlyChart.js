@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { hot } from 'react-hot-loader';
 import * as d3 from 'd3';
-import BackGround from '../../services/BackGround.js';
+//import BackGround from '../../services/BackGround.js';
 class MonthlyChart extends Component {
     constructor(props) {
         super(props);
@@ -22,20 +22,20 @@ class MonthlyChart extends Component {
         let x = this.props.x;
         let y = this.props.y;
         let margin = this.props.margin;
-        let width = 1000;
+        //let width = 1000;
 
 
         let comp = d3.select("g#monthly");
         this.hLineX = 150;
         this.lLineX = 50;
         //svg graph für background
-        this.background = comp.append("g")
+        this.background = comp.append("g");
         this.topbar = comp.append("rect")
             .attr("class", "topbar")
             .attr("x", margin.left)
             .attr("y", margin.top)
             .attr("height", 25)
-            .attr("width", this.props.x.range()[1])
+            .attr("width", this.props.x.range()[1]);
         //Chart Legende
         this.legendeBackground = comp.append("rect")
             .attr("class", "legendeBackground")
@@ -148,100 +148,100 @@ class MonthlyChart extends Component {
             .attr("y", margin.top + 60 + y(400))
             .attr("height", 400)
 
-        let focusLineX = comp.append('line')
-            .attr('id', 'focusLineX')
-            .attr('class', 'focusLine');
+        // let focusLineX = comp.append('line')
+        //     .attr('id', 'focusLineX')
+        //     .attr('class', 'focusLine');
 
         this.drawChart(this.props);
     }
     drawChart(props) {
-        let y = props.y;
-        let x = props.x;
+        // let y = props.y;
+        // let x = props.x;
         //wenn xAxis neue Scale bekommt, erneue Graph von xAxis und draw Background
         if (this.xAxis_graph) {
             //ebene und focus-Elementen werden dargestellt
-            d3.select('.overlay').attr("width", x.range()[1] - x.range()[0]);
+            d3.select('.overlay').attr("width", props.x.range()[1] - props.x.range()[0]);
             this.mouseCatchMove(props);
             //neue xAxis Daten von props
-            var newxAxis = d3.axisTop(x)
+            var newxAxis = d3.axisTop(props.x);
             this.xAxis_graph.call(newxAxis)
-            var bg = new BackGround();
-            var readTicks = bg.readTicks(x);
-            var opacityArr = bg.creatOpacity();
-            var xPos = bg.creatXpos(x);
-            var wdArr = bg.getWds();
+            //var bg = new BackGround();
+            //var readTicks = bg.readTicks(x);
+            // var opacityArr = bg.creatOpacity();
+            // var xPos = bg.creatXpos(x);
+            // var wdArr = bg.getWds();
             //console.log("opacityArr", opacityArr)
-            var ticksGroup = this.background.selectAll('rect').data(xPos).join(
-                    (enter) => enter.append('rect')
-                    .attr('x', d => d)
-                    .attr('y', y(400))
-                    .attr('height', 400)
-                    .attr('width', (d, i) => wdArr[i])
-                    .style("fill", "lightgray")
-                    .style("opacity", (d, i) => opacityArr[i]),
-                    (update) => update
-                    .attr('x', d => d)
-                    .attr('width', (d, i) => wdArr[i])
-                    .style("opacity", (d, i) => opacityArr[i])
-                )
-                .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
+            // var ticksGroup = this.background.selectAll('rect').data(xPos).join(
+            //         (enter) => enter.append('rect')
+            //         .attr('x', d => d)
+            //         .attr('y', y(400))
+            //         .attr('height', 400)
+            //         .attr('width', (d, i) => wdArr[i])
+            //         .style("fill", "lightgray")
+            //         .style("opacity", (d, i) => opacityArr[i]),
+            //         (update) => update
+            //         .attr('x', d => d)
+            //         .attr('width', (d, i) => wdArr[i])
+            //         .style("opacity", (d, i) => opacityArr[i])
+            //     )
+            //     .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
 
         }
 
 
         if (this.percRectH != null) {
 
-            var percH = this.percRectH.selectAll('rect').data(props.data.glucose).join(
-                    (enter) => enter.append('rect')
-                    .attr('width', 8)
-                    .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[2])
-                    .attr('y', d => y(+d.percentile[2]))
-                    .attr('x', d => x(d.time))
-                    .attr('fill', '#3498DB'),
-                    (update) => update
-                    .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[2])
-                    .attr('y', d => y(+d.percentile[2]))
-                    .attr('x', d => x(d.time))
-                )
-                .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
-            var percM = this.percRectM.selectAll('rect').data(props.data.glucose).join(
-                    (enter) => enter.append('rect')
-                    .attr('width', 8)
-                    .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[1])
-                    .attr('y', d => y(this.hLineX) < y(+d.percentile[2]) ? y(+d.percentile[2]) : y(this.hLineX))
-                    .attr('x', d => x(d.time))
-                    .attr('fill', '#58D68D'),
-                    (update) => update
-                    .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[1])
-                    .attr('y', d => y(this.hLineX) < y(+d.percentile[2]) ? y(+d.percentile[2]) : y(this.hLineX))
-                    .attr('x', d => x(d.time))
-                )
-                .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
-            var percL = this.percRectL.selectAll('rect').data(props.data.glucose).join(
-                    (enter) => enter.append('rect')
-                    .attr('width', 8)
-                    .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[0])
-                    .attr('y', d => y(this.lLineX))
-                    .attr('x', d => x(d.time))
-                    .attr('fill', '#DC7633'),
-                    (update) => update
-                    .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[0])
-                    .attr('y', d => y(this.lLineX))
-                    .attr('x', d => x(d.time))
-                )
-                .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
+            // var percH = this.percRectH.selectAll('rect').data(props.data.glucose).join(
+            //         (enter) => enter.append('rect')
+            //         .attr('width', 8)
+            //         .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[2])
+            //         .attr('y', d => y(+d.percentile[2]))
+            //         .attr('x', d => x(d.time))
+            //         .attr('fill', '#3498DB'),
+            //         (update) => update
+            //         .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[2])
+            //         .attr('y', d => y(+d.percentile[2]))
+            //         .attr('x', d => x(d.time))
+            //     )
+            //     .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
+            // var percM = this.percRectM.selectAll('rect').data(props.data.glucose).join(
+            //         (enter) => enter.append('rect')
+            //         .attr('width', 8)
+            //         .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[1])
+            //         .attr('y', d => y(this.hLineX) < y(+d.percentile[2]) ? y(+d.percentile[2]) : y(this.hLineX))
+            //         .attr('x', d => x(d.time))
+            //         .attr('fill', '#58D68D'),
+            //         (update) => update
+            //         .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[1])
+            //         .attr('y', d => y(this.hLineX) < y(+d.percentile[2]) ? y(+d.percentile[2]) : y(this.hLineX))
+            //         .attr('x', d => x(d.time))
+            //     )
+            //     .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
+            // var percL = this.percRectL.selectAll('rect').data(props.data.glucose).join(
+            //         (enter) => enter.append('rect')
+            //         .attr('width', 8)
+            //         .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[0])
+            //         .attr('y', d => y(this.lLineX))
+            //         .attr('x', d => x(d.time))
+            //         .attr('fill', '#DC7633'),
+            //         (update) => update
+            //         .attr('height', d => this.getPercHeight(d.percentile, this.hLineX, this.lLineX)[0])
+            //         .attr('y', d => y(this.lLineX))
+            //         .attr('x', d => x(d.time))
+            //     )
+            //     .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
         }
 
         //update topbar
         if (this.topbar) {
             this.topbar.attr("width", this.props.x.range()[1]);
             this.legendeBackground.attr("width", this.props.x.range()[1]);
-            d3.select(".legendeCircleH").attr('cx', x.range()[1] - 20);
-            d3.select(".legendeCircleN").attr('cx', x.range()[1] - 40);
-            d3.select(".legendeCircleL").attr('cx', x.range()[1] - 60);
-            d3.select(".legendeCircText").attr("x", x.range()[1] - 110);
-            d3.select(".dashLineH_N").attr("x2", this.props.margin.left + x.range()[1]);
-            d3.select(".dashLineN_L").attr("x2", this.props.margin.left + x.range()[1]);
+            d3.select(".legendeCircleH").attr('cx', this.props.x.range()[1] - 20);
+            d3.select(".legendeCircleN").attr('cx', this.props.x.range()[1] - 40);
+            d3.select(".legendeCircleL").attr('cx', this.props.x.range()[1] - 60);
+            d3.select(".legendeCircText").attr("x", this.props.x.range()[1] - 110);
+            d3.select(".dashLineH_N").attr("x2", this.props.margin.left + this.props.x.range()[1]);
+            d3.select(".dashLineN_L").attr("x2", this.props.margin.left + this.props.x.range()[1]);
         }
     }
     getPercHeight(perc, h, l) {
@@ -259,7 +259,7 @@ class MonthlyChart extends Component {
 
     //focus zeigt zuerst automatisch, wenn man mouse click halten, dann focus sich verbergt, 
     //nach dem verschieben oder zoomen, mit ein mal mouseclick wird focus wieder dargestellt.
-    mouseCatchMove(props, focusLineX) {
+    mouseCatchMove(props) {
         let data = props.data.glucose;
         let y = props.y;
         let x = props.x;
@@ -291,7 +291,7 @@ class MonthlyChart extends Component {
                 let dSuf = data[index];
                 let d = mouseDate.getTime() - dPre.time.getTime() > dSuf.time.getTime() - mouseDate.getTime() ? dSuf : dPre;
                 let xPos = x(d.time);
-                let yPos = y(d.value);
+                //let yPos = y(d.value);
                 console.log("mouseX", xPos);
                 /*
                 d3.select('#focusCircle')
@@ -377,7 +377,7 @@ class MonthlyChart extends Component {
             });
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         this.drawChart(nextProps);
     }
     shouldComponentUpdate() {

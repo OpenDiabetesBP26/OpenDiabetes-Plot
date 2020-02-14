@@ -29,7 +29,7 @@ class BarGlucose extends Component {
     componentWillUnmount(){
         this.tooltip.remove();
     }
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         this.drawChart(nextProps);
     }
     drawChart(props){

@@ -19,7 +19,7 @@ export class App extends Component {
                 <ReactDropzone onDrop={this.fileDrop.bind(this)}>
                  {({getRootProps, getInputProps}) => (
                     <section>
-                    <div class="fileDrop" {...getRootProps()}>
+                    <div className="fileDrop" {...getRootProps()}>
                         <input {...getInputProps()} />
                         <p>Drop File here</p>
                     </div>

@@ -195,7 +195,7 @@ class DataManager {
 		let filter_dim = data_crossfilter.dimension(d => d.time);
 		let group_dim = data_crossfilter.dimension(d => d.time);
 		let groupThreeHour = group_dim.group(d => d3.timeMinute.every(10).floor(d)).reduce(
-			function reduceAdd(p, v, nf) {
+			function reduceAdd(p, v) {
 				if (v.type == types.glucose) {
 					p.glucose.sum += parseInt(v.value);
 					p.glucose.count++;
@@ -217,7 +217,7 @@ class DataManager {
 					return p;
 				}
 			},
-			function reduceRemove(p, v, nf) {
+			function reduceRemove(p, v) {
 				if (v.type == types.glucose) {
 					p.glucose.sum -= parseInt(v.value);
 					p.glucose.count--;
@@ -262,7 +262,7 @@ class DataManager {
 
 
 		let groupSixHour = group_dim.group(d => d3.timeMinute.every(20).floor(d)).reduce(
-			function reduceAdd(p, v, nf) {
+			function reduceAdd(p, v) {
 				if (v.type == types.glucose) {
 					p.glucose.sum += parseInt(v.value);
 					p.glucose.count++;
@@ -284,7 +284,7 @@ class DataManager {
 					return p;
 				}
 			},
-			function reduceRemove(p, v, nf) {
+			function reduceRemove(p, v) {
 				if (v.type == types.glucose) {
 					p.glucose.sum -= parseInt(v.value);
 					p.glucose.count--;
@@ -328,7 +328,7 @@ class DataManager {
 		);
 		let limit = 400;
 		//Reduce function for percentile
-		function reduceAddPercentile(p, v, nf) {
+		function reduceAddPercentile(p, v) {
 			if (v.type == types.glucose) {
 				let value = v.value;
 				if (value > limit) {
@@ -356,7 +356,7 @@ class DataManager {
 				return p;
 			}
 		}
-		function reduceRemovePercentile(p, v, nf) {
+		function reduceRemovePercentile(p, v) {
 			if (v.type == types.glucose) {
 				let value = v.value;
 				if (value > limit) {
@@ -409,7 +409,7 @@ class DataManager {
 			reduceInitialPercentile
 		);
 
-		let week = 60000 * 60 * 24 * 7;
+		//let week = 60000 * 60 * 24 * 7;
 		let groupWeekly = group_dim.group(d => d3.timeWeek.floor(d)).reduce(
 			reduceAddPercentile,
 			reduceRemovePercentile,
@@ -426,7 +426,7 @@ class DataManager {
 
 		let glucoseLevels = this.glucoseLevels;
 		let group_stats_range = group_dim.groupAll().reduce(
-			function reduceAdd(p, v, nf) {
+			function reduceAdd(p, v) {
 				if (v.type == types.glucose) {
 					//Compute hour
 					let hour = v.time.getHours();
@@ -449,7 +449,7 @@ class DataManager {
 				}
 				return p;
 			},
-			function reduceRemove(p, v, nf) {
+			function reduceRemove(p, v) {
 				if (v.type == types.glucose) {
 					//Compute hour
 					let hour = v.time.getHours();
@@ -528,7 +528,7 @@ class DataManager {
 		//Filter Domain -> later
 
 
-		const week = 60000 * 60 * 24 * 7;
+		//const week = 60000 * 60 * 24 * 7;
 		const hours = Math.floor((domain[1] - domain[0]) / (60000 * 60));
 		let display = 0;
 		if (hours > 24 * 30 * 12) {

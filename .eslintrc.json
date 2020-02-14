@@ -1,9 +1,13 @@
 {
     "env": {
         "browser": true,
-        "es6": true
+        "es6": true,
+        "commonjs": true
     },
-    "extends": "plugin:react/recommended",
+    "extends": [
+        "eslint:recommended",
+        "plugin:react/recommended"
+    ],
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
@@ -18,11 +22,6 @@
     "plugins": [
         "react"
     ],
-    "settings": {
-        "react": {
-            "version": "16.8.0"
-        }
-    },
     "rules": {
         "react/prop-types": 0
     }
