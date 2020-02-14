@@ -22,7 +22,7 @@ class TimeAxis extends Component {
     componentWillUnmount(){
         this.tooltip.remove();
     }
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         if (!this.upperTime || !this.lowerTime || !nextProps.x || !this.background) return;
         const stickFirstTick = (caller) => {
             let firstYear = caller.select('g.tick');
@@ -56,7 +56,7 @@ class TimeAxis extends Component {
         let lowerAxis = d3.axisTop(nextProps.x);
         const domain = nextProps.x.domain();
         const hours = Math.floor((domain[1] - domain[0]) / (60000 * 60));
-        let alphaFunc = d => 1;
+        let alphaFunc = () => 1;
 
         let upperOffset, lowerOffset, upperTicks, lowerTicks, upperTickFormat, lowerTickFormat;
         if (hours > 24 * 30 * 12) {

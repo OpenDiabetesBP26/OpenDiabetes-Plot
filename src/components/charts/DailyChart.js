@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { hot } from 'react-hot-loader';
 import * as d3 from 'd3';
-import BackGround from '../../services/BackGround.js';
+//import BackGround from '../../services/BackGround.js';
 class DailyChart extends Component {
     constructor(props) {
         super(props);
@@ -20,11 +20,11 @@ class DailyChart extends Component {
         let xAxis = d3.axisBottom(this.props.x);
         let yAxis = d3.axisLeft(this.props.y);
         this.yBasal = d3.scaleLinear().range([150, 0]).domain([0, 5]);
-        let yBasalAxis = d3.axisRight(this.yBasal)
+        //let yBasalAxis = d3.axisRight(this.yBasal)
         let y = this.props.y;
         let x = this.props.x;
         let margin = this.props.margin;
-        let width = 1000;
+        //let width = 1000;
 
         let comp = d3.select("g#daily");
         this.hLineX = 150;
@@ -144,76 +144,76 @@ class DailyChart extends Component {
             .attr("height", 400)
 
         //focus-Elementen
-        let focusLineX = comp.append('line')
-            .attr('id', 'focusLineX')
-            .attr('class', 'focusLine');
+        // let focusLineX = comp.append('line')
+        //     .attr('id', 'focusLineX')
+        //     .attr('class', 'focusLine');
 
-        let focusLineY = comp.append('line')
-            .attr('id', 'focusLineY')
-            .attr('class', 'focusLine');
+        // let focusLineY = comp.append('line')
+        //     .attr('id', 'focusLineY')
+        //     .attr('class', 'focusLine');
 
-        let focusCircle = comp.append('circle')
-            .attr('id', 'focusCircle')
-            .attr('r', 8)
-            .attr('class', 'focusCircle')
-            .attr('display', 'none');
-        let focusCircleInne = comp.append('circle')
-            .attr('id', 'focusCircleInne')
-            .attr('r', 5)
-            .attr('class', 'focusCircleInne')
-            .attr('display', 'none');
+        // let focusCircle = comp.append('circle')
+        //     .attr('id', 'focusCircle')
+        //     .attr('r', 8)
+        //     .attr('class', 'focusCircle')
+        //     .attr('display', 'none');
+        // let focusCircleInne = comp.append('circle')
+        //     .attr('id', 'focusCircleInne')
+        //     .attr('r', 5)
+        //     .attr('class', 'focusCircleInne')
+        //     .attr('display', 'none');
     
     }
     drawChart(props) {
-        let y = props.y;
-        let x = props.x;
-        let yb = this.yBasal;
+        // let y = props.y;
+        //let x = props.x;
+        //let yb = this.yBasal;
 
 
         //wenn xAxis neue Scale bekommt, erneue Graph von xAxis und draw Background
         if (this.xAxis_graph) {
             //ebene und focus-Elementen werden dargestellt
-            d3.select('.overlay').attr("width", x.range()[1] - x.range()[0]);
+            d3.select('.overlay').attr("width", props.x.range()[1] - props.x.range()[0]);
             this.mouseCatchMove(props);
             //neue xAxis Daten von props
-            var newxAxis = d3.axisTop(x)
+            var newxAxis = d3.axisTop(props.x)
             this.xAxis_graph.call(newxAxis)
-            var bg = new BackGround();
-            var readTicks = bg.readTicks(x);
-            var opacityArr = bg.creatOpacity();
-            var xPos = bg.creatXpos(x);
-            var wdArr = bg.getWds();
+            //var bg = new BackGround();
+            //var readTicks = bg.readTicks(x);
+            // var opacityArr = bg.creatOpacity();
+            // var xPos = bg.creatXpos(x);
+            // var wdArr = bg.getWds();
             //console.log("opacityArr", opacityArr)
-            var ticksGroup = this.background.selectAll('rect').data(xPos).join(
-                    (enter) => enter.append('rect')
-                    .attr('x', d => d)
-                    .attr('y', y(400))
-                    .attr('height', 400)
-                    .attr('width', (d, i) => wdArr[i])
-                    .style("fill", "lightgray")
-                    .style("opacity", (d, i) => opacityArr[i]),
-                    (update) => update
-                    .attr('x', d => d)
-                    .attr('width', (d, i) => wdArr[i])
-                    .style("opacity", (d, i) => opacityArr[i])
-                )
-                .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
+            // var ticksGroup = this.background.selectAll('rect').data(xPos).join(
+            //         (enter) => enter.append('rect')
+            //         .attr('x', d => d)
+            //         .attr('y', y(400))
+            //         .attr('height', 400)
+            //         .attr('width', (d, i) => wdArr[i])
+            //         .style("fill", "lightgray")
+            //         .style("opacity", (d, i) => opacityArr[i]),
+            //         (update) => update
+            //         .attr('x', d => d)
+            //         .attr('width', (d, i) => wdArr[i])
+            //         .style("opacity", (d, i) => opacityArr[i])
+            //     )
+            //     .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
 
         }
 
         if (this.circs != null) {
-            var circles = this.circs.selectAll('circle').data(props.data.glucose).join(
-                    (enter) => enter.append('circle')
-                    .attr('r', 3)
-                    .attr('cy', d => y(+d.value))
-                    .attr('cx', d => x(d.time))
-                    .attr('fill', d => this.circleColor(d.value)),
-                    (update) => update
-                    .attr('cy', d => y(+d.value))
-                    .attr('cx', d => x(d.time))
-                    .attr('fill', d => this.circleColor(d.value))
-                )
-                .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
+            // var circles = this.circs.selectAll('circle').data(props.data.glucose).join(
+            //         (enter) => enter.append('circle')
+            //         .attr('r', 3)
+            //         .attr('cy', d => y(+d.value))
+            //         .attr('cx', d => x(d.time))
+            //         .attr('fill', d => this.circleColor(d.value)),
+            //         (update) => update
+            //         .attr('cy', d => y(+d.value))
+            //         .attr('cx', d => x(d.time))
+            //         .attr('fill', d => this.circleColor(d.value))
+            //     )
+            //     .attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top + 60) + ')');
         }
         /*
         if (this.line != null) {
@@ -238,12 +238,12 @@ class DailyChart extends Component {
         if (this.topbar) {
             this.topbar.attr("width", this.props.x.range()[1]);
             this.legendeBackground.attr("width", this.props.x.range()[1]);
-            d3.select(".legendeCircleH").attr('cx', x.range()[1] - 20);
-            d3.select(".legendeCircleN").attr('cx', x.range()[1] - 40);
-            d3.select(".legendeCircleL").attr('cx', x.range()[1] - 60);
-            d3.select(".legendeCircText").attr("x", x.range()[1] - 110);
-            d3.select(".dashLineH_N").attr("x2", this.props.margin.left + x.range()[1]);
-            d3.select(".dashLineN_L").attr("x2", this.props.margin.left + x.range()[1]);
+            d3.select(".legendeCircleH").attr('cx', this.props.x.range()[1] - 20);
+            d3.select(".legendeCircleN").attr('cx', this.props.x.range()[1] - 40);
+            d3.select(".legendeCircleL").attr('cx', this.props.x.range()[1] - 60);
+            d3.select(".legendeCircText").attr("x", this.props.x.range()[1] - 110);
+            d3.select(".dashLineH_N").attr("x2", this.props.margin.left + this.props.x.range()[1]);
+            d3.select(".dashLineN_L").attr("x2", this.props.margin.left + this.props.x.range()[1]);
         }
     }
     //circle_color 
@@ -252,7 +252,7 @@ class DailyChart extends Component {
     }
     //focus zeigt zuerst automatisch, wenn man mouse click halten, dann focus sich verbergt, 
     //nach dem verschieben oder zoomen, mit ein mal mouseclick wird focus wieder dargestellt.
-    mouseCatchMove(props, focusLineX) {
+    mouseCatchMove(props) {
         let data = props.data.glucose;
         let y = props.y;
         let x = props.x;
@@ -367,7 +367,8 @@ class DailyChart extends Component {
                 d3.select('.tooltipTextS').style('display', 'block');
             });
     }
-    componentWillReceiveProps(nextProps) {
+    
+    UNSAFE_componentWillReceiveProps(nextProps) {
         console.log('DATA DEBUG')
         console.log(nextProps.data)
         this.drawChart(nextProps);

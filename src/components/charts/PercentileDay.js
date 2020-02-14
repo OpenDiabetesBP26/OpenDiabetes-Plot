@@ -25,13 +25,13 @@ class PercentileDay extends Component {
         this.axisGroup_x = svg.append('g');
         this.axisGroup_y = svg.append('g');
         this.data_group = svg.append('g');
-        this.data_group.call(y_axis).attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top +60) + ')');;
-        this.axisGroup_y.call(y_axis).attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top +60) + ')');;
-        this.axisGroup_x.call(x_axis).attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top +60) + ')');;
+        this.data_group.call(y_axis).attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top +60) + ')');
+        this.axisGroup_y.call(y_axis).attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top +60) + ')');
+        this.axisGroup_x.call(x_axis).attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top +60) + ')');
         this.drawChart(this.props);
 
     }
-    drawChart(props) {
+    drawChart() {
         let x = d3.scaleTime().domain(d3.extent(this.props.data, d => d.time)).range(this.props.x.range());
         let x_axis = d3.axisBottom(x);
         this.axisGroup_x.call(x_axis);
@@ -55,7 +55,7 @@ class PercentileDay extends Component {
         }
 
     }
-    componentWillReceiveProps(nextProps){
+    UNSAFE_componentWillReceiveProps(nextProps){
         console.log(nextProps.data)
         this.drawChart(nextProps);
     }
@@ -64,4 +64,4 @@ class PercentileDay extends Component {
         return false;
     }
 }
-export default hot ? hot(module)(PercentileDay) : DailyCPercentileDay;
+export default hot ? hot(module)(PercentileDay) : PercentileDay;
