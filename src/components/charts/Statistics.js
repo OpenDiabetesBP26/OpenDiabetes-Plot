@@ -71,9 +71,8 @@ class Statistics extends Component {
     componentDidUpdate(prevProps){
         if(this.props.domain !== prevProps.domain){
             //Loading Data
-            if(this.props.dm != null){
-                let stats = this.props.dm.getStatistics();
-                this.setState({stats: stats, loading: false});
+            if(this.props.data != null){
+                this.setState({stats: this.props.data, loading: false});
             }
         }
     }
