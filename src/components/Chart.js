@@ -5,6 +5,7 @@ import DataManager from '../services/DataManager';
 import TimeAxis from './charts/TimeAxis';
 import BarGlucose from './charts/BarGlucose';
 import PointGlucose from './charts/PointGlucose';
+import BarBolusCarbs from './charts/BarBolusCarbs';
 
 const margin = { top: 20, right: 40, bottom: 110, left: 40 };
 class Chart extends Component {
@@ -15,10 +16,7 @@ class Chart extends Component {
         this.x = d3.scaleTime();
         this.xBase = d3.scaleTime();
         this.state = { x: this.x }
-       
     }
-
-
 
     render() {
         return (
@@ -26,11 +24,12 @@ class Chart extends Component {
                 <div className="row">
                     <div className="col-lg-8 col-md-12">
                         {!this.props.data && <div> No data loaded </div>}
-                        <svg id="d3sample" width="100%" height="800" ref={(svg) => this.svg = svg}>
+                        <svg id="d3sample" width="100%" height="1200" ref={(svg) => this.svg = svg}>
                         <g id="mainGroup">
                         <TimeAxis x={this.state.x} />
                         {this.renderData && this.renderData.dataDisplay.glucoseDisplay == 'percentile' && <BarGlucose data={this.renderData.dataDisplay.glucose} x={this.state.x}/>}
                         {this.renderData && this.renderData.dataDisplay.glucoseDisplay == 'point' && <PointGlucose data={this.renderData.dataDisplay.glucose} x={this.state.x}/>}
+                        {this.renderData && <BarBolusCarbs data={{bolus:this.renderData.dataDisplay.bolus, carbs:this.renderData.dataDisplay.carbs}} x={this.state.x}/>}
                         </g>
                         </svg>
                     </div>
