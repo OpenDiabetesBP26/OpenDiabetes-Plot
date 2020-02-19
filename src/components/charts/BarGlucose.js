@@ -37,7 +37,7 @@ class BarGlucose extends Component {
         let high = 180;
         let low = 80;
         //Add clip paths
-        d3.select(this.mainGroup).select('rect').attr('width', this.props.x.range()[1]);
+        d3.select(this.mainGroup).select('rect').attr('width', props.x.range()[1]);
         this.groupData.selectAll('clipPath').remove();
         this.groupData.append('clipPath')
             .attr("id", "clipHigh")

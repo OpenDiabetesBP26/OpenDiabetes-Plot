@@ -24,7 +24,6 @@ class DataManager {
 		}
 	}
 	readData(data) {
-		console.log(data.filter(d => d.type == 'REFINED_VAULT_ENTRY'));
 		//TODO Annahme Daten sind nach Datum sortiert
 		//More efficient algo
 		const hours = 60000 * 60;
@@ -504,10 +503,6 @@ class DataManager {
 			stats_range: group_stats_range,
 		}
 		this.filter = filter_dim;
-		console.log(this.data.monthly.all())
-		console.log(this.data.weekly.all())
-		console.log(this.data.daily.all())
-
 
 	}
 	getDomain() {
@@ -606,7 +601,6 @@ class DataManager {
 				glucoseDisplay: 'point',
 				basalDisplay: 'line'
 			}
-			console.log(results);
 			output.dataDisplay = results;
 
 		} else if (display <= 2) {
@@ -653,7 +647,6 @@ class DataManager {
 				basalDisplay: 'bar'
 			};
 		} else if (display > 2) {
-			console.log(data);
 			let glucose = [];
 			let basal = [];
 			let bolus = [];
@@ -728,7 +721,9 @@ class DataManager {
 				time: new Date(1970, 1, 2, Math.floor(i / 6), (i % 6) * 10),
 				value: this.getPercentile(day[i], day[i].reduce((p, c) => p + c), [0.10, 0.25, 0.5, 0.75, 0.90])
 			}
-			result.push(item);
+			if(item.value){
+				result.push(item);
+			}
 		}
 		output.percentileDay = result;
 

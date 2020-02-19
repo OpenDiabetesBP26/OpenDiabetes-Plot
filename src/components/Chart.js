@@ -7,6 +7,7 @@ import BarGlucose from './charts/BarGlucose';
 import PointGlucose from './charts/PointGlucose';
 import LineBasal from './charts/LineBasal';
 import Statistics from './charts/Statistics';
+import PercentileDay from './charts/PercentileDay';
 
 const margin = { top: 20, right: 40, bottom: 110, left: 40 };
 class Chart extends Component {
@@ -40,6 +41,9 @@ class Chart extends Component {
                     <div className="col-lg-4 col-md-12">
                     {this.renderData && <Statistics domain={this.state.x != null ? this.state.x.domain() : null} data={this.renderData.timeInRange} />}
                     </div>
+                </div>
+                <div className="row">
+                    {this.renderData && this.renderData.percentileDay && <PercentileDay data={this.renderData.percentileDay} x={this.state.x}/>}
                 </div>
             </div>
         );

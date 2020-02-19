@@ -1,16 +1,19 @@
 import React, { Component } from 'react';
 import {hot} from 'react-hot-loader';
 import * as d3 from 'd3';
+import TimeAxis from './TimeAxis';
 
 class PercentileDay extends Component {
     constructor(props) {
         super(props);
-        this.state = { data: props.data, svg: props.svg, x: props.x }
-        this.svg = React.createRef()
     }
     render() {
         return (
-            <svg id='percentile-day' width="100%" height="500" ref={(svg) => this.svg = svg}></svg>
+            <svg id='percentile-day' width="100%" height="500" ref={(svg) => this.svg = svg}>
+            <g className="time-axis" transform='translate(60,20)' ref={(axis) => this.timeAxxis = axis}>
+            <TimeAxis x={this.x} />
+            </g>
+            </svg>
          );
     }
     componentDidMount(){
@@ -22,17 +25,20 @@ class PercentileDay extends Component {
         let x_axis = d3.axisBottom(x);
 
         let svg = d3.select("svg#percentile-day");
-        this.axisGroup_x = svg.append('g');
-        this.axisGroup_y = svg.append('g');
-        this.data_group = svg.append('g');
-        this.data_group.call(y_axis).attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top +60) + ')');
-        this.axisGroup_y.call(y_axis).attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top +60) + ')');
-        this.axisGroup_x.call(x_axis).attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top +60) + ')');
+        this.mainGroup = svg.append('g');
+        this.mainGroup.attr('transform', 'translate(60,20)');
+        this.axisGroup_x = this.mainGroup.append('g');
+        this.axisGroup_y = this.mainGroup.append('g');
+        this.data_group = this.mainGroup.append('g');
+        this.data_group.call(y_axis);
+        this.axisGroup_y.call(y_axis);
+        this.axisGroup_x.call(x_axis);
         this.drawChart(this.props);
 
     }
-    drawChart() {
-        let x = d3.scaleTime().domain(d3.extent(this.props.data, d => d.time)).range(this.props.x.range());
+    drawChart(props) {
+        let x = d3.scaleTime().domain(d3.extent(this.props.data, d => d.time)).range(props.x.range());
+        this.x = x;
         let x_axis = d3.axisBottom(x);
         this.axisGroup_x.call(x_axis);
 
@@ -40,10 +46,10 @@ class PercentileDay extends Component {
         let y = this.y;
         //Median
         let median = [];
-        this.props.data.forEach(d => median.push({y: y(d.value[2]), x: x(d.time)}))
+        props.data.forEach(d => median.push({y: y(d.value[2]), x: x(d.time)}))
 
         let upper = [];
-        this.props.data.forEach(d => upper.push({y1: y(d.value[1]), y2: y(d.value[3]), x: x(d.time)}))
+        props.data.forEach(d => upper.push({y1: y(d.value[1]), y2: y(d.value[3]), x: x(d.time)}))
 
         let lines = d3.line().x(d => d.x).y(d=>d.y);
         let area = d3.area().x(d => d.x).y0(d => d.y1).y1(d=>d.y2);
@@ -56,12 +62,11 @@ class PercentileDay extends Component {
 
     }
     UNSAFE_componentWillReceiveProps(nextProps){
-        console.log(nextProps.data)
         this.drawChart(nextProps);
     }
     shouldComponentUpdate(){
         //Update ausgeschaltet -> wird nicht neu gerendert
-        return false;
+        return true;
     }
 }
 export default hot ? hot(module)(PercentileDay) : PercentileDay;

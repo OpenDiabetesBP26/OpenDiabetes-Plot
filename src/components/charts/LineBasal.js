@@ -18,6 +18,8 @@ class LineBasal extends Component {
         d3.select(this.mainGroup).append('text').attr('x', 10).attr('y', 30).text('BASAL');
         this.y = d3.scaleLinear().domain([5, 0]).range([0, 200]);
         this.groupData = d3.select(this.mainGroup).append('g').attr('class', 'data').attr('transform', 'translate(0, 50)');
+        this.groupDataPath = this.groupData.append('g');
+        this.groupDataRect = this.groupData.append('g');
         this.groupAxis = d3.select(this.mainGroup).append('g').attr('class', 'axis').attr('transform', 'translate(0, 50)');
         this.groupAxis.call(d3.axisLeft(this.y));
         this.tooltip = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0)
@@ -56,6 +58,8 @@ class LineBasal extends Component {
             let args = Array.prototype.slice.call(arguments);
             let data = args[0];
             let target = args[2][args[1]];
+            console.log(args)
+            console.log(data)
             //TEST
             const offset = 10;
             let point = svg.createSVGPoint();
@@ -63,15 +67,11 @@ class LineBasal extends Component {
             point.x = bbox.x + bbox.width + offset;
             point.y = bbox.y;
             let tpoint = point.matrixTransform(target.getScreenCTM())
-            let timePrint = d3.timeFormat("%Y %B %d %I %p");
+            let timePrint = d3.timeFormat("%Y %B %d - %I:%M %p");
             tip.attr('style', 'opacity: 1; position: absolute; left: ' + tpoint.x + 'px ; top: ' + tpoint.y + 'px ;')
                 .html('' + timePrint(data.time) + ' - ' + timePrint(data.timeEnd) + '</br>' +
                     '<table>' +
-                    '<tr> <td> 90th percentile: </td><td>' + data.percentile[4] + ' mg/dl </td></tr>' +
-                    '<tr> <td> 75th percentile: </td><td>' + data.percentile[3] + ' mg/dl </td></tr>' +
-                    '<tr> <td> median: </td><td>' + data.percentile[2] + ' mg/dl </td></tr>' +
-                    '<tr> <td> 25th percentile: </td><td>' + data.percentile[1] + ' mg/dl </td></tr>' +
-                    '<tr> <td> 10th percentile: </td><td>' + data.percentile[0] + ' mg/dl </td></tr>' +
+                    '<tr> <td> Basal per hour:  </td><td>' + data.value + ' mg/dl </td></tr>' +
                     '</table>'
 
                 )
@@ -81,7 +81,7 @@ class LineBasal extends Component {
             tip.style('opacity', 0).style('pointer-events', 'none');
         }
         //Reset basal
-        this.groupData.selectAll('path').remove();
+        this.groupDataPath.selectAll('path').remove();
         if (props.data.length != 0) {
             //Basal to line points
             let x = props.x;
@@ -110,12 +110,33 @@ class LineBasal extends Component {
 
             let lines = d3.line().x(d => d.x).y(d => d.y);
             let area = d3.area().x(d => d.x).y0(yb(0)).y1(d => d.y);
-            this.groupData.append("path").attr("d", area(basal_temp_points)).attr("stroke", "lightblue").attr("style", "fill: lightblue; opacity:0.5").attr("stroke-width", 2).attr("fill", "none")
+            this.groupDataPath.append("path").attr("d", area(basal_temp_points)).attr("stroke", "lightblue").attr("style", "fill: lightblue; opacity:0.5").attr("stroke-width", 2).attr("fill", "none")
             if (props.dataProfile.length != 0) {
                 let basal_profile_points = linegen(props.dataProfile);
-                this.groupData.append("path").attr("d", lines(basal_profile_points)).attr("stroke", "blue").attr("stroke-width", 2).attr("stroke-dasharray", "3,3,3").attr("fill", "none")
+                this.groupDataPath.append("path").attr("d", lines(basal_profile_points)).attr("stroke", "blue").attr("stroke-width", 2).attr("stroke-dasharray", "3,3,3").attr("fill", "none")
             }
-            this.groupData.append("path").attr("d", lines(basal_temp_points)).attr("stroke", "blue").attr("stroke-width", 2).attr("fill", "none")
+            this.groupDataPath.append("path").attr("d", lines(basal_temp_points)).attr("stroke", "blue").attr("stroke-width", 2).attr("fill", "none")
+
+            //Basal hover rects
+            this.groupDataRect.selectAll('rect').data(props.data).join(
+                (enter) => {
+                    enter.append('rect')
+                        .attr('x', d => props.x(d.time))
+                        .attr('width', d => props.x(d.timeEnd) - props.x(d.time))
+                        .attr('y', d => this.y(d.value))
+                        .attr('height', d => this.y(0) - this.y(d.value))
+                        .on('mouseover', tip_show)
+                        .on('mouseout', tip_hide)
+                        .attr('style', 'opacity: 0')
+                },
+                (update) => {
+                    update
+                        .attr('x', d => props.x(d.time))
+                        .attr('width', d => props.x(d.timeEnd) - props.x(d.time))
+                        .attr('y', d => this.y(d.value))
+                        .attr('height', d => this.y(0) - this.y(d.value))
+                }
+            )
 
         }
     }
