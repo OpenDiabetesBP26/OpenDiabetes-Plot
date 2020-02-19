@@ -22,17 +22,19 @@ class PercentileDay extends Component {
         let x_axis = d3.axisBottom(x);
 
         let svg = d3.select("svg#percentile-day");
-        this.axisGroup_x = svg.append('g');
-        this.axisGroup_y = svg.append('g');
-        this.data_group = svg.append('g');
-        this.data_group.call(y_axis).attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top +60) + ')');;
-        this.axisGroup_y.call(y_axis).attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top +60) + ')');;
-        this.axisGroup_x.call(x_axis).attr('transform', 'translate(' + this.props.margin.left + ' ' + (this.props.margin.top +60) + ')');;
+        this.mainGroup = svg.append('g');
+        this.mainGroup.attr('transform', 'translate(60,0)');
+        this.axisGroup_x = this.mainGroup.append('g');
+        this.axisGroup_y = this.mainGroup.append('g');
+        this.data_group = this.mainGroup.append('g');
+        this.data_group.call(y_axis);
+        this.axisGroup_y.call(y_axis);
+        this.axisGroup_x.call(x_axis);
         this.drawChart(this.props);
 
     }
     drawChart(props) {
-        let x = d3.scaleTime().domain(d3.extent(this.props.data, d => d.time)).range(this.props.x.range());
+        let x = d3.scaleTime().domain(d3.extent(this.props.data, d => d.time)).range(props.x.range());
         let x_axis = d3.axisBottom(x);
         this.axisGroup_x.call(x_axis);
 
@@ -40,10 +42,10 @@ class PercentileDay extends Component {
         let y = this.y;
         //Median
         let median = [];
-        this.props.data.forEach(d => median.push({y: y(d.value[2]), x: x(d.time)}))
+        props.data.forEach(d => median.push({y: y(d.value[2]), x: x(d.time)}))
 
         let upper = [];
-        this.props.data.forEach(d => upper.push({y1: y(d.value[1]), y2: y(d.value[3]), x: x(d.time)}))
+        props.data.forEach(d => upper.push({y1: y(d.value[1]), y2: y(d.value[3]), x: x(d.time)}))
 
         let lines = d3.line().x(d => d.x).y(d=>d.y);
         let area = d3.area().x(d => d.x).y0(d => d.y1).y1(d=>d.y2);
@@ -56,7 +58,6 @@ class PercentileDay extends Component {
 
     }
     componentWillReceiveProps(nextProps){
-        console.log(nextProps.data)
         this.drawChart(nextProps);
     }
     shouldComponentUpdate(){
