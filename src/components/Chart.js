@@ -5,6 +5,9 @@ import DataManager from '../services/DataManager';
 import TimeAxis from './charts/TimeAxis';
 import BarGlucose from './charts/BarGlucose';
 import PointGlucose from './charts/PointGlucose';
+import LineBasal from './charts/LineBasal';
+import Statistics from './charts/Statistics';
+import PercentileDay from './charts/PercentileDay';
 
 const margin = { top: 20, right: 40, bottom: 110, left: 40 };
 class Chart extends Component {
@@ -26,14 +29,21 @@ class Chart extends Component {
                 <div className="row">
                     <div className="col-lg-8 col-md-12">
                         {!this.props.data && <div> No data loaded </div>}
-                        <svg id="d3sample" width="100%" height="800" ref={(svg) => this.svg = svg}>
+                        <svg id="d3sample" width="100%" height="850" ref={(svg) => this.svg = svg}>
                         <g id="mainGroup">
                         <TimeAxis x={this.state.x} />
                         {this.renderData && this.renderData.dataDisplay.glucoseDisplay == 'percentile' && <BarGlucose data={this.renderData.dataDisplay.glucose} x={this.state.x}/>}
                         {this.renderData && this.renderData.dataDisplay.glucoseDisplay == 'point' && <PointGlucose data={this.renderData.dataDisplay.glucose} x={this.state.x}/>}
+                        {this.renderData && this.renderData.dataDisplay.basalDisplay == 'line' && <LineBasal data={this.renderData.dataDisplay.basal} dataProfile={this.renderData.dataDisplay.basal_profile} x={this.state.x}/>}
                         </g>
                         </svg>
                     </div>
+                    <div className="col-lg-4 col-md-12">
+                    {this.renderData && <Statistics domain={this.state.x != null ? this.state.x.domain() : null} data={this.renderData.timeInRange} />}
+                    </div>
+                </div>
+                <div className="row">
+                    {this.renderData && this.renderData.percentileDay && <PercentileDay data={this.renderData.percentileDay} x={this.state.x}/>}
                 </div>
             </div>
         );

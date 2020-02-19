@@ -31,6 +31,7 @@ class PointGlucose extends Component {
         this.drawChart(nextProps)
     }
     drawChart(props){
+        d3.select(this.mainGroup).select('rect').attr('width', props.x.range()[1]).attr('fill', '#fff');
         if (!this.groupData) return;
         this.groupData.selectAll('clipPath').remove();
         this.groupData.append('clipPath')
