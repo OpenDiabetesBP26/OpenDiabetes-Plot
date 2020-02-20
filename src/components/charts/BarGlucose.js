@@ -87,7 +87,7 @@ class BarGlucose extends Component {
             point.y = bbox.y;
             let tpoint = point.matrixTransform(target.getScreenCTM())
             let timePrint = d3.timeFormat("%Y %B %d %I %p");
-            tip.attr('style', 'opacity: 1; position: absolute; left: ' + tpoint.x + 'px ; top: ' + tpoint.y + 'px ;')
+            tip.attr('style', 'opacity: 1; position: absolute; left: ' + tpoint.x + 'px ; top: ' + (tpoint.y + window.pageYOffset) + 'px ;')
                 .html('' + timePrint(data.time) + ' - ' + timePrint(data.timeEnd) + '</br>' +
                     '<table>' +
                     '<tr> <td> 90th percentile: </td><td>' + data.percentile[4] + ' mg/dl </td></tr>' +

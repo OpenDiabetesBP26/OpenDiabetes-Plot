@@ -14,24 +14,42 @@ class PointGlucose extends Component {
     }
 
     componentDidMount() {
+        //Hier einmalige Sachen deklarieren
+
+        //Titelanzeige
         d3.select(this.mainGroup).attr('transform', 'translate(0, 130)').append('rect').attr('x', 0).attr('y', 0).attr('height', '50px').attr('width', this.props.x.range()[1]).attr('fill', '#fff');
         d3.select(this.mainGroup).append('text').attr('x', 10).attr('y', 30).text('BLOOD GLUCOSE');
+
+        //Y Achse
         this.y = d3.scaleLinear().domain([400, 0]).range([0, 400]);
+
+        //Gruppen
         this.groupData = d3.select(this.mainGroup).append('g').attr('class', 'point-glucose').attr('transform', 'translate(0, 50)');
         this.groupAxis = d3.select(this.mainGroup).append('g').attr('class', 'axis').attr('transform', 'translate(0, 50)');
+
+        //Y Achse wird gezeichnet
         this.groupAxis.call(d3.axisLeft(this.y));
+        //Tooltip div wird einmalig erstellt
         this.tooltip = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0)
+        //svg objekt wird geholt
         this.svg = this.mainGroup.ownerSVGElement;
+
+        //Nach componentDidMount muss der Chart noch gezeichnet werden
         this.drawChart(this.props);
     }
     componentWillUnmount(){
+        //Tooltip entfernen
         this.tooltip.remove();
     }
     UNSAFE_componentWillReceiveProps(nextProps) {
+        //Zeichne chart wenn neue props
         this.drawChart(nextProps)
     }
     drawChart(props){
-        d3.select(this.mainGroup).select('rect').attr('width', props.x.range()[1]).attr('fill', '#fff');
+        //Titel breite aktualisiert
+        d3.select(this.mainGroup).attr('transform', 'translate(0, 130)').append('rect').attr('x', 0).attr('y', 0).attr('height', '50px').attr('width', props.x.range()[1]).attr('fill', '#fff');
+
+        //Existiert unsere gruppe wo die daten reinkommen?
         if (!this.groupData) return;
         this.groupData.selectAll('clipPath').remove();
         this.groupData.append('clipPath')
@@ -60,7 +78,7 @@ class PointGlucose extends Component {
             point.y = bbox.y;
             let tpoint = point.matrixTransform(target.getScreenCTM())
             let timePrint = d3.timeFormat("%Y %B %d. %I:%M %p");
-            tip.attr('style', 'opacity: 1; position: absolute; left: ' + tpoint.x + 'px ; top: ' + tpoint.y + 'px ;')
+            tip.attr('style', 'opacity: 1; position: absolute; left: ' + (tpoint.y + window.pageYOffset) + 'px ; top: ' + tpoint.y + 'px ;')
                 .html('' + timePrint(data.time) + '</br>' +
                     '<table>' +
                     '<tr> <td> Value </td><td>' + data.value + ' mg/dl </td></tr>' +
@@ -82,6 +100,8 @@ class PointGlucose extends Component {
             if(value < low) return 'low';
             return 'normal';
         }
+
+        
         this.groupData.selectAll('circle').data(props.data).join(
             (enter) => {
                 enter.append('circle')

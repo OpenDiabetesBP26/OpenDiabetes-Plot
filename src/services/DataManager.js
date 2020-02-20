@@ -26,6 +26,7 @@ class DataManager {
 	readData(data) {
 		//TODO Annahme Daten sind nach Datum sortiert
 		//More efficient algo
+		console.log(data.filter(d => d.type == 'BOLUS_NORMAL'));
 		const hours = 60000 * 60;
 		const minute = 60000;
 		const underLimit = 40;
