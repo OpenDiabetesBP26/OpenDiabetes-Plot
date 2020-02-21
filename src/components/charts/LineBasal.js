@@ -68,7 +68,7 @@ class LineBasal extends Component {
             point.y = bbox.y;
             let tpoint = point.matrixTransform(target.getScreenCTM())
             let timePrint = d3.timeFormat("%Y %B %d - %I:%M %p");
-            tip.attr('style', 'opacity: 1; position: absolute; left: ' + tpoint.x + 'px ; top: ' + tpoint.y + 'px ;')
+            tip.attr('style', 'opacity: 1; position: absolute; left: ' + (tpoint.y + window.pageYOffset) + 'px ; top: ' + tpoint.y + 'px ;')
                 .html('' + timePrint(data.time) + ' - ' + timePrint(data.timeEnd) + '</br>' +
                     '<table>' +
                     '<tr> <td> Basal per hour:  </td><td>' + data.value + ' mg/dl </td></tr>' +

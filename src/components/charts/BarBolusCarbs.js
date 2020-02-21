@@ -15,12 +15,12 @@ class BarBolusCarbs extends Component {
     }
 
     componentDidMount() {
-        d3.select(this.mainGroup).attr('transform', 'translate(0, 650)').append('rect').attr('x', 0).attr('y', 0).attr('height', '50px').attr('width', this.props.x.range()[1]).attr('fill', '#fff');
+        d3.select(this.mainGroup).attr('transform', 'translate(0, 830)').append('rect').attr('x', 0).attr('y', 0).attr('height', '50px').attr('width', this.props.x.range()[1]).attr('fill', '#fff');
         d3.select(this.mainGroup).append('text').attr('x', 10).attr('y', 30).text('Bolus Carbs');
         //let dataDomain = d3.extent(this.props.data.carbs);
-        this.max =  500;// this.props.data.carbs.map(o=>o.value).concat(this.props.data.bolus.map(o=>o.value)).reduce((a,b)=> Math.max(a,b));
+        this.max = 500;// this.props.data.carbs.map(o=>o.value).concat(this.props.data.bolus.map(o=>o.value)).reduce((a,b)=> Math.max(a,b));
 
-        this.y  = d3.scaleLinear().domain([this.max > 500 ? this.max : 500, 0]).range([0, this.max > 500 ? this.max : 500]);
+        this.y = d3.scaleLinear().domain([0, 500]).range([300, 0]);
 
         this.groupBolus = d3.select(this.mainGroup).append('g').attr('class', 'bolus');
         this.groupCarbs = d3.select(this.mainGroup).append('g').attr('class', 'carbs');
@@ -28,21 +28,27 @@ class BarBolusCarbs extends Component {
         this.groupDataBolus = this.groupBolus.append('g').attr('class', 'data').attr('transform', 'translate(0, 50)');
         this.groupDataCarbs = this.groupCarbs.append('g').attr('class', 'data').attr('transform', 'translate(0, 50)');
         this.groupAxis = d3.select(this.mainGroup).append('g').attr('class', 'axis').attr('transform', 'translate(0, 50)');
-        
+
         this.groupAxis.call(d3.axisLeft(this.y));
         this.tooltip = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0)
         this.svg = this.mainGroup.ownerSVGElement;
         this.drawChart(this.props);
 
     }
-    componentWillUnmount(){
+    componentWillUnmount() {
         this.tooltip.remove();
     }
     UNSAFE_componentWillReceiveProps(nextProps) {
         this.drawChart(nextProps);
     }
-    drawChart(props){
+    drawChart(props) {
         if (!this.groupDataBolus || !this.groupDataCarbs) return;
+        //update y axis
+        d3.select(this.mainGroup).select('rect').attr('width', props.x.range()[1]);
+        let maxCarbs = d3.extent(props.data.carbs, d => d.value);
+        let currentMax = maxCarbs[1] > 20 ? maxCarbs[1] : 20;
+        this.y.domain([0, currentMax]);
+        this.groupAxis.call(d3.axisLeft(this.y));
 
         let width = 15;
         let height = this.max;
@@ -63,7 +69,7 @@ class BarBolusCarbs extends Component {
             point.y = bbox.y;
             let tpoint = point.matrixTransform(target.getScreenCTM())
             let timePrint = d3.timeFormat("%Y %B %d. %I:%M %p");
-            tip.attr('style', 'opacity: 1; position: absolute; left: ' + tpoint.x + 'px ; top: ' + tpoint.y + 'px ;')
+            tip.attr('style', 'opacity: 1; position: absolute; left: ' + tpoint.x + 'px ; top: ' + (tpoint.y + window.pageYOffset) + 'px ;')
                 .html('' + timePrint(data.time) + '</br>' +
                     '<table>' +
                     '<tr> <td> Value </td><td>' + data.value + '</td></tr>' +
@@ -81,47 +87,44 @@ class BarBolusCarbs extends Component {
             d3.select(target).attr('r', 3);
         }
 
-        this.groupDataBolus.selectAll('g').data(props.data.bolus).join(
+        this.groupDataBolus.selectAll('rect').data(props.data.bolus).join(
             (enter) => {
-                let group = enter.append('g').attr('class', 'bar-bolus')
-                //OUTER PERCENTILE
-                group.append('rect')
+                enter.append('rect')
+                    .attr('class', 'bar-bolus')
                     .attr('x', d => props.x(d.time))
                     .attr('width', width / 2)
-                    .attr('y', d => height - (d.value > height ? height : d.value))
-                    .attr('height', d=> d.value > height ? height : d.value)                    .on('mouseover', tip_show)
+                    .attr('y', d => this.y(d.value))
+                    .attr('height', d => this.y(0) - this.y(d.value) > 0 ? this.y(0) - this.y(d.value) : 0)
                     .on('mouseover', tip_show)
                     .on('mouseout', tip_hide);
-                return enter;
 
             },
             (update) => {
-                update.select('rect').attr('x', d => props.x(d.time))
-                .attr('width', width / 2)
-                .attr('y', d=> height - (d.value > height ? height : d.value))
-                .attr('height', d=> d.value > height ? height : d.value);
+                update.attr('x', d => props.x(d.time))
+                    .attr('width', width / 2)
+                    .attr('y', d => this.y(d.value))
+                    .attr('height', d => this.y(0) - this.y(d.value) > 0 ? this.y(0) - this.y(d.value) : 0)
             }
         );
-        
-        this.groupDataCarbs.selectAll('g').data(props.data.carbs).join(
+
+        this.groupDataCarbs.selectAll('rect').data(props.data.carbs).join(
             (enter) => {
-                let group = enter.append('g').attr('class', 'bar-carbs')
-                //OUTER PERCENTILE
-                group.append('rect')
+                enter.append('rect')
+                     .attr('class', 'bar-carbs')
                     .attr('x', d => props.x(d.time) - width / 2)
                     .attr('width', width / 2)
-                    .attr('y', d=> height - (d.value > height ? height : d.value))
-                    .attr('height', d=> (d.value > height ? height : d.value))
+                    .attr('y', d => this.y(d.value))
+                    .attr('height', d => this.y(0) - this.y(d.value) > 0 ? this.y(0) - this.y(d.value) : 0)
                     .on('mouseover', tip_show)
                     .on('mouseout', tip_hide);
-                return enter;
 
             },
             (update) => {
-                update.select('rect').attr('x', d => props.x(d.time) - width / 2)
-                .attr('width', width / 2)
-                .attr('y', d=> height - (d.value > height ? height : d.value))
-                .attr('height', d=> d.value > height ? height : d.value);
+                update
+                    .attr('x', d => props.x(d.time) - width / 2)
+                    .attr('width', width / 2)
+                    .attr('y', d => this.y(d.value))
+                    .attr('height', d => this.y(0) - this.y(d.value) > 0 ? this.y(0) - this.y(d.value) : 0)
             }
         )
     }

@@ -27,7 +27,7 @@ class Chart extends Component {
                 <div className="row">
                     <div className="col-lg-8 col-md-12">
                         {!this.props.data && <div> No data loaded </div>}
-                        <svg id="d3sample" width="100%" height="1200" ref={(svg) => this.svg = svg}>
+                        <svg id="d3sample" width="100%" height="1180" ref={(svg) => this.svg = svg}>
                         <g id="mainGroup">
                         <TimeAxis x={this.state.x} />
                         {this.renderData && this.renderData.dataDisplay.glucoseDisplay == 'percentile' && <BarGlucose data={this.renderData.dataDisplay.glucose} x={this.state.x}/>}
