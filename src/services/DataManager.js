@@ -645,7 +645,8 @@ class DataManager {
 				bolus: bolus,
 				carbs: carbs,
 				glucoseDisplay: 'point',
-				basalDisplay: 'bar'
+				basalDisplay: 'bar',
+				basalBarWidth: 10
 			};
 		} else if (display > 2) {
 			let glucose = [];
@@ -692,7 +693,8 @@ class DataManager {
 				bolus: bolus,
 				carbs: carbs,
 				glucoseDisplay: 'percentile',
-				basalDisplay: 'bar'
+				basalDisplay: 'bar',
+				basalBarWidth: 30
 			};
 		}
 

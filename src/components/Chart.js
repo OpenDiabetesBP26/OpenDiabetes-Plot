@@ -6,6 +6,7 @@ import TimeAxis from './charts/TimeAxis';
 import BarGlucose from './charts/BarGlucose';
 import PointGlucose from './charts/PointGlucose';
 import LineBasal from './charts/LineBasal';
+import BarBasal from './charts/BarBasal';
 import Statistics from './charts/Statistics';
 import PercentileDay from './charts/PercentileDay';
 import BarBolusCarbs from './charts/BarBolusCarbs';
@@ -33,6 +34,7 @@ class Chart extends Component {
                         {this.renderData && this.renderData.dataDisplay.glucoseDisplay == 'percentile' && <BarGlucose data={this.renderData.dataDisplay.glucose} x={this.state.x}/>}
                         {this.renderData && this.renderData.dataDisplay.glucoseDisplay == 'point' && <PointGlucose data={this.renderData.dataDisplay.glucose} x={this.state.x}/>}
                         {this.renderData && this.renderData.dataDisplay.basalDisplay == 'line' && <LineBasal data={this.renderData.dataDisplay.basal} dataProfile={this.renderData.dataDisplay.basal_profile} x={this.state.x}/>}
+                        {this.renderData && this.renderData.dataDisplay.basalDisplay == 'bar' && <BarBasal data={this.renderData.dataDisplay.basal} dataProfile={this.renderData.dataDisplay.basal_profile} x={this.state.x} height={200} basalBarWidth={this.renderData.dataDisplay.basalBarWidth}/>}
                         {this.renderData && <BarBolusCarbs data={{bolus:this.renderData.dataDisplay.bolus, carbs:this.renderData.dataDisplay.carbs}} x={this.state.x}/>}
                         </g>
                         </svg>
