@@ -11,5 +11,3 @@ Project Dev Ops Site: https://dev.azure.com/aleksej-strassheim/OpenDiabetes-
 __npm start__ will compile and open project in __hot reload__ mode 
 _(you have just to edit and save the files and your changes will be on the site directly without refresh)_
 
-# Codecov page
-https://codecov.io/gh/Creative332/OpenDiabetes-Plot/
