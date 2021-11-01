@@ -3,8 +3,10 @@ The purpose of this project is to provide a client side GUI for Open Diabetes da
 
 Live Preview Site: https://opendiabetes.z6.web.core.windows.net/
 
+Devops site containing the scrum process: https://aleksej-strassheim.visualstudio.com/OpenDiabetes-plot
+
 ## Abstract-Keywords
-Diabetes, Dashboards, Client Side JavaScript GUI, Progressive Web App (PWA)
+Diabetes, Dashboards, Client Side JavaScript GUI, Progressive Web App (PWA), Agile-Development, Scrum
 
 ## Technical-Keywords
 JavaScript, D3, Crossfilter, React, SCSS, Webpack, JSON, Azure File Storage Hosting, Azure Devops CI/CD
