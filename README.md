@@ -7,7 +7,7 @@ Live Preview Site: https://opendiabetes.z6.web.core.windows.net/
 Diabetes, Dashboards, Client Side JavaScript GUI, Progressive Web App (PWA)
 
 ## Technical-Keywords
-JavaScript, D3, Crossfilter, React, Webpack, JSON, Azure File Storage Hosting, Azure Devops CI/CD
+JavaScript, D3, Crossfilter, React, SCSS, Webpack, JSON, Azure File Storage Hosting, Azure Devops CI/CD
 
 ## User Manual
 1. Compile the project (Installation Manual) and open index.html
