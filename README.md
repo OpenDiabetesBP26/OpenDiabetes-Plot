@@ -2,7 +2,6 @@
 The purpose of this project is to provide a client side GUI for Open Diabetes data in JavaScript and D3. 
 
 Live Preview Site: https://opendiabetes.z6.web.core.windows.net/
-Project Dev Ops Site: https://dev.azure.com/aleksej-strassheim/OpenDiabetes-plot
 
 ## Abstract-Keywords
 Diabetes, Dashboards, Client Side JavaScript GUI, Progressive Web App (PWA)
@@ -31,4 +30,3 @@ JavaScript, D3, Crossfilter, React, Webpack, JSON, Azure File Storage Hosting, A
 ### Debug Mode: 
 __npm start__ will compile and open project in __hot reload__ mode 
 _(you have just to edit and save the files and your changes will be on the site directly without refresh)_
-
