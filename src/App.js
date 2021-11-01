@@ -26,6 +26,7 @@ export class App extends Component {
                     </section>
                 )}
                 </ReactDropzone>
+                <div style={{ marginTop:'5px', textAlign:'center', fontStyle:'italic', color:'orange', fontWeight:'bold', fontSize:'1.28em'}}>Please use the mouse scroll wheel on computer or pinch gesture on smartphone to zoom in or out</div>
                 <Chart data={this.state.data} />
             </React.Fragment>
         );
